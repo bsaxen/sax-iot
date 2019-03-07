@@ -109,7 +109,7 @@ def lib_publishMyStatic(co):
     co.mycounter = 0
     data = {}
     # meta data
-    data['do']       = 'stat'
+    data['do']       = 'static'
     data['id']       = co.myid
     data['desc']     = co.mydesc
     data['tags']     = co.mytags
@@ -139,7 +139,7 @@ def lib_publishMyDynamic(co,dy,payload):
     server = co.myserver
     data = {}
     # meta data
-    data['do']       = 'dyn'
+    data['do']       = 'dynamic'
     data['id']       = co.myid
     data['topic']    = co.mytopic
     data['counter']  = dy.mycounter
@@ -166,7 +166,7 @@ def lib_publishMyPayload(co,dy,payload):
     server = co.myserver
     data = {}
     # meta data
-    data['do']       = 'dyn'
+    data['do']       = 'payload'
     data['id']       = co.myid
     data['topic']    = co.mytopic
     data['counter']  = dy.mycounter
@@ -332,6 +332,8 @@ def lib_readConfiguration(confile,c1):
             print 'z' + line
             if line[0] != '#':
                 word = line.split()
+                if word[0] == 'c_id':
+                    c1.myid               = word[1]
                 if word[0] == 'c_title':
                     c1.mytitle            = word[1]
                 if word[0] == 'c_tags':
@@ -419,11 +421,12 @@ def lib_readConfiguration(confile,c1):
     except Exception as e:
         print(e)
         fh = open(confile, 'w')
+        fh.write('c_id        1234\n')
         fh.write('c_title     title\n')
-        fh.write('c_domain    gow.simuino.com\n')
+        fh.write('c_domain    iot.simuino.com\n')
         fh.write('c_tags      tag\n')
         fh.write('c_desc      some\n')
-        fh.write('c_server    gowServer.php\n')
+        fh.write('c_server    gateway.php\n')
         fh.write('c_period    10\n')
         fh.write('c_platform  python\n')
         fh.write('c_wrap      999999\n')
