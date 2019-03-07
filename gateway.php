@@ -10,7 +10,7 @@
 // Library
 class sipDoc {
     public $sys_ts;
-    public $dev_id;
+    public $id;
     public $msg_static;
     public $msg_dynamic;
     public $msg_payload;
@@ -26,13 +26,14 @@ $obj->sys_ts  = date_format($date, 'Y-m-d H:i:s');
 function saveStaticMsg($obj)
 //=============================================
 {
-  $f_file = $obj->topic.'/static.json';
+  $f_file = $obj->id.'/static.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
         fwrite($doc, "{\"sip\": {\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
-        fwrite($doc, "   \"msg\":     \"$obj->msg_static\"\n");
+        fwrite($doc, "   \"id\":       \"$obj->id\",\n");
+        fwrite($doc, "   \"msg\":      \"$obj->msg_static\"\n");
         fwrite($doc, "}}\n ");
         fclose($doc);
   }
@@ -42,7 +43,7 @@ function saveStaticMsg($obj)
 function saveDynamicMsg($obj)
 //=============================================
 {
-  $f_file = $obj->topic.'/dynamic.json';
+  $f_file = $obj->id.'/dynamic.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -58,7 +59,7 @@ function saveDynamicMsg($obj)
 function savePayloadMsg($obj)
 //=============================================
 {
-  $f_file = $obj->topic.'/payload.json';
+  $f_file = $obj->id.'/payload.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -75,7 +76,7 @@ function savePayloadMsg($obj)
 function saveLog($obj)
 //=============================================
 {
-  $f_file = $obj->topic.'/log.sip';
+  $f_file = $obj->id.'/log.sip';
   $doc = fopen($f_file, "a");
   if ($doc)
   {
@@ -111,14 +112,14 @@ function readFeedbackFile($fb_file)
   return $result;
 }
 //=============================================
-function readFeedbackFileList($topic)
+function readFeedbackFileList($id)
 //=============================================
 {
   $result = ' ';
-  $do = 'ls '.$topic.'/*_sip.feedback > '.$topic.'/feedback.work';
+  $do = 'ls '.$id.'/*_sip.feedback > '.$id.'/feedback.work';
   //echo $do;
   system($do);
-  $list_file = $topic.'/feedback.work';
+  $list_file = $id.'/feedback.work';
   $no_of_lines = count(file($list_file));
   $file = fopen($list_file, "r");
   if ($file)
