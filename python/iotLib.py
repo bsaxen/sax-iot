@@ -46,7 +46,6 @@ class Configuration:
     myperiod     = 10
     myfeedback   = 1
     mywrap       = 999999
-    mytopic      = "benny/saxen/0"
 
     # Trigger feedback
     fb_feedback    = []
