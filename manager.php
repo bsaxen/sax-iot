@@ -9,6 +9,8 @@ $version = '2019-03-08';
 session_start();
 
 $sel_domain = $_SESSION["domain"];
+$sel_domain = readDomainUrl($sel_domain);
+
 $sel_device = $_SESSION["device"];
 
 $flag_show_static  = $_SESSION["flag_show_static"];
@@ -29,6 +31,24 @@ $g_action     = 0;
 //=============================================
 // library
 //=============================================
+//=============================================
+function readDomainUrl($file)
+//=============================================
+{
+  $file = $file.'.domain';
+  //echo $file;
+  $file = fopen($file, "r");
+  if ($file)
+  {
+      while(! feof($file))
+      {
+        $url = fgets($file);
+      }
+      fclose($file);
+  }
+  //echo $url;
+  return $url;
+}
 //=============================================
 function generateRandomString($length = 15)
 //=============================================
@@ -153,8 +173,11 @@ function addDomain ($domain)
 //=============================================
 {
   echo("[$domain]");
-  $domain = $domain.'.domain';
-  $fh = fopen($domain, 'w') or die("Can't add domain $domain");
+  $filename = str_replace("/","_",$domain);
+  $filename = $filename.'.domain';
+  $fh = fopen($filename, 'w') or die("Can't add domain $domain");
+  fwrite($fh, "$domain");
+  fclose($fh);
 }
 //=============================================
 function restApi($api,$domain,$device)
@@ -266,6 +289,7 @@ if (isset($_GET['do'])) {
     {
       $sel_domain = $_GET['domain'];
       $_SESSION["domain"] = $sel_domain;
+      $sel_domain = readDomainUrl($sel_domain);
     }
     if (isset($_GET['device']))
     {
@@ -501,7 +525,7 @@ $data = array();
      display: block;
    }
       </style>
-         <title>GOW Device Manager</title>
+         <title>Manager</title>
       </head>
       <body > ";
 
@@ -561,7 +585,7 @@ window.onload = function(){
       echo("<h1>Sax IoT Device Manager $sel_domain $sel_device</h1>");
       echo "<div class=\"navbar\">";
 
-      echo "<a href=\"gowDeviceManager.php?do=add_domain\">Add Domain</a>";
+      echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
 
       echo "  <div class=\"dropdown\">
           <button class=\"dropbtn\">Select Information
@@ -569,10 +593,10 @@ window.onload = function(){
           </button>
           <div class=\"dropdown-content\">
            ";
-          echo "<a href=gowDeviceManager.php?do=info&what=static>static</a>";
-          echo "<a href=gowDeviceManager.php?do=info&what=dynamic>dynamic</a>";
-          echo "<a href=gowDeviceManager.php?do=info&what=payload>payload</a>";
-          echo "<a href=gowDeviceManager.php?do=info&what=log>log</a>";
+          echo "<a href=manager.php?do=info&what=static>static</a>";
+          echo "<a href=manager.php?do=info&what=dynamic>dynamic</a>";
+          echo "<a href=manager.php?do=info&what=payload>payload</a>";
+          echo "<a href=manager.php?do=info&what=log>log</a>";
           echo "</div></div>";
 
         echo "<div class=\"dropdown\">
@@ -744,7 +768,8 @@ if ($form_add_domain == 1)
 if ($flag_show_static == 1)
 {
   echo "<div id=\"static\">";
-  $doc = 'http://'.$sel_domain.'/'.$sel_device.'/static.json';
+  echo "Static";
+  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/static.json';
   $json   = file_get_contents($doc);
   $result = prettyTolk( $json);
   $id = generateForm($json);
@@ -754,8 +779,9 @@ if ($flag_show_static == 1)
 
 if ($flag_show_dynamic == 1)
 {
-    echo "<div id=\"dynamic\">";
-  $doc = 'http://'.$sel_domain.'/'.$sel_device.'/dynamic.json';
+  echo "<div id=\"dynamic\">";
+  echo "Dynamic";
+  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/dynamic.json';
   $json   = file_get_contents($doc);
   $result = prettyTolk( $json);
   $id = generateForm($json);
@@ -765,8 +791,9 @@ if ($flag_show_dynamic == 1)
 
 if ($flag_show_payload == 1)
 {
-    echo "<div id=\"payload\">";
-  $doc = 'http://'.$sel_domain.'/'.$sel_device.'/payload.json';
+  echo "<div id=\"payload\">";
+  echo "Payload";
+  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/payload.json';
   $json   = file_get_contents($doc);
   $result = prettyTolk( $json);
   $id = generateForm($json);
@@ -778,7 +805,7 @@ if ($flag_show_log == 1)
 {
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
-  $doc = 'http://'.$sel_domain.'/'.$sel_device.'/log.gow?ignore='.$rnd;
+  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.gow?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"600\"></iframe>");
     echo "</div>";
 }
