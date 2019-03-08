@@ -642,6 +642,7 @@ window.onload = function(){
                   for ($ii = 0; $ii < $num; $ii++)
                   {
                     $device = str_replace(".reg", "", $data[$ii]);
+                    echo $device;
                     if (strlen($id) > 2)
                     {
                       //$topic = explode("_",$id);
@@ -650,7 +651,7 @@ window.onload = function(){
                       //$device = $topic[0];
                       //for ($jj=1;$jj<$topic_num;$jj++)
                        //  $device = $device."/$topic[$jj]";
-                      $doc = 'http://'.$sel_domain.'/devices/'.$device;
+                      $doc = 'http://'.$sel_domain.'/'.$device;
                       //$status = getStatus($doc);
                       $status = 0;
                       $temp = $device;
