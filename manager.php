@@ -639,20 +639,11 @@ window.onload = function(){
                   for ($ii = 0; $ii < $num; $ii++)
                   {
                     $device = str_replace(".reg", "", $data[$ii]);
-                    //echo $ii."benny".$device."saxen";
                     if (strlen($device) > 2)
                     {
-                      //$topic = explode("_",$id);
-                      //$topic_num = count($topic);
-                      //$link = 'http://'.$url;
-                      //$device = $topic[0];
-                      //for ($jj=1;$jj<$topic_num;$jj++)
-                       //  $device = $device."/$topic[$jj]";
                       $doc = 'http://'.$sel_domain.'/devices/'.$device;
                       $status = getStatus($doc);
-                      //$status = 0;
                       $temp = $device;
-                      //if ($g_action == 2) $temp = '.'.$temp;
                       if ($status == 0)
                       {
                         echo "<a style=\"background: #2FBC63;\" href=manager.php?do=select&device=$device>$temp</a>";
@@ -660,7 +651,6 @@ window.onload = function(){
                       else {
                         echo "<a style=\"background: #F5E50F;\" href=manager.php?do=select&device=$device>$temp $status</a>";
                       }
-                      //echo " $g_rssi ";
                      }
                    }
           echo "</div></div>";
