@@ -643,7 +643,7 @@ window.onload = function(){
                   {
                     $device = str_replace(".reg", "", $data[$ii]);
                     echo $ii."benny".$device."saxen";
-                    if (strlen($id) > 2)
+                    if (strlen($device) > 2)
                     {
                       //$topic = explode("_",$id);
                       //$topic_num = count($topic);
