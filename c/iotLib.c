@@ -9,21 +9,22 @@
 
 struct Configuration
 {
-  String conf_id = "x";
-  int conf_period  = 10;
-  int conf_wrap    = 999999;
-  int conf_feedback  = 1;
-  String conf_tags = "tag1";
-  String conf_desc = "your_description";
-  String conf_platform = "esp8266";
+  String conf_id         = "x";
+  int conf_period        = 10;
+  int conf_wrap          = 999999;
+  int conf_feedback      = 1;
+  String conf_tags       = "tag1";
+  String conf_desc       = "your_description";
+  String conf_platform   = "esp8266";
   String conf_ssid       = "bridge";
   String conf_password   = "qweqwe";
-  String conf_domain       = "iot.simuino.com";
-  String conf_server       = "gateway.php";
+  String conf_domain     = "iot.simuino.com";
+  String conf_server     = "gateway.php";
   String conf_streamId   = "....................";
   String conf_privateKey = "....................";
-  int conf_em_pulses = 1000;
-  String conf_mac = "void";
+  int conf_kwh_pulses    = 0;
+  int conf_sensors       = 0;
+  String conf_mac        = "void";
 };
 
 struct Data
@@ -80,30 +81,53 @@ String lib_buildUrlStatic(struct Configuration c2)
   
   url += "&json=";
   url += "{";
+  
   url += "\"desc";
   url += "\":\"";
   url += c2.conf_desc;
   url += "\",";
+  
   url += "\"tags";
   url += "\":\"";
   url += c2.conf_tags;
   url += "\",";
+  
   url += "\"ssid";
   url += "\":\"";
   url += c2.conf_ssid;
   url += "\",";
+  
   url += "\"wrap";
   url += "\":\"";
   url += c2.conf_wrap;
   url += "\",";
+  
+  if (c2.conf_sensors != 0)
+  {
+    url += "\"sensors";
+    url += "\":\"";
+    url += c2.conf_sensors;
+    url += "\",";
+  }
+  
+  if (c2.conf_kwh_pulses != 0)
+  {
+    url += "\"kwh_pulses";
+    url += "\":\"";
+    url += c2.conf_kwh_pulses;
+    url += "\",";
+  }  
+  
   url += "\"feedback";
   url += "\":\"";
   url += c2.conf_feedback;
   url += "\",";
+  
   url += "\"period";
   url += "\":\"";
   url += c2.conf_period;
   url += "\"";
+  
   url += "}";
 
   return url;
