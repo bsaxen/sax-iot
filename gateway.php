@@ -31,11 +31,11 @@ function saveStaticMsg($obj)
   $doc = fopen($f_file, "w");
   if ($doc)
   {
-        fwrite($doc, "{\"sip\": {\n");
+        fwrite($doc, "{\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
         fwrite($doc, "   \"id\":       \"$obj->id\",\n");
-        fwrite($doc, "   \"msg\":      \"$obj->msg_static\"\n");
-        fwrite($doc, "}}\n ");
+        fwrite($doc, "   \"msg\": $obj->msg_static\n");
+        fwrite($doc, "}\n ");
         fclose($doc);
   }
   return;
@@ -48,10 +48,10 @@ function saveDynamicMsg($obj)
   $doc = fopen($f_file, "w");
   if ($doc)
   {
-        fwrite($doc, "{\"sip\": {\n");
+        fwrite($doc, "{\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
-        fwrite($doc, "   \"msg\":     \"$obj->msg_dynamic\"\n");
-        fwrite($doc, "}}\n ");
+        fwrite($doc, "   \"msg\":  $obj->msg_dynamic\n");
+        fwrite($doc, "}\n ");
         fclose($doc);
   }
   return;
@@ -64,20 +64,32 @@ function savePayloadMsg($obj)
   $doc = fopen($f_file, "w");
   if ($doc)
   {
-        fwrite($doc, "{\"sip\": {\n");
+        fwrite($doc, "{\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
-        fwrite($doc, "   \"msg\":     \"$obj->msg_payload\"\n");
-        fwrite($doc, "}}\n ");
+        fwrite($doc, "   \"msg\":  $obj->msg_payload\n");
+        fwrite($doc, "}\n ");
         fclose($doc);
   }
   return;
 }
-
+//=============================================
+function initLog($obj)
+//=============================================
+{
+  $f_file = 'devices/'.$obj->id.'/log.txt';
+  $doc = fopen($f_file, "w");
+  if ($doc)
+  {
+        fwrite($doc, "$obj->sys_ts Created\n");
+        fclose($doc);
+  }
+  return;
+}
 //=============================================
 function saveLog($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/log.sip';
+  $f_file = 'devices/'.$obj->id.'/log.txt';
   $doc = fopen($f_file, "a");
   if ($doc)
   {
@@ -270,7 +282,7 @@ if (isset($_GET['do']))
       if ($do == 'payload')
       {
         if (isset($_GET['json'])) {
-          $obj->msg_static = $_GET['json'];
+          $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
         echo readFeedbackFileList($obj->id);
