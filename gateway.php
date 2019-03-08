@@ -244,7 +244,7 @@ if (isset($_GET['do']))
       {
         $msg   = $_GET['msg'];
         $tag   = $_GET['tag'];
-        writeFeedbackFile('devices/'.$obj->dev_id, $msg, $tag);
+        writeFeedbackFile('devices/'.$obj->id, $msg, $tag);
       }
       if ($do == 'clearlog')
       {
@@ -257,7 +257,7 @@ if (isset($_GET['do']))
       }
       if ($do == 'delete')
       {
-        deleteDevice($obj->dev_id);
+        deleteDevice($obj->id);
       }
 
 
