@@ -8,7 +8,7 @@
 
 //=============================================
 // Library
-class sipDoc {
+class iotDoc {
     public $sys_ts;
     public $id;
     public $msg_static;
@@ -16,12 +16,27 @@ class sipDoc {
     public $msg_payload;
 }
 
-$obj = new sipDoc();
+$obj = new iotDoc();
 
 //=============================================
 $date         = date_create();
 $obj->sys_ts  = date_format($date, 'Y-m-d H:i:s');
 
+
+//=============================================
+function deleteDevice($id)
+//=============================================
+{
+  // remove reg file
+  //$filename = str_replace("/","_",$id);
+  $filename = 'register/'.$id.'.reg';
+  if (file_exists($filename)) unlink($filename);
+  // remove directory content
+  $dirname = $id;
+  array_map('unlink', glob("$dirname/*.*"));
+  // remove directory
+  rmdir($dirname);
+}
 //=============================================
 function saveStaticMsg($obj)
 //=============================================
