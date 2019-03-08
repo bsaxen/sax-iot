@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-07
+# Date: 2019-03-08
 # Description: IoT python library
 # =============================================
 import MySQLdb
