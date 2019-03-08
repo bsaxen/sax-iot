@@ -143,7 +143,7 @@ function readFeedbackFileList($id)
       if (strlen($line) > 2)
       {
           $line = trim($line);
-          $line = 'devices/'.$line;
+          //$line = 'devices/'.$line;
           $result = readFeedbackFile($line);
       }
   }
