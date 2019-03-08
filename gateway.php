@@ -186,7 +186,7 @@ function writeFeedbackFile($device, $feedback, $tag)
   return $result;
 }
 //=============================================
-function listAllTopics()
+function listAllDevices()
 //=============================================
 {
   $do = "ls register"."/"."*.reg > register/register.work";
@@ -221,9 +221,9 @@ if (isset($_GET['do']))
 {
 
     $do = $_GET['do'];
-     if ($do == 'list_topics')
+     if ($do == 'list_devices')
      {
-       listAllTopics();
+       listAllDevices();
        exit;
      }
     // Check if id is given
@@ -233,6 +233,8 @@ if (isset($_GET['do']))
 
       // Create device register
       $obj->id = $_GET['id'];
+      $obj->id  = str_replace(":","_",$obj->id);
+        
       $error = 0;
 
       $ok = 0;
