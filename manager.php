@@ -651,7 +651,8 @@ window.onload = function(){
                       //for ($jj=1;$jj<$topic_num;$jj++)
                        //  $device = $device."/$topic[$jj]";
                       $doc = 'http://'.$sel_domain.'/devices/'.$device;
-                      $status = getStatus($doc);
+                      //$status = getStatus($doc);
+                      $status = 0;
                       $temp = $device;
                       //if ($g_action == 2) $temp = '.'.$temp;
                       if ($status == 0)
