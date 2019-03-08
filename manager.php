@@ -752,8 +752,11 @@ if ($flag_show_static == 1)
   echo "Static";
   $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/static.json';
   $json   = file_get_contents($doc);
-  $result = prettyTolk( $json);
-  $id = generateForm($json);
+  if ($json)
+  {
+    $result = prettyTolk( $json);
+    $id = generateForm($json);
+  }
   //echo ("<br>static<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
   echo "</div>";
 }
@@ -764,8 +767,11 @@ if ($flag_show_dynamic == 1)
   echo "Dynamic";
   $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/dynamic.json';
   $json   = file_get_contents($doc);
-  $result = prettyTolk( $json);
-  $id = generateForm($json);
+  if ($json)
+  {
+    $result = prettyTolk( $json);
+    $id = generateForm($json);
+  }
   //echo ("<br>dynamic<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
 }
@@ -776,8 +782,11 @@ if ($flag_show_payload == 1)
   echo "Payload";
   $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/payload.json';
   $json   = file_get_contents($doc);
-  $result = prettyTolk( $json);
-  $id = generateForm($json);
+  if ($json)
+  {
+    $result = prettyTolk( $json);
+    $id = generateForm($json);
+  }
   //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
 }
