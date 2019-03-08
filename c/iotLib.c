@@ -171,6 +171,7 @@ void lib_wifiBegin(struct Configuration *c2)
    Serial.println("IP address: ");
    Serial.println(WiFi.localIP());
    c2->conf_mac = WiFi.macAddress();
+   c2->conf_id = c2->conf_mac;
    Serial.println(WiFi.macAddress());
 }
 //=============================================
