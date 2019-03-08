@@ -193,15 +193,12 @@ function restApi($api,$domain,$device)
 function getStatus($uri)
 //=============================================
 {
-  global $g_action;
-
   $url = $uri.'/static.json';
   //echo "$url<br>";
   $json = file_get_contents($url);
   $json = utf8_encode($json);
   $res = json_decode($json, TRUE);
   $period     = $res['msg']['period'];
-  $g_action   = $res['msg']['feedback'];
 
   $url = $uri.'/dynamic.json';
   //echo "$url<br>";
@@ -642,7 +639,7 @@ window.onload = function(){
                   for ($ii = 0; $ii < $num; $ii++)
                   {
                     $device = str_replace(".reg", "", $data[$ii]);
-                    echo $ii."benny".$device."saxen";
+                    //echo $ii."benny".$device."saxen";
                     if (strlen($device) > 2)
                     {
                       //$topic = explode("_",$id);
@@ -651,9 +648,9 @@ window.onload = function(){
                       //$device = $topic[0];
                       //for ($jj=1;$jj<$topic_num;$jj++)
                        //  $device = $device."/$topic[$jj]";
-                      //$doc = 'http://'.$sel_domain.'/'.$device;
-                      //$status = getStatus($doc);
-                      $status = 0;
+                      $doc = 'http://'.$sel_domain.'/devices/'.$device;
+                      $status = getStatus($doc);
+                      //$status = 0;
                       $temp = $device;
                       //if ($g_action == 2) $temp = '.'.$temp;
                       if ($status == 0)
