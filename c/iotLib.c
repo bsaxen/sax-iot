@@ -9,10 +9,10 @@
 
 struct Configuration
 {
-  String conf_topic = "benny/saxen/esp";
+  String conf_id = "x";
   int conf_period  = 10;
   int conf_wrap    = 999999;
-  int conf_action  = 1;
+  int conf_feedback  = 1;
   String conf_tags = "tag1,tag2,tag3";
   String conf_desc = "your_description";
   String conf_platform = "esp8266";
@@ -70,86 +70,73 @@ String lib_buildUrlStatic(struct Configuration c2)
 //=============================================
 {
   //===================================
-  String stat_url = "/gowServer.php";
+  String url = c2_conf_host;
   //===================================
-  stat_url += "?do=stat";
+  url += "?do=static";
 
-  stat_url += "&topic=";
-  stat_url += c2.conf_topic;
+  url += "&id=";
+  url += c2.conf_id;
+  
+  url += "&json=";
+  url += "{";
+  url += "\"desc" + "\":\"" + c2.conf_desc + "\",";
+  url += "\"tags" + "\":\"" + c2.conf_tags + "\",";
+  url += "\"ssid" + "\":\"" + c2.conf_ssid + "\",";
+  url += "\"wrap" + "\":\"" + c2.conf_wrap + "\",";
+  url += "\"feedback" + "\":\"" + c2.conf_feedback + "\",";
+  url += "\"period" + "\":\""   + c2.conf_period + "\"";
+  url += "}";
 
-  stat_url += "&mac=";
-  stat_url += c2.conf_mac;
-
-  stat_url += "&ssid=";
-  stat_url += c2.conf_ssid;
-
-  stat_url += "&wrap=";
-  stat_url += c2.conf_wrap;
-
-  stat_url += "&period=";
-  stat_url += c2.conf_period;
-
-  stat_url += "&domain=";
-  stat_url += c2.conf_host;
-
-  stat_url += "&platform=";
-  stat_url += c2.conf_platform;
-
-  stat_url += "&tags=";
-  stat_url += c2.conf_tags;
-
-  stat_url += "&desc=";
-  stat_url += c2.conf_desc;
-
-  stat_url += "&action=";
-  stat_url += c2.conf_action;
-
-  return stat_url;
+  return url;
 }
 //=============================================
 String lib_buildUrlDynamic(struct Configuration c2,struct Data d2)
 //=============================================
 {
   //===================================
-  String dyn_url = "/gowServer.php";
+  String url = c2_conf_host;
   //===================================
-  dyn_url += "?do=dyn";
+  url += "?do=dynamic";
 
-  dyn_url += "&topic=";
-  dyn_url += c2.conf_topic;
-
-  dyn_url += "&counter=";
-  dyn_url += d2.counter;
-
-  dyn_url += "&rssi=";
-  dyn_url += d2.rssi;
-
-  dyn_url += "&fail=";
-  dyn_url += d2.fail;
+  url += "&id=";
+  url += c2.conf_id;
   
-  /*dyn_url += "&payload=";
-  dyn_url += "{";
-  dyn_url += "\"temp";
-  dyn_url += "\":\"";
-  dyn_url += 123;
-  dyn_url += "\"";
-  dyn_url += "}";*/
-  return dyn_url;
+  url += "&json=";
+  url += "{";
+  url += "\"counter" + "\":\"" + d2.counter + "\",";
+  url += "\"fail" + "\":\"" + d2.fail + "\",";
+  url += "\"rssi" + "\":\"" + d2.rssi + "\"";
+  url += "}";
+  
+  return url;
+}
+//=============================================
+String lib_buildUrlPayload(struct Configuration c2,struct Data d2, String payload)
+//=============================================
+{
+  //===================================
+  String url = c2_conf_host;
+  //===================================
+  url += "?do=payload";
+
+  url += "&id=";
+  url += c2.conf_id;
+  
+  url += "&json=" + payload;
+  
+  return url;
 }
 //=============================================
 String lib_buildUrlLog(struct Configuration c2, char* message)
 //=============================================
 {
   //===================================
-  String url = "/gowServer.php";
+  String url = c2_conf_host;
   //===================================
   url += "?do=log";
 
-  url += "&topic=";
-  url += c2.conf_topic;
-  
-  url += "&dev_ts=";
-  url += 'void';
+  url += "&id=";
+  url += c2.conf_id;
   
   url += "&log=";
   url += message;
