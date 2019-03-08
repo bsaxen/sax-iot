@@ -87,9 +87,9 @@ void setup()
   stat_url = lib_buildUrlStatic(c1);
   String dont_care = lib_wifiConnectandSend(c1,d1, stat_url); 
   
-  message = "Temperature Clien started";
+  message = "Temperature_Client_Started";
   log_url = lib_buildUrlLog(c1,message);
-  msg = lib_wifiConnectandSend(c1,d1, log_url);
+  String msg = lib_wifiConnectandSend(c1,d1, log_url);
   Serial.println(msg);
 }
 
