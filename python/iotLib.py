@@ -125,7 +125,7 @@ def lib_publishMyStatic(co):
     try:
         response = urllib2.urlopen(req)
         the_page = response.read()
-        print 'Message to ' + co.mytopic + ': ' + the_page
+        print 'Message to ' + co.myid + ': ' + the_page
         #evaluateAction(the_page)
     except urllib2.URLError as e:
         print e.reason
@@ -151,7 +151,7 @@ def lib_publishMyDynamic(co,dy):
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
-        print 'Message to ' + co.mytopic + ': ' + msg
+        print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
         print e.reason
 
@@ -199,7 +199,7 @@ def lib_publishMyLog(co, message ):
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
-        print 'Message to ' + co.mytopic + ': ' + msg
+        print 'Message to ' + co.myid + ': ' + msg
         #evaluateAction(the_page)
     except urllib2.URLError as e:
         print e.reason
@@ -208,22 +208,22 @@ def lib_publishMyLog(co, message ):
 #===================================================
 def lib_createMyUrl(co):
 #===================================================
-    url = 'http://' + co.mydomain + '/' + co.mytopic + '/'
+    url = 'http://' + co.mydomain + '/devices/' + co.myid + '/'
     return url
 #=====================================================
 def lib_buildMyUrl(co,dynstat):
 #===================================================
-    url =  'http://' + co.mydomain + '/' + co.mytopic + '/' + dynstat +'.json'
+    url =  'http://' + co.mydomain + '/devices/' + co.myid + '/' + dynstat +'.json'
     return url
 #===================================================
 def lib_createAnyUrl(domain,device):
 #===================================================
-    url = 'http://' + domain + '/' + device + '/'
+    url = 'http://' + domain + '/devices/' + device + '/'
     return url
 #=====================================================
 def lib_buildAnyUrl(domain,device,dynstat):
 #===================================================
-    url =  'http://' + domain + '/' + device + '/' + dynstat +'.json'
+    url =  'http://' + domain + '/devices/' + device + '/' + dynstat +'.json'
     return url
 #=====================================================
 def lib_init_history(fname):
@@ -307,8 +307,8 @@ def lib_common_action(co,feedback):
                 co.myperiod = q[1]
             if q[0] == 'feedback':
                 co.myfeedback = q[1]
-            if q[0] == 'mytopic':
-                co.mytopic = q[1]
+            if q[0] == 'id':
+                co.myid = q[1]
             if q[0] == 'desc':
                 co.mydesc = q[1]
     return action
@@ -343,8 +343,6 @@ def lib_readConfiguration(confile,c1):
                     c1.myplatform         = word[1]
                 if word[0] == 'c_wrap':
                     c1.mywrap             = word[1]
-                if word[0] == 'c_topic':
-                    c1.mytopic            = word[1]
                 if word[0] == 'c_feedback':
                     c1.myfeedback         = word[1]
 
@@ -423,7 +421,6 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_period    10\n')
         fh.write('c_platform  python\n')
         fh.write('c_wrap      999999\n')
-        fh.write('c_topic     benny/saxen/0\n')
         fh.write('c_feedback  1\n')
 
         fh.write('c_mintemp      -7\n')
@@ -499,7 +496,7 @@ def lib_checkSequenceNumber(co,ds,domain,device):
 #=============================================
     j = lib_getDynamicDeviceJson(domain,device)
 
-    n = j['gow']['counter']
+    n = j['msg']['counter']
     m = ds.no[device]
     k = m + 1
 
@@ -523,7 +520,7 @@ def lib_readDynamicParam(co,ds,domain,device,par):
     ok = 0
     x = 'void'
     if ok == 0:
-        x = j['gow'][par]
+        x = j['msg'][par]
     return x
 #=============================================
 def lib_readStaticParam(co,ds,domain,device,par):
@@ -533,7 +530,7 @@ def lib_readStaticParam(co,ds,domain,device,par):
     ok = 0
     x = 'void'
     if ok == 0:
-        x = j['gow'][par]
+        x = j['msg'][par]
     return x
 #=============================================
 def lib_readPayloadParam(co,ds,domain,device,par):
@@ -543,16 +540,16 @@ def lib_readPayloadParam(co,ds,domain,device,par):
     ok = 0
     x = 'void'
     if ok == 0:
-        x = j['gow']['payload'][par]
+        x = j['msg']['payload'][par]
     return x
 #===================================================
 def lib_placeOrder(domain, server, device, feedback):
 #===================================================
     data = {}
-    data['do']     = 'feedback'
-    data['topic']  = device
+    data['do']        = 'feedback'
+    data['id']        = device
     data['feedback']  = feedback
-    data['tag']    = lib_generateRandomString()
+    data['tag']       = lib_generateRandomString()
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
     print req
