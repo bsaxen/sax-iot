@@ -111,15 +111,14 @@ def lib_publishMyStatic(co):
     # meta data
     data['do']       = 'static'
     data['id']       = co.myid
-    data['desc']     = co.mydesc
-    data['tags']     = co.mytags
-    data['topic']    = co.mytopic
-    data['wrap']     = co.mywrap
-    data['period']   = co.myperiod
-    data['platform'] = 'python'
-    data['domain']      = co.mydomain
-    data['ssid']     = 'nowifi'
-    data['feedback']   = co.myfeedback
+    payload  = '{'
+    payload += '"desc" : "'     + str(co.mydesc) + '",'
+    payload += '"tags" : "'     + str(co.mytags) + '",'
+    payload += '"feedback" : "' + str(co.myfeedback) + '",'
+    payload += '"period" : "'   + str(co.myperiod) + '",'
+    payload += '"platform" : "' + str(co.myplatform) + '"'
+    payload += '}'
+    data['json']     = payload
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
@@ -132,7 +131,7 @@ def lib_publishMyStatic(co):
     except urllib2.URLError as e:
         print e.reason
 #===================================================
-def lib_publishMyDynamic(co,dy,payload):
+def lib_publishMyDynamic(co,dy):
 #===================================================
     msg = '-'
     domain = co.mydomain
@@ -141,12 +140,12 @@ def lib_publishMyDynamic(co,dy,payload):
     # meta data
     data['do']       = 'dynamic'
     data['id']       = co.myid
-    data['topic']    = co.mytopic
-    data['counter']  = dy.mycounter
-    data['rssi']     = 0
-    data['dev_ts']   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['fail']     = 0
-    data['payload']  = 0
+    payload  = '{'
+    payload += '"counter" : "'  + str(dy.mycounter) + '",'
+    payload += '"errors" : "'  + str(dy.myerrors) + '"'
+    payload += '}'
+    data['json']     = payload
+
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
     print req
@@ -168,12 +167,7 @@ def lib_publishMyPayload(co,dy,payload):
     # meta data
     data['do']       = 'payload'
     data['id']       = co.myid
-    data['topic']    = co.mytopic
-    data['counter']  = dy.mycounter
-    data['rssi']     = 0
-    data['dev_ts']   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data['fail']     = 0
-    data['payload']    = payload
+    data['json']     = payload
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
@@ -181,7 +175,7 @@ def lib_publishMyPayload(co,dy,payload):
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
-        print 'Message to ' + co.mytopic + ': ' + msg
+        print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
         print e.reason
 
