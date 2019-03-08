@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-03-07
+// Date.......: 2019-03-08
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -32,7 +32,7 @@ function deleteDevice($id)
   $filename = 'register/'.$id.'.reg';
   if (file_exists($filename)) unlink($filename);
   // remove directory content
-  $dirname = $id;
+  $dirname = 'devices/'.$id;
   array_map('unlink', glob("$dirname/*.*"));
   // remove directory
   rmdir($dirname);
