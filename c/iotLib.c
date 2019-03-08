@@ -13,12 +13,13 @@ struct Configuration
   int conf_period  = 10;
   int conf_wrap    = 999999;
   int conf_feedback  = 1;
-  String conf_tags = "tag1,tag2,tag3";
+  String conf_tags = "tag1";
   String conf_desc = "your_description";
   String conf_platform = "esp8266";
   String conf_ssid       = "bridge";
   String conf_password   = "qweqwe";
-  String conf_host       = "gow.qwe.com";
+  String conf_domain       = "iot.simuino.com";
+  String conf_server       = "gateway.php";
   String conf_streamId   = "....................";
   String conf_privateKey = "....................";
   int conf_em_pulses = 1000;
@@ -70,7 +71,7 @@ String lib_buildUrlStatic(struct Configuration c2)
 //=============================================
 {
   //===================================
-  String url = c2_conf_host;
+  String url = '/'+ c2.conf_server;
   //===================================
   url += "?do=static";
 
@@ -79,12 +80,30 @@ String lib_buildUrlStatic(struct Configuration c2)
   
   url += "&json=";
   url += "{";
-  url += "\"desc" + "\":\"" + c2.conf_desc + "\",";
-  url += "\"tags" + "\":\"" + c2.conf_tags + "\",";
-  url += "\"ssid" + "\":\"" + c2.conf_ssid + "\",";
-  url += "\"wrap" + "\":\"" + c2.conf_wrap + "\",";
-  url += "\"feedback" + "\":\"" + c2.conf_feedback + "\",";
-  url += "\"period" + "\":\""   + c2.conf_period + "\"";
+  url += "\"desc";
+  url += "\":\"";
+  url += c2.conf_desc;
+  url += "\",";
+  url += "\"tags";
+  url += "\":\"";
+  url += c2.conf_tags;
+  url += "\",";
+  url += "\"ssid";
+  url += "\":\"";
+  url += c2.conf_ssid;
+  url += "\",";
+  url += "\"wrap";
+  url += "\":\"";
+  url += c2.conf_wrap;
+  url += "\",";
+  url += "\"feedback";
+  url += "\":\"";
+  url += c2.conf_feedback;
+  url += "\",";
+  url += "\"period";
+  url += "\":\"";
+  url += c2.conf_period;
+  url += "\"";
   url += "}";
 
   return url;
@@ -94,7 +113,7 @@ String lib_buildUrlDynamic(struct Configuration c2,struct Data d2)
 //=============================================
 {
   //===================================
-  String url = c2_conf_host;
+  String url = '/'+ c2.conf_server;
   //===================================
   url += "?do=dynamic";
 
@@ -103,9 +122,18 @@ String lib_buildUrlDynamic(struct Configuration c2,struct Data d2)
   
   url += "&json=";
   url += "{";
-  url += "\"counter" + "\":\"" + d2.counter + "\",";
-  url += "\"fail" + "\":\"" + d2.fail + "\",";
-  url += "\"rssi" + "\":\"" + d2.rssi + "\"";
+  url += "\"counter";
+  url += "\":\"";
+  url += d2.counter;
+  url += "\",";
+  url += "\"fail";
+  url += "\":\"";
+  url += d2.fail;
+  url += "\",";
+  url += "\"rssi";
+  url += "\":\"";
+  url += d2.rssi;
+  url += "\"";
   url += "}";
   
   return url;
@@ -115,7 +143,7 @@ String lib_buildUrlPayload(struct Configuration c2,struct Data d2, String payloa
 //=============================================
 {
   //===================================
-  String url = c2_conf_host;
+  String url = '/'+ c2.conf_server;
   //===================================
   url += "?do=payload";
 
@@ -127,11 +155,11 @@ String lib_buildUrlPayload(struct Configuration c2,struct Data d2, String payloa
   return url;
 }
 //=============================================
-String lib_buildUrlLog(struct Configuration c2, char* message)
+String lib_buildUrlLog(struct Configuration c2, String message)
 //=============================================
 {
   //===================================
-  String url = c2_conf_host;
+  String url = '/'+ c2.conf_server;
   //===================================
   url += "?do=log";
 
@@ -171,7 +199,7 @@ void lib_wifiBegin(struct Configuration *c2)
    Serial.println("IP address: ");
    Serial.println(WiFi.localIP());
    c2->conf_mac = WiFi.macAddress();
-   c2->conf_id = c2->conf_mac;
+   //c2->conf_id = c2->conf_mac;
    Serial.println(WiFi.macAddress());
 }
 //=============================================
@@ -179,12 +207,14 @@ String lib_wifiConnectandSend(struct Configuration c2,struct Data d2, String cur
 //=============================================
 {
   String sub = "-";
-  Serial.print("Requesting URL: ");
+  Serial.print(c2.conf_domain);
+  //cur_url = "/gowServer.php";
   Serial.println(cur_url);
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
   const int httpPort = 80;
-  if (!client.connect(c2.conf_host,httpPort)) {
+  if (!client.connect(c2.conf_domain,httpPort)) {
+    Serial.print(c2.conf_domain);
     Serial.println("connection failed");
     d2.fail += 1;
     return sub;
@@ -192,7 +222,7 @@ String lib_wifiConnectandSend(struct Configuration c2,struct Data d2, String cur
 
   // This will send the request to the server
   client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
-             "Host: " + c2.conf_host + "\r\n" +
+             "Host: " + c2.conf_domain + "\r\n" +
              "Connection: close\r\n\r\n");
   unsigned long timeout = millis();
   while (client.available() == 0) {
