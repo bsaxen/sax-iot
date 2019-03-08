@@ -263,6 +263,7 @@ if (isset($_GET['do']))
 
       if ($do == 'static')
       {
+          $obj->msg_static = "{\"no_data\":\"0\"}";
         if (isset($_GET['json'])) {
           $obj->msg_static = $_GET['json'];
         }
@@ -272,6 +273,7 @@ if (isset($_GET['do']))
 
       if ($do == 'dynamic')
       {
+        $obj->msg_dynamic = "{\"no_data\":\"0\"}";
         if (isset($_GET['json'])) {
           $obj->msg_dynamic = $_GET['json'];
         }
@@ -281,6 +283,7 @@ if (isset($_GET['do']))
 
       if ($do == 'payload')
       {
+        $obj->msg_payload = "{\"no_data\":\"0\"}";
         if (isset($_GET['json'])) {
           $obj->msg_payload = $_GET['json'];
         }
