@@ -230,7 +230,7 @@ function sendMessage($url,$device,$msg,$tag)
 //=============================================
 {
   echo "Send message $msg tag=$tag to $url/$device<br>";
-  $call = 'http://'.$url.'/gateway.php?do=order&id='.$device.'&msg='.$msg.'&tag='.$tag;
+  $call = 'http://'.$url.'/gateway.php?do=feedback&id='.$device.'&msg='.$msg.'&tag='.$tag;
   $res = file_get_contents($call);
 }
 //=============================================
@@ -732,9 +732,6 @@ window.onload = function(){
 if ($form_send_action == 1)
 {
   $doc = 'http://'.$sel_domain.'/'.$sel_device;
-  $status = getStatus($doc);
-  if ($g_action == 2)
-  {
   echo "<br><br>
   <table border=0>";
   echo "
@@ -747,11 +744,8 @@ if ($form_send_action == 1)
     <td><input type= \"submit\" value=\"Send\"></td></tr>
   </form>
   </table>";
-  }
-  else {
-    echo("<br>Device not able to receive orders<br>");
-  }
 }
+              
 if ($form_add_domain == 1)
 {
   echo "
