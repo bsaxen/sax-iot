@@ -641,19 +641,19 @@ window.onload = function(){
 
                   for ($ii = 0; $ii < $num; $ii++)
                   {
-                    $id = str_replace(".reg", "", $data[$ii]);
+                    $device = str_replace(".reg", "", $data[$ii]);
                     if (strlen($id) > 2)
                     {
-                      $topic = explode("_",$id);
-                      $topic_num = count($topic);
+                      //$topic = explode("_",$id);
+                      //$topic_num = count($topic);
                       //$link = 'http://'.$url;
-                      $device = $topic[0];
-                      for ($jj=1;$jj<$topic_num;$jj++)
-                         $device = $device."/$topic[$jj]";
-                      $doc = 'http://'.$sel_domain.'/'.$device;
+                      //$device = $topic[0];
+                      //for ($jj=1;$jj<$topic_num;$jj++)
+                       //  $device = $device."/$topic[$jj]";
+                      $doc = 'http://'.$sel_domain.'/devices/'.$device;
                       $status = getStatus($doc);
                       $temp = $device;
-                      if ($g_action == 2) $temp = '.'.$temp;
+                      //if ($g_action == 2) $temp = '.'.$temp;
                       if ($status == 0)
                       {
                         echo "<a style=\"background: #2FBC63;\" href=manager.php?do=select&device=$device>$temp</a>";
