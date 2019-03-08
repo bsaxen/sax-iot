@@ -20,7 +20,7 @@ String message = "nothing";
 //=============================================
 void setup() {
 //=============================================  
-  c1.conf_id         = "5678";
+  c1.conf_id         = "set_to_mac";
   c1.conf_period     = 10;
   c1.conf_wrap       = 999999;
   c1.conf_feedback   = 1;
@@ -41,7 +41,7 @@ void setup() {
   lib_wifiBegin(&c1);
   
   d1.counter = 0;
-  
+  c1.conf_id = c1.conf_mac;
   stat_url = lib_buildUrlStatic(c1);
   Serial.println(stat_url);
   String dont_care = lib_wifiConnectandSend(c1,d1, stat_url);
