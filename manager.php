@@ -184,7 +184,7 @@ function restApi($api,$domain,$device)
 //=============================================
 {
   //echo("RestApi [$api] domain=$domain device=$device<br>");
-  $call = 'http://'.$domain.'/gateway.php?do='.$api.'&topic='.$device;
+  $call = 'http://'.$domain.'/gateway.php?do='.$api.'&id='.$device;
   //echo $call;
   $res = file_get_contents($call);
 }
@@ -193,23 +193,22 @@ function restApi($api,$domain,$device)
 function getStatus($uri)
 //=============================================
 {
-  global $g_action, $g_rssi;
+  global $g_action;
 
   $url = $uri.'/static.json';
   //echo "$url<br>";
   $json = file_get_contents($url);
   $json = utf8_encode($json);
   $res = json_decode($json, TRUE);
-  $period     = $res['gow']['period'];
-  $g_action   = $res['gow']['action'];
+  $period     = $res['msg']['period'];
+  $g_action   = $res['msg']['feedback'];
 
   $url = $uri.'/dynamic.json';
   //echo "$url<br>";
   $json = file_get_contents($url);
   $json = utf8_encode($json);
   $res = json_decode($json, TRUE);
-  $timestamp   = $res['gow']['sys_ts'];
-  $g_rssi   = $res['gow']['rssi'];
+  $timestamp   = $res['sys_ts'];
   $now = date_create('now')->format('Y-m-d H:i:s');
 
   $diff = strtotime($now) - strtotime($timestamp);
@@ -227,13 +226,12 @@ function getStatus($uri)
 
 
 //=============================================
-function sendMessage($url,$topic,$msg,$tag)
+function sendMessage($url,$device,$msg,$tag)
 //=============================================
 {
-  echo "Send message $msg tag=$tag to $url/$topic<br>";
-  $call = 'http://'.$url.'/gateway.php?do=order&topic='.$topic.'&msg='.$msg.'&tag='.$tag;
+  echo "Send message $msg tag=$tag to $url/$device<br>";
+  $call = 'http://'.$url.'/gateway.php?do=order&id='.$device.'&msg='.$msg.'&tag='.$tag;
   $res = file_get_contents($call);
-  //gowServer.php?do=action&topic=<topic>&order=<order>&tag=<tag>
 }
 //=============================================
 // End of library
@@ -805,7 +803,7 @@ if ($flag_show_log == 1)
 {
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.gow?ignore='.$rnd;
+  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.txt?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"600\"></iframe>");
     echo "</div>";
 }
