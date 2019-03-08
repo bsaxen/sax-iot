@@ -26,7 +26,8 @@ $obj->sys_ts  = date_format($date, 'Y-m-d H:i:s');
 function saveStaticMsg($obj)
 //=============================================
 {
-  $f_file = $obj->id.'/static.json';
+  $f_file = 'devices/'.$obj->id.'/static.json';
+  echo $f_file;
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -43,7 +44,7 @@ function saveStaticMsg($obj)
 function saveDynamicMsg($obj)
 //=============================================
 {
-  $f_file = $obj->id.'/dynamic.json';
+  $f_file = 'devices/'.$obj->id.'/dynamic.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -59,7 +60,7 @@ function saveDynamicMsg($obj)
 function savePayloadMsg($obj)
 //=============================================
 {
-  $f_file = $obj->id.'/payload.json';
+  $f_file = 'devices/'.$obj->id.'/payload.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -76,7 +77,7 @@ function savePayloadMsg($obj)
 function saveLog($obj)
 //=============================================
 {
-  $f_file = $obj->id.'/log.sip';
+  $f_file = 'devices/'.$obj->id.'/log.sip';
   $doc = fopen($f_file, "a");
   if ($doc)
   {
@@ -116,10 +117,10 @@ function readFeedbackFileList($id)
 //=============================================
 {
   $result = ' ';
-  $do = 'ls '.$id.'/*_sip.feedback > '.$id.'/feedback.work';
+  $do = "ls devices/".$id."/"."*_sip.feedback > devices/".$id."/feedback.work";
   //echo $do;
   system($do);
-  $list_file = $id.'/feedback.work';
+  $list_file = 'devices/'.$id.'/feedback.work';
   $no_of_lines = count(file($list_file));
   $file = fopen($list_file, "r");
   if ($file)
@@ -130,38 +131,91 @@ function readFeedbackFileList($id)
       if (strlen($line) > 2)
       {
           $line = trim($line);
+          $line = 'devices/'.$line;
           $result = readFeedbackFile($line);
       }
   }
   $result = "[$no_of_lines]".$result;
   return $result;
 }
-
+//=============================================
+function listAllTopics()
+//=============================================
+{
+  $do = "ls register"."/"."*.reg > register/register.work";
+  //echo $do;
+  system($do);
+  $file = fopen('register/register.work', "r");
+  if ($file)
+  {
+    while(!feof($file))
+    {
+      $line = fgets($file);
+      //echo $line;
+      if (strlen($line) > 2)
+      {
+          $line = trim($line);
+          $file2 = fopen($line, "r");
+          if ($file2)
+          {
+                  $line2 = fgets($file2);
+                  $line2 = trim($line2);
+                  echo $line2.':';
+          }
+      }
+    }
+  }
+}
 //=============================================
 // End of library
 //=============================================
 
 if (isset($_GET['do']))
 {
+
     $do = $_GET['do'];
-    
+     if ($do == 'list_topics')
+     {
+       listAllTopics();
+       exit;
+     }
     // Check if id is given
     $error = 1;
     if (isset($_GET['id']))
     {
-      $obj->dev_id = $_GET['id'];
+
+      // Create device register
+      $obj->id = $_GET['id'];
       $error = 0;
-      if (!is_dir($obj->dev_id))
+
+      $ok = 0;
+      $dir = 'devices/'.$obj->id;
+      if (is_dir($dir)) $ok++;
+      $file = 'register/'.$obj->id.'.reg';
+      if (file_exists($file)) $ok++;
+
+      if ($ok == 0) // New device - register!
       {
-         mkdir($obj->dev_id, 0777, true);
+         mkdir($dir, 0777, true);
         //===========================================
         // Registration
         //===========================================
-        $filename = str_replace("/","_",$obj->dev_id);
-        $filename = $filename.".reg";
+        // Create register directory if not exist
+        $dir = 'register';
+        if (!is_dir($dir))
+        {
+           mkdir($dir, 0777, true);
+        }
+        //$filename = str_replace("/","_",$obj->id);
+        $filename = 'register/'.$obj->id.'.reg';
         $doc = fopen($filename, "w");
-        fwrite($doc, "$gs_ts $ts $obj->dev_id");
+        fwrite($doc, "$gs_ts $ts $obj->id");
         fclose($doc);
+      }
+      if ($ok == 1) // un-complete register
+      {
+        $error = 3;
+        echo "Error: register broken";
       }
     }
     else
@@ -178,7 +232,7 @@ if (isset($_GET['do']))
       {
         $msg   = $_GET['msg'];
         $tag   = $_GET['tag'];
-        writeFeedbackFile($obj->dev_id, $msg, $tag);
+        writeFeedbackFile('devices/'.$obj->dev_id, $msg, $tag);
       }
       if ($do == 'clearlog')
       {
@@ -212,7 +266,7 @@ if (isset($_GET['do']))
         saveDynamicMsg($obj);
         echo readFeedbackFileList($obj->id);
       }
-      
+
       if ($do == 'payload')
       {
         if (isset($_GET['json'])) {
