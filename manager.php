@@ -625,7 +625,7 @@ window.onload = function(){
                   <div class=\"dropdown-content\">
                   ";
 
-                  $request = 'http://'.$sel_domain."/gateway.php?do=list_topics";
+                  $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
                   //echo $request;
                   $ctx = stream_context_create(array('http'=>
                    array(
@@ -671,7 +671,7 @@ window.onload = function(){
       echo "</div>";
 
       // Ajax fields
-      $request = 'http://'.$sel_domain."/gateway.php?do=list_topics";
+      $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
       //echo $request;
       $ctx = stream_context_create(array('http'=>
        array(
