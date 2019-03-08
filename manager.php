@@ -543,7 +543,7 @@ window.onload = function(){
     function getData() {
         console.log("Getting  data");
         $.ajax({
-            url:		'gowDmAjax.php',
+            url:		'ajaxManager.php',
             /*dataType:	'json',*/
             dataType:	'text',
             success:	setData,
