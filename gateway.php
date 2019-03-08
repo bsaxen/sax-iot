@@ -129,7 +129,7 @@ function readFeedbackFileList($id)
 //=============================================
 {
   $result = ' ';
-  $do = "ls devices/".$id."/"."*_sip.feedback > devices/".$id."/feedback.work";
+  $do = "ls devices/".$id."/"."*.feedback > devices/".$id."/feedback.work";
   //echo $do;
   system($do);
   $list_file = 'devices/'.$id.'/feedback.work';
@@ -148,6 +148,26 @@ function readFeedbackFileList($id)
       }
   }
   $result = "[$no_of_lines]".$result;
+  return $result;
+}
+//=============================================
+function writeFeedbackFile($device, $feedback, $tag)
+//=============================================
+{
+  if (is_null($device))  return;
+  if (is_null($feedback)) return;
+  if (is_null($tag)) $tag = 'notag';
+  $fb_file = $device.'/'.$tag.'.feedback';
+  $file = fopen($fb_file, "w");
+  if ($file)
+  {
+    fwrite($file,$feedback);
+    fclose($file);
+  }
+  else
+  {
+      $result = " ";
+  }
   return $result;
 }
 //=============================================
