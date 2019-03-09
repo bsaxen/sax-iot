@@ -56,7 +56,7 @@ function getJsonDomain($sel_domain)
 //=========================================================================
 {
 
-  $request = 'http://'.$sel_domain."/gateway.php?do=list_topics";
+  $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
   //echo $request;
   $ctx = stream_context_create(array('http'=>
    array(
@@ -70,20 +70,9 @@ function getJsonDomain($sel_domain)
   $answer = '';
   for ($ii = 0; $ii < $num; $ii++)
   {
-    //echo $ii;
-    //echo  "z".$data[$ii]."x";
     $device = $data[$ii];
     if (strlen($device) > 2)
     {
-      //$topic = explode("_",$id);
-
-      //$topic_num = count($topic);
-      //echo $topic_num;
-      //$link = 'http://'.$url;
-      //$device = $topic[0];
-
-      //for ($jj=1;$jj<$topic_num;$jj++)
-      //   $device = $device."/$topic[$jj]";
       $doc = 'http://'.$sel_domain.'/devices/'.$device;
       //echo  $doc;
       $status = getStatus($doc);
