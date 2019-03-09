@@ -1,6 +1,6 @@
 //=============================================
 // File.......: temperature.c
-// Date.......: 2019-03-08
+// Date.......: 2019-03-09
 // Author.....: Benny Saxen
 // Description: Signal from D1 pin.
 // 4.7kOhm between signal and Vcc
@@ -147,7 +147,7 @@ void loop()
   
   pay_url = lib_buildUrlPayload(c1, d1, payload);
 
-  String msg = lib_wifiConnectandSend(c1, d1, pay_url);
+  msg = lib_wifiConnectandSend(c1, d1, pay_url);
   
   delay(c1.conf_period*1000);
   
