@@ -693,13 +693,8 @@ window.onload = function(){
         {
           $nn += 1;
           echo "<td>$nn</td>";
-          echo "<td>$id</td>";
-          //$topic = explode("_",$id);
-          //$topic_num = count($topic);
-          //$link = 'http://'.$url;
+          echo "<td><a href=manager.php?do=select&device=$id>$id</a></td>";
           $device = $id;
-          //for ($jj=1;$jj<=$topic_num;$jj++)
-          //   $device = $device."/$topic[$jj]";
           $doc = 'http://'.$sel_domain.'/'.$device;
           $status = getStatus($doc);
           $temp = $device;
