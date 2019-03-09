@@ -56,7 +56,7 @@ time.sleep(3)
 total_duration = 0
 while True:
     lib_increaseMyCounter(co,dy)
-    if dy.mycounter%co.myperiod == 0:
+    if int(dy.mycounter)%int(co.myperiod) == 0:
         msg = lib_publishMyDynamic(co,dy)
         
     then = now
