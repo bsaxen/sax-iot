@@ -190,6 +190,17 @@ function restApi($api,$domain,$device)
 }
 
 //=============================================
+function getDesc($uri)
+//=============================================
+{
+  $url       = $uri.'/static.json';
+  $json      = file_get_contents($url);
+  $json      = utf8_encode($json);
+  $dec       = json_decode($json, TRUE);
+  $desc      = $dec['msg']['desc'];
+  return $desc
+}
+//=============================================
 function getStatus($uri)
 //=============================================
 {
@@ -402,7 +413,7 @@ $data = array();
       color: #336600;
       //background-color: grey;
       float: left;
-      width: 300px;
+      width: 400px;
 
       }
 
@@ -410,7 +421,7 @@ $data = array();
       color: #336600;
       //background-color: grey;
       float: left;
-      width: 250px;
+      width: 400px;
 
       }
 
@@ -418,7 +429,7 @@ $data = array();
       color: #336600;
       //background-color: red;
       float: left;
-      width: 250px;
+      width: 400px;
 
       }
 
@@ -693,10 +704,13 @@ window.onload = function(){
         {
           $nn += 1;
           echo "<td>$nn</td>";
-          echo "<td><a href=manager.php?do=select&device=$id>$id</a></td>";
+ 
           $device = $id;
           $doc = 'http://'.$sel_domain.'/'.$device;
           $status = getStatus($doc);
+          $desc = getDesc($uri)
+            
+          echo "<td><a href=manager.php?do=select&device=$id>$desc</a></td>";
           $temp = $device;
           if ($status == 0)
           {
