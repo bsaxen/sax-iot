@@ -13,6 +13,7 @@ struct Configuration
   int conf_period        = 10;
   int conf_wrap          = 999999;
   int conf_feedback      = 1;
+  String conf_title      = "title";
   String conf_tags       = "tag1";
   String conf_desc       = "your_description";
   String conf_platform   = "esp8266";
@@ -81,6 +82,11 @@ String lib_buildUrlStatic(struct Configuration c2)
   
   url += "&json=";
   url += "{";
+  
+  url += "\"title";
+  url += "\":\"";
+  url += c2.conf_title;
+  url += "\",";
   
   url += "\"desc";
   url += "\":\"";
