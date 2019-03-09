@@ -700,10 +700,10 @@ window.onload = function(){
           $temp = $device;
           if ($status == 0)
           {
-            echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
+            echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
           }
           else {
-            echo("<td><input style=\"background: red;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
+            echo("<td><input style=\"background: red;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
           }
         }
         echo ("</tr>");
