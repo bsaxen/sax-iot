@@ -62,7 +62,8 @@ void setup()
   c1.conf_wrap       = 999999;
   c1.conf_feedback   = 0;
 
-  c1.conf_tags       = "tag1";
+  c1.conf_title      = "title";
+  c1.conf_tags       = "tag";
   c1.conf_desc       = "your";
   c1.conf_platform   = "esp8266";
   c1.conf_ssid       = "bridge";
