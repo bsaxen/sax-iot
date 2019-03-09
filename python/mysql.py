@@ -52,9 +52,6 @@ now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
 time.sleep(3)
 total_duration = 0
 while True:
-    lib_increaseMyCounter(co,dy)
-    msg = lib_publishMyDynamic(co,dy)
-    
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
     #print now
@@ -90,11 +87,15 @@ while True:
                 ok = 1
             if delta_counter > 1:
                 print "Missing data: " + str(delta_counter)
+                message = 'counter:' + "Missing_data"
+                msg = lib_publishMyLog(co,message)
                 ok = 1
             if delta_counter == 0:
                 print "No update of data: " + str(delta_counter)
             if delta_counter < 0:
                 print "Wrap around of data: " + str(delta_counter)
+                message = 'counter:' + "Wrap_data"
+                msg = lib_publishMyLog(co,message)
                 ok = 1
             if ok == 1:
                 running[num] = counter
@@ -106,6 +107,8 @@ while True:
                     table = co.ds_db_table[num]
                     
                 lib_mysqlInsert(co,0,table,'value',x)
+                lib_increaseMyCounter(co,dy)
+                msg = lib_publishMyDynamic(co,dy)
 #===================================================
 # End of file
 #===================================================
