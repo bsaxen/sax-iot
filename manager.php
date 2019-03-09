@@ -1,10 +1,10 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-03-08
+// Date.......: 2019-03-09
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
-$version = '2019-03-08';
+$version = '2019-03-09';
 //=============================================
 session_start();
 
@@ -646,10 +646,10 @@ window.onload = function(){
                       $temp = $device;
                       if ($status == 0)
                       {
-                        echo "<a style=\"background: #2FBC63;\" href=manager.php?do=select&device=$device>$temp</a>";
+                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$temp</a>";
                       }
                       else {
-                        echo "<a style=\"background: #F5E50F;\" href=manager.php?do=select&device=$device>$temp $status</a>";
+                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $status</a>";
                       }
                      }
                    }
@@ -694,25 +694,24 @@ window.onload = function(){
           $nn += 1;
           echo "<td>$nn</td>";
           echo "<td>$id</td>";
-          $topic = explode("_",$id);
-          $topic_num = count($topic);
+          //$topic = explode("_",$id);
+          //$topic_num = count($topic);
           //$link = 'http://'.$url;
-          $device = $topic[0];
-          for ($jj=1;$jj<=$topic_num;$jj++)
-             $device = $device."/$topic[$jj]";
+          $device = $id;
+          //for ($jj=1;$jj<=$topic_num;$jj++)
+          //   $device = $device."/$topic[$jj]";
           $doc = 'http://'.$sel_domain.'/'.$device;
           $status = getStatus($doc);
           $temp = $device;
-          if ($g_action == 2) $temp = '.'.$temp;
           if ($status == 0)
           {
-            echo("<td><input style=\"background: #2FBC63;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
+            echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
           }
           else {
-            echo("<td><input style=\"background: #F5E50F;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
+            echo("<td><input style=\"background: red;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 /></td>");
           }
         }
-          echo ("</tr>");
+        echo ("</tr>");
       }
      echo "</table>";
      echo "</div>";
