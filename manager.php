@@ -565,7 +565,7 @@ window.onload = function(){
           var id = 'no';
           id = id.concat(i.toString());
           input = document.getElementById(id);
-
+          input.value = resArray[i];
           if (resArray[i] == 0)
             input.style.background = "green";
           if (resArray[i] > 0)
