@@ -198,7 +198,7 @@ function getDesc($uri)
   $json      = utf8_encode($json);
   $dec       = json_decode($json, TRUE);
   $desc      = $dec['msg']['desc'];
-  return $desc
+  return $desc;
 }
 //=============================================
 function getStatus($uri)
