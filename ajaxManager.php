@@ -1,7 +1,7 @@
 <?php
 //=========================================================================
 // File.......: ajaxManager.php
-// Date.......: 2019-03-08
+// Date.......: 2019-03-09
 // Author.....: Benny Saxen
 // Description: Ajax Device Manager
 //=========================================================================
@@ -9,29 +9,24 @@
 function getStatus($uri)
 //=============================================
 {
-  global $g_feedback;
-
-  $url = $uri.'/static.json';
-  //echo "$url<br>";
-  $json = file_get_contents($url);
-  $json = utf8_encode($json);
-  $res = json_decode($json, TRUE);
-  $period     = $res['msg']['period'];
-
-  $url = $uri.'/dynamic.json';
-  //echo "$url<br>";
-  $json = file_get_contents($url);
-  $json = utf8_encode($json);
-  $res = json_decode($json, TRUE);
-  $timestamp   = $res['sys_ts'];
-  $now = date_create('now')->format('Y-m-d H:i:s');
-
+  $url       = $uri.'/static.json';
+  $json      = file_get_contents($url);
+  $json      = utf8_encode($json);
+  $dec       = json_decode($json, TRUE);
+  $period    = $dec['msg']['period'];
+  $url       = $uri.'/dynamic.json';
+  $json      = file_get_contents($url);
+  $json      = utf8_encode($json);
+  $dec       = json_decode($json, TRUE);
+  $timestamp = $dec['sys_ts'];
+  
+  $now       = date_create('now')->format('Y-m-d H:i:s');
   $diff = strtotime($now) - strtotime($timestamp);
-  //echo "now=$now ts=$timestamp diff= $diff";
-
-  if ($diff > $period)
+  $res = 999;
+  $bias = 1;
+  if ($diff > $period + $bias)
   {
-    $res = $diff;
+    $res = $diff - $period - $bias;
   }
   else {
     $res = 0;
