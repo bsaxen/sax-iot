@@ -189,8 +189,6 @@ def lib_publishMyLog(co, message ):
 
     data['do']       = 'log'
     data['id']       = co.myid
-    data['topic']    = co.mytopic
-    data['dev_ts']   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data['log']      = message
 
     values = urllib.urlencode(data)
