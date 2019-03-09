@@ -52,6 +52,9 @@ now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
 time.sleep(3)
 total_duration = 0
 while True:
+    lib_increaseMyCounter(co,dy)
+    msg = lib_publishMyDynamic(co,dy)
+    
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
     #print now
