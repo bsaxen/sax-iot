@@ -193,6 +193,7 @@ function restApi($api,$domain,$device)
 function getDesc($uri)
 //=============================================
 {
+  echo $uri ;
   $url       = $uri.'/static.json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
