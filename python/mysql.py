@@ -55,6 +55,10 @@ now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
 time.sleep(3)
 total_duration = 0
 while True:
+    lib_increaseMyCounter(co,dy)
+    if dy.mycounter%co.myperiod == 0:
+        msg = lib_publishMyDynamic(co,dy)
+        
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
     #print now
@@ -110,8 +114,6 @@ while True:
                     table = co.ds_db_table[num]
                     
                 lib_mysqlInsert(co,0,table,'value',x)
-                lib_increaseMyCounter(co,dy)
-                msg = lib_publishMyDynamic(co,dy)
 #===================================================
 # End of file
 #===================================================
