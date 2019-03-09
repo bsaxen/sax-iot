@@ -708,7 +708,7 @@ window.onload = function(){
           $device = $id;
           $doc = 'http://'.$sel_domain.'/'.$device;
           $status = getStatus($doc);
-          $desc = getDesc($uri)
+          $desc = getDesc($uri);
             
           echo "<td><a href=manager.php?do=select&device=$id>$desc</a></td>";
           $temp = $device;
