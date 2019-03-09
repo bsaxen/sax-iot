@@ -193,7 +193,6 @@ function restApi($api,$domain,$device)
 function getDesc($uri)
 //=============================================
 {
-  echo $uri ;
   $url       = $uri.'/static.json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
@@ -707,7 +706,7 @@ window.onload = function(){
           echo "<td>$nn</td>";
  
           $device = $id;
-          $doc = 'http://'.$sel_domain.'/'.$device;
+          $doc = 'http://'.$sel_domain.'/devices/'.$device;
           $status = getStatus($doc);
           $desc = getDesc($doc);
             
