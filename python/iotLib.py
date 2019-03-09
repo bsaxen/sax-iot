@@ -111,6 +111,7 @@ def lib_publishMyStatic(co):
     data['do']       = 'static'
     data['id']       = co.myid
     payload  = '{'
+    payload += '"title" : "'    + str(co.mytitle) + '",'
     payload += '"desc" : "'     + str(co.mydesc) + '",'
     payload += '"tags" : "'     + str(co.mytags) + '",'
     payload += '"feedback" : "' + str(co.myfeedback) + '",'
