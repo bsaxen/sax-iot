@@ -34,7 +34,6 @@ for num in range(0,co.nds):
     period = float(lib_readStaticParam(co,ds,domain,device,'period'))
     print period
     desc = lib_readStaticParam(co,ds,domain,device,'desc')
-    print desc
     schedule.append(period)
     work.append(period)
     counter = float(lib_readDynamicParam(co,ds,domain,device,'counter'))
@@ -94,14 +93,14 @@ while True:
                 ok = 1
             if delta_counter > 1:
                 print "Missing data: " + str(delta_counter)
-                message = str(counter) + "_Missing_data_" + device
+                message = str(counter) + "_Missing_data_" + desc
                 msg = lib_publishMyLog(co,message)
                 ok = 1
             if delta_counter == 0:
                 print "No update of data: " + str(delta_counter)
             if delta_counter < 0:
                 print "Wrap around of data: " + str(delta_counter)
-                message = str(counter) + "_Wrap_data_" + device
+                message = str(counter) + "_Wrap_data_" + desc
                 msg = lib_publishMyLog(co,message)
                 ok = 1
             if ok == 1:
