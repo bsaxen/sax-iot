@@ -538,7 +538,7 @@ def lib_readPayloadParam(co,ds,domain,device,par):
     ok = 0
     x = 'void'
     if ok == 0:
-        x = j['msg']['payload'][par]
+        x = j['msg'][par]
     return x
 #===================================================
 def lib_placeOrder(domain, server, device, feedback):
