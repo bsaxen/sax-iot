@@ -22,7 +22,7 @@ lib_readConfiguration(confile,co)
 print "Number of datastreams: " + str(co.nds)
 lib_publishMyStatic(co)
 
-message = 'mysql_started_streams_' + String(co.nds)
+message = 'mysql_started_streams_' + str(co.nds)
 msg = lib_publishMyLog(co,message)
 
 max_period = 0
@@ -90,14 +90,14 @@ while True:
                 ok = 1
             if delta_counter > 1:
                 print "Missing data: " + str(delta_counter)
-                message = String(counter) + "_Missing_data_" + device
+                message = str(counter) + "_Missing_data_" + device
                 msg = lib_publishMyLog(co,message)
                 ok = 1
             if delta_counter == 0:
                 print "No update of data: " + str(delta_counter)
             if delta_counter < 0:
                 print "Wrap around of data: " + str(delta_counter)
-                message = String(counter) + "_Wrap_data_" + device
+                message = str(counter) + "_Wrap_data_" + device
                 msg = lib_publishMyLog(co,message)
                 ok = 1
             if ok == 1:
