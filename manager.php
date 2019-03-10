@@ -784,7 +784,7 @@ if ($flag_show_dynamic == 0)
   if ($json)
   {
     $result = prettyTolk( $json);
-    $id = generateForm($json,"green");
+    $id = generateForm($json,"#FF5733");
   }
   //echo ("<br>dynamic<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
@@ -799,7 +799,7 @@ if ($flag_show_payload == 0)
   if ($json)
   {
     $result = prettyTolk( $json);
-    $id = generateForm($json,"blue");
+    $id = generateForm($json,"#A2D5F8");
   }
   //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
