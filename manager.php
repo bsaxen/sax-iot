@@ -592,7 +592,7 @@ window.onload = function(){
 
 
 <?php
-      echo("<h1>Sax IoT Device Manager $sel_domain $sel_device</h1>");
+      echo("<h1>Sax IoT Device Manager $sel_domain $sel_desc</h1>");
       echo "<div class=\"navbar\">";
 
       echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
@@ -734,7 +734,7 @@ window.onload = function(){
 
 if ($form_send_action == 1)
 {
-  $doc = 'http://'.$sel_domain.'/'.$sel_desc;
+  //$doc = 'http://'.$sel_domain.'/device/'.$sel_device;
   echo "<br><br>
   <table border=0>";
   echo "
