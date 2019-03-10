@@ -12,6 +12,8 @@ $sel_domain = $_SESSION["domain"];
 $sel_domain = readDomainUrl($sel_domain);
 
 $sel_device = $_SESSION["device"];
+$doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
+$sel_desc = getDesc($doc);
 
 $flag_show_static  = $_SESSION["flag_show_static"];
 $flag_show_dynamic = $_SESSION["flag_show_dynamic"];
@@ -654,13 +656,14 @@ window.onload = function(){
                     {
                       $doc = 'http://'.$sel_domain.'/devices/'.$device;
                       $status = getStatus($doc);
+                      $desc = getDesc($doc);
                       $temp = $device;
                       if ($status == 0)
                       {
-                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$temp</a>";
+                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$descr</a>";
                       }
                       else {
-                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $status</a>";
+                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $descr</a>";
                       }
                      }
                    }
@@ -674,9 +677,10 @@ window.onload = function(){
             </button>
             <div class=\"dropdown-content\">
             ";
+              
       echo "<a href=manager.php?do=delete&what=domain>$sel_domain</a>";
-      echo "<a href=manager.php?do=delete&what=device>$sel_device</a>";
-      echo "<a href=manager.php?do=delete&what=log>clear log $sel_device</a>";
+      echo "<a href=manager.php?do=delete&what=device>$sel_descr</a>";
+      echo "<a href=manager.php?do=delete&what=log>clear log $sel_descr</a>";
       echo "</div></div>";
 
       echo "</div>";
@@ -728,7 +732,7 @@ window.onload = function(){
 
 if ($form_send_action == 1)
 {
-  $doc = 'http://'.$sel_domain.'/'.$sel_device;
+  $doc = 'http://'.$sel_domain.'/'.$sel_descr;
   echo "<br><br>
   <table border=0>";
   echo "
