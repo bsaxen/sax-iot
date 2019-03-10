@@ -13,6 +13,7 @@ $sel_domain = readDomainUrl($sel_domain);
 
 $sel_device = $_SESSION["device"];
 $doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
+echo $doc;
 $sel_desc = getDesc($doc);
 
 $flag_show_static  = $_SESSION["flag_show_static"];
@@ -660,10 +661,10 @@ window.onload = function(){
                       $temp = $device;
                       if ($status == 0)
                       {
-                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$descr</a>";
+                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$desc</a>";
                       }
                       else {
-                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $descr</a>";
+                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $desc</a>";
                       }
                      }
                    }
@@ -679,8 +680,8 @@ window.onload = function(){
             ";
               
       echo "<a href=manager.php?do=delete&what=domain>$sel_domain</a>";
-      echo "<a href=manager.php?do=delete&what=device>$sel_descr</a>";
-      echo "<a href=manager.php?do=delete&what=log>clear log $sel_descr</a>";
+      echo "<a href=manager.php?do=delete&what=device>$sel_desc</a>";
+      echo "<a href=manager.php?do=delete&what=log>clear log $sel_desc</a>";
       echo "</div></div>";
 
       echo "</div>";
@@ -732,7 +733,7 @@ window.onload = function(){
 
 if ($form_send_action == 1)
 {
-  $doc = 'http://'.$sel_domain.'/'.$sel_descr;
+  $doc = 'http://'.$sel_domain.'/'.$sel_desc;
   echo "<br><br>
   <table border=0>";
   echo "
