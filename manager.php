@@ -139,7 +139,7 @@ function prettyTolk( $json )
 }
 
 //=============================================
-function generateForm($inp)
+function generateForm($inp,$color)
 //=============================================
 {
   global $rank,$g_nn;
@@ -161,7 +161,7 @@ function generateForm($inp)
       }
       else
       {
-          echo "<td>$key</td><td bgcolor=\"#C5FD69\">$val</td><tr>";
+          echo "<td>$key</td><td bgcolor=\"$color\">$val</td><tr>";
       }
       echo "</tr>";
    }
@@ -592,7 +592,7 @@ window.onload = function(){
 
 
 <?php
-      echo("<h1>Sax IoT Device Manager $sel_domain $sel_desc</h1>");
+      echo("<h1>Device Manager $sel_domain $sel_desc $now</h1>");
       echo "<div class=\"navbar\">";
 
       echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
@@ -769,7 +769,7 @@ if ($flag_show_static == 0)
   if ($json)
   {
     $result = prettyTolk( $json);
-    $id = generateForm($json);
+    $id = generateForm($json,"white");
   }
   //echo ("<br>static<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
   echo "</div>";
@@ -784,7 +784,7 @@ if ($flag_show_dynamic == 0)
   if ($json)
   {
     $result = prettyTolk( $json);
-    $id = generateForm($json);
+    $id = generateForm($json,"green");
   }
   //echo ("<br>dynamic<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
@@ -799,7 +799,7 @@ if ($flag_show_payload == 0)
   if ($json)
   {
     $result = prettyTolk( $json);
-    $id = generateForm($json);
+    $id = generateForm($json,"blue");
   }
   //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
