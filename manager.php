@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-03-09
+// Date.......: 2019-03-10
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
 $version = '2019-03-09';
@@ -13,7 +13,6 @@ $sel_domain = readDomainUrl($sel_domain);
 
 $sel_device = $_SESSION["device"];
 $doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
-echo $doc;
 $sel_desc = getDesc($doc);
 
 $flag_show_static  = $_SESSION["flag_show_static"];
@@ -304,6 +303,8 @@ if (isset($_GET['do'])) {
     {
       $sel_device = $_GET['device'];
       $_SESSION["device"]   = $sel_device;
+      $doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
+      $sel_desc = getDesc($doc);
     }
   }
 
