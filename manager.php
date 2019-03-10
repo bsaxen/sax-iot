@@ -760,7 +760,7 @@ if ($form_add_domain == 1)
 }
 
 //  echo "<div id=\"container\">";
-if ($flag_show_static == 1)
+if ($flag_show_static == 0)
 {
   echo "<div id=\"static\">";
   echo "Static";
@@ -775,7 +775,7 @@ if ($flag_show_static == 1)
   echo "</div>";
 }
 
-if ($flag_show_dynamic == 1)
+if ($flag_show_dynamic == 0)
 {
   echo "<div id=\"dynamic\">";
   echo "Dynamic";
@@ -790,7 +790,7 @@ if ($flag_show_dynamic == 1)
     echo "</div>";
 }
 
-if ($flag_show_payload == 1)
+if ($flag_show_payload == 0)
 {
   echo "<div id=\"payload\">";
   echo "Payload";
@@ -805,12 +805,12 @@ if ($flag_show_payload == 1)
     echo "</div>";
 }
 
-if ($flag_show_log == 1)
+if ($flag_show_log == 0)
 {
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
   $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.txt?ignore='.$rnd;
-  echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"600\"></iframe>");
+  echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
     echo "</div>";
 }
 //  echo "</div";
