@@ -1,8 +1,9 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-08
+# Date: 2019-03-11
 # Description: IoT python library
+version = 1
 # =============================================
 import MySQLdb
 import urllib
@@ -46,6 +47,8 @@ class Configuration:
     myperiod     = 10
     myfeedback   = 1
     mywrap       = 999999
+    mysw         = 0
+    mylibrary    = 0
 
     # Trigger feedback
     fb_feedback    = []
@@ -90,6 +93,7 @@ class Configuration:
 
 
 co = Configuration()
+co.mylibrary = version
 ds = Datastreams()
 dy = ModuleDynamic()
 
@@ -116,6 +120,8 @@ def lib_publishMyStatic(co):
     payload += '"tags" : "'     + str(co.mytags) + '",'
     payload += '"feedback" : "' + str(co.myfeedback) + '",'
     payload += '"period" : "'   + str(co.myperiod) + '",'
+    payload += '"sw" : "'       + str(co.mysw) + '",'
+    payload += '"library" : "'  + str(co.mylibrary) + '",'
     payload += '"platform" : "' + str(co.myplatform) + '"'
     payload += '}'
     data['json']     = payload
