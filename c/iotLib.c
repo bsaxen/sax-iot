@@ -3,6 +3,7 @@
 // Date.......: 2019-03-08
 // Author.....: Benny Saxen
 // Description:
+int verion = 1;
 //=============================================
 #include <ESP8266WiFi.h>
 
@@ -26,6 +27,8 @@ struct Configuration
   int conf_kwh_pulses    = 0;
   int conf_sensors       = 0;
   String conf_mac        = "void";
+  int conf_library       = version;
+  int conf_sw            = 0;
 };
 
 struct Data
@@ -127,6 +130,16 @@ String lib_buildUrlStatic(struct Configuration c2)
   url += "\"feedback";
   url += "\":\"";
   url += c2.conf_feedback;
+  url += "\",";
+  
+  url += "\"library";
+  url += "\":\"";
+  url += c2.conf_library;
+  url += "\",";
+  
+  url += "\"sw";
+  url += "\":\"";
+  url += c2.conf_sw;
   url += "\",";
   
   url += "\"period";
