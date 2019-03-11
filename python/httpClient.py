@@ -1,8 +1,9 @@
 # =============================================
 # File: httpClient.py
 # Author: Benny Saxen
-# Date: 2019-03-08
+# Date: 2019-03-11
 # Description:
+version = 1
 # =============================================
 from iotLib import *
 #===================================================
@@ -11,6 +12,7 @@ from iotLib import *
 confile = "httpclient.conf"
 lib_readConfiguration(confile,co)
 lib_publishMyStatic(co)
+co.mysw = version
 #===================================================
 # Loop
 #===================================================
