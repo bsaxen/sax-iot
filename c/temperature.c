@@ -1,7 +1,8 @@
 //=============================================
 // File.......: temperature.c
-// Date.......: 2019-03-09
+// Date.......: 2019-03-11
 // Author.....: Benny Saxen
+int version = 1;
 // Description: Signal from D1 pin.
 // 4.7kOhm between signal and Vcc
 // Problem access port: sudo chmod 666 /dev/ttyUSB0
@@ -57,6 +58,7 @@ void SetUpTemperatureSensors()
 void setup()
 //=============================================
 {
+  c1.conf_sw         = version;
   c1.conf_id         = "set_to_mac";
   c1.conf_period     = 10;
   c1.conf_wrap       = 999999;
