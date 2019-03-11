@@ -4,6 +4,7 @@
 # Date.......: 2019-03-09
 # Author.....: Benny Saxen
 # Description:
+version = 1
 #=============================================
 # Libraries
 #=============================================
@@ -19,6 +20,7 @@ running  = []
 #=============================================
 confile = 'mysql.conf'
 lib_readConfiguration(confile,co)
+co.mysw = version
 print "Number of datastreams: " + str(co.nds)
 lib_publishMyStatic(co)
 
