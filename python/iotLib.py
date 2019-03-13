@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-11
+# Date: 2019-03-13
 # Description: IoT python library
 version = 1
 # =============================================
@@ -120,6 +120,7 @@ def lib_publishMyStatic(co):
     payload += '"tags" : "'     + str(co.mytags) + '",'
     payload += '"feedback" : "' + str(co.myfeedback) + '",'
     payload += '"period" : "'   + str(co.myperiod) + '",'
+    payload += '"wrap" : "'     + str(co.mywrap) + '",'
     payload += '"sw" : "'       + str(co.mysw) + '",'
     payload += '"library" : "'  + str(co.mylibrary) + '",'
     payload += '"platform" : "' + str(co.myplatform) + '"'
