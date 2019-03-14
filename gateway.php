@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-03-08
+// Date.......: 2019-03-13
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -305,7 +305,7 @@ if (isset($_GET['do']))
           $obj->msg_static = $_GET['json'];
         }
         saveStaticMsg($obj);
-        echo readFeedbackFileList($obj->id);
+        //echo readFeedbackFileList($obj->id);
       }
 
       if ($do == 'dynamic')
@@ -325,7 +325,7 @@ if (isset($_GET['do']))
           $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
-        echo readFeedbackFileList($obj->id);
+        //echo readFeedbackFileList($obj->id);
       }
 
  } // error
