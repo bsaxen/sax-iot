@@ -26,7 +26,7 @@ class HeaterControl:
    timeout_temperature_indoor    = 60
    timeout_temperature_outdoor   = 60
 #=====================================================
-def heater_model(co,dy,hc):
+def control_algorithm(co,dy,hc):
     mintemp = float(co.mintemp)
     maxtemp = float(co.maxtemp)
     minheat = float(co.minheat)
@@ -133,9 +133,9 @@ def heater_model(co,dy,hc):
     payload += '"temperature_outdoor" : "' + str(hc.temperature_outdoor) + '",\n'
     payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
     payload += '}\n'
-
-    print payload
-    msg = lib_publishMyDynamic(co,dy,payload)
+	
+    lib_publishMyPayload(co,dy,payload)
+    msg = lib_publishMyDynamic(co,dy)
 
     if ":" in msg:
 		p = msg.split(':')
@@ -146,11 +146,11 @@ def heater_model(co,dy,hc):
 			if q[0] == 'stopcontrol':
 				message = 'Stop control: '
 				lib_publishMyLog(co, message )
-				dy.mystop = 1
+				md.mystop = 1
 			if q[0] == 'startcontrol':
 				message = 'Start control: '
 				lib_publishMyLog(co, message )
-				dy.mystop = 0
+				md.mystop = 0
 		if m == 2:
 			if q[0] == 'bias':
 				hc.bias = float(q[1])
@@ -168,42 +168,38 @@ confile = "heatercontrol.conf"
 lib_readConfiguration(confile,co)
 lib_publishMyStatic(co)
 
-dy.mymode = MODE_OFFLINE
-dy.mystate = STATE_OFF
+md.mymode = MODE_OFFLINE
+md.mystate = STATE_OFF
 #===================================================
 # Loop
 #===================================================
 while True:
     lib_increaseMyCounter(co,md)
 
-    url = 'http://' + co.ds_uri[0] + '/' + co.ds_topic[0] + '/payload.json'
-    print url
     hc.temperature_indoor_prev = hc.temperature_indoor
-    hc.temperature_indoor = lib_readJsonPayload(url,'temp1')
+    hc.temperature_indoor = lib_readPayloadParam(co,ds,co.ds_domain[0],co.ds_device[0],co.ds_param[0])
     print hc.temperature_indoor
     diff  = float(hc.temperature_indoor) - float(hc.temperature_indoor_prev)
     if abs(diff) > 10 and hc.temperature_indoor_prev != 999:
       message = 'Temperature indoor error: cur=' + str(hc.temperature_indoor) + ' prev=' + str(hc.temperature_indoor_prev)
     	#publishLog(co, message )
     	hc.temperature_indoor = hc.temperature_indoor_prev
-    	dy.myerrors += 1
+    	md.myerrors += 1
     hc.timeout_temperature_indoor = 60
 
-    url = 'http://' + co.ds_uri[1] + '/' + co.ds_topic[1] + '/payload.json'
-    print url
     hc.temperature_outdoor_prev = hc.temperature_outdoor
-    hc.temperature_outdoor = lib_readJsonPayload(url,'temp1')
+    hc.temperature_indoor = lib_readPayloadParam(co,ds,co.ds_domain[1],co.ds_device[1],co.ds_param[1])
     print hc.temperature_outdoor
     diff  = float(hc.temperature_outdoor) - float(hc.temperature_outdoor_prev)
     if abs(diff) > 10 and hc.temperature_outdoor_prev != 999:
       message = 'Temperature outdoor error: cur=' + str(hc.temperature_outdoor) + ' prev=' + str(hc.temperature_outdoor_prev)
     	#gowPublishLog(co, message )
     	hc.temperature_outdoor = hc.temperature_outdoor_prev
-    	dy.myerrors += 1
+    	md.myerrors += 1
     hc.timeout_temperature_outdoor = 60
 
-    heater_model(co,md,hc)
-    print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
+    heater_algorithm(co,md,hc)
+    print "sleep: " + str(co.myperiod) + " triggered: " + str(md.mycounter)
     time.sleep(float(co.myperiod))
 
 #===================================================
