@@ -15,6 +15,9 @@
 # c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
 # c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
 # c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
+#
+# Stepper device
+# c_send       iot.simuino.com 103
 # =============================================
 import math
 import urllib
@@ -43,7 +46,35 @@ class HeaterTwin:
    inertia  = 0
    warmcool = 0
    steps = 0
-
+#=====================================================
+def show_action_bit_info(a):
+    message = ''
+    c = a & 1
+    if c == 1:
+        message +=  "|inertia_active "
+    c = a & 2
+    if c == 2:
+        message +=  "|heater_is_off "
+    c = a & 4
+    if c == 4:
+        message +=  "|no_warming_above_20"
+    c = a & 8
+    if c == 8:
+        message +=  "|no_cooling_possible"
+    c = a & 16
+    if c == 16:
+        message +=  "|below_min_steps"
+    c = a & 32
+    if c == 32:
+        message +=  "|steps_is_0"
+    c = a & 64
+    if c == 64:
+        message +=  "|energy_limit_reached"
+    c = a & 128
+    if c == 128:
+        message +=  "|128_no_defined"
+    print message
+    return message
 #=====================================================
 def simulate(co,dy,ht):
 
@@ -96,17 +127,73 @@ def simulate(co,dy,ht):
             lib_publishMyLog(co, message )
 
         if dy.mystate == STATE_OFF:
-            ht.warmcool -= 1
+            ht.warmcool -= int(co.myperiod)
             if ht.warmcool < 0:
                 ht.warmcool = 0
-            if ht.temperature_smoke > co.minsmoke:
+            if ht.temperature_smoke > float(co.minsmoke):
                 dy.mystate = STATE_WARMING
                 message = 'STATE_WARMING'
                 lib_publishMyLog(co, message )
 
-        if dy.mystate == STATE_ON:
+        if dy.mystate == STATE_WARMING:
+            ht.warmcool += int(co.myperiod)
+            if ht.warmcool > float(co.warmcool):
+                ht.inertia = 0
+                ht.warmcool = float(co.warmcool)
+                dy.mystate = STATE_ON
+                message = 'STATE_ON'
+                lib_publishMyLog(co, message )
+            if ht.temperature_smoke < float(co.minsmoke):
+                action += 2
+                dy.mystate = STATE_OFF
+                ht.warmcool = 0
+                message = 'STATE_OFF'
+                lib_publishMyLog(co, message )
 
-            ht.steps = 10
+        action = 0
+        if dy.mystate == STATE_ON:
+            if ht.inertia > 0:
+                action += 1
+            if ht.temperature_smoke < float(co.minsmoke):
+                action += 2
+                dy.mystate = STATE_OFF
+                ht.warmcool = 0
+                message = 'STATE_OFF'
+                lib_publishMyLog(co, message )
+
+            tmp1 = float(ht.temperature_target)*float(co.relax)
+            tmp2 = float(ht.temperature_water_out)*float(co.relax)
+            tmp3 = tmp1 - tmp2
+            ht.steps = round(tmp3)
+
+            if ht.temperature_water_in > ht.temperature_water_out and ht.steps < 0:
+                action += 8
+            if abs(ht.steps) < int(co.minsteps):
+                action += 16
+
+            energy = float(ht.temperature_water_out) - float(ht.temperature_water_in)
+            if energy > float(co.maxenergy) and int(ht.steps) > 0:
+                action += 64
+
+            if ht.steps > 0:
+                direction = COUNTERCLOCKWISE
+            if ht.steps < 0:
+                diection = CLOCKWISE
+
+            if ht.steps == 0:
+                action += 32
+
+            if abs(ht.steps) > int(co.maxsteps):
+                ht.steps = int(co.maxsteps)
+
+            why = show_action_bit_info(action)
+
+            if action == 0 and dy.mystop == 0:
+                steps = abs(ht.steps)
+                #send message to stepper devices
+                print "========= Stepper Move ======" + str(direction) + ' steps=' + str(steps)
+                message = "STEPPER"+','+str(direction)+','+str(steps)
+                lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], message )
 #========================================================================
     payload  = '{\n'
     payload += '"mode" : "' + str(dy.mymode) + '",\n'
@@ -116,6 +203,9 @@ def simulate(co,dy,ht):
     payload += '"inertia" : "' + str(ht.inertia) + '",\n'
     payload += '"warmcool" : "' + str(ht.warmcool) + '",\n'
     payload += '"steps" : "' + str(ht.steps) + '",\n'
+    payload += '"action" : "' + str(action) + '",\n'
+    payload += '"why" : "' + str(why) + '",\n'
+    payload += '"energy" : "' + str(energy) + '",\n'
     payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
     payload += '"temperature_water_in" : "' + str(ht.temperature_water_in) + '",\n'
     payload += '"temperature_smoke" : "' + str(ht.temperature_smoke) + '",\n'
@@ -127,7 +217,7 @@ def simulate(co,dy,ht):
 
     if ":" in msg:
 		p = msg.split(':')
-		#print p[1]
+		print msg
 		q = p[1].split(",")
 		m = len(q)
 		if m == 1:
@@ -180,7 +270,7 @@ dy.mymode  = MODE_OFFLINE
 dy.mystate = STATE_OFF
 
 ht.inertia = 0
-ht.warmcool = int(co.warmcool)
+ht.warmcool = int(co.warmcool)*int(co.myperiod)
 #===================================================
 # Loop
 #===================================================
@@ -188,16 +278,16 @@ while True:
     lib_increaseMyCounter(co,dy)
 
     res = getLatestValue(co,ds,ht,ht.temperature_water_out_ix)
-    print " water_out" + str(res)
-    ht.temperature_water_out = res
+    print "water_out" + str(res)
+    ht.temperature_water_out = 29.3 #res
 
     res = getLatestValue(co,ds,ht,ht.temperature_water_in_ix)
     print "water_in" + str(res)
-    ht.temperature_water_in = res
+    ht.temperature_water_in = 27.3 #res
 
     res = getLatestValue(co,ds,ht,ht.temperature_smoke_ix)
     print "smoke" + str(res)
-    ht.temperature_smoke = res
+    ht.temperature_smoke = 40.0 #res
 
     res = getLatestValue(co,ds,ht,ht.temperature_target_ix)
     print "target" + str(res)

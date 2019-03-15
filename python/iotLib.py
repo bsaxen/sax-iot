@@ -20,6 +20,9 @@ STATE_WARMING = 3
 MODE_OFFLINE  = 1
 MODE_ONLINE   = 2
 
+CLOCKWISE        = 1
+COUNTERCLOCKWISE = 2
+
 class Datastreams:
     no        = []
     period    = []
@@ -57,6 +60,11 @@ class Configuration:
     data_device    = []
     data_type      = [] # static, dynamic, payload
     ndata = 0
+
+    # Data sources
+    send_domain    = []
+    send_device    = []
+    nsend = 0
 
     # Heater algorithm
     mintemp = 0.0
@@ -405,7 +413,11 @@ def lib_readConfiguration(confile,c1):
                     c1.data_type.append(word[3])
                     c1.data_parameter.append(word[4])
                     c1.ndata += 1
-                    print c1.ndata
+
+                if word[0] == 'c_send':
+                    c1.send_domain.append(word[1])
+                    c1.send_device.append(word[2])
+                    c1.nsend += 1
 
                 if word[0] == 'c_stream':
                     c1.ds_domain.append(word[1])
@@ -455,6 +467,8 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_warmcool     720\n')
         fh.write('c_inertia      480\n')
         fh.write('c_maxenergy    4.0\n')
+
+        fh.write('c_send         domain device\n')
 
         fh.write('c_data         domain device type parameter\n')
 
@@ -582,12 +596,12 @@ def lib_readData(co,ds,index):
         x = lib_readPayloadParam(co,ds,domain,device,parameter)
     return x
 #===================================================
-def lib_placeOrder(domain, server, device, feedback):
+def lib_placeOrder(domain, server, device, message):
 #===================================================
     data = {}
     data['do']        = 'feedback'
     data['id']        = device
-    data['feedback']  = feedback
+    data['msg']       = message
     data['tag']       = lib_generateRandomString()
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
