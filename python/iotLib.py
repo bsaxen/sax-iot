@@ -1,9 +1,9 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-13
+# Date: 2019-03-15
 # Description: IoT python library
-version = 1
+version = 2
 # =============================================
 import MySQLdb
 import urllib
@@ -50,11 +50,12 @@ class Configuration:
     mysw         = 0
     mylibrary    = 0
 
-    # Trigger feedback
-    fb_feedback    = []
-    fb_domain      = []
-    fb_device      = []
-    nfb = 0
+    # Data sources
+    data_parameter = []
+    data_domain    = []
+    data_device    = []
+    data_type      = [] # static, dynamic, payload
+    ndata = 0
     # Heater algorithm
     mintemp = 0.0
     maxtemp = 0.0
@@ -129,11 +130,11 @@ def lib_publishMyStatic(co):
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
-    print req
+    #print req
     try:
         response = urllib2.urlopen(req)
         the_page = response.read()
-        print 'Message to ' + co.myid + ': ' + the_page
+        #print 'Message to ' + co.myid + ': ' + the_page
         #evaluateAction(the_page)
     except urllib2.URLError as e:
         print e.reason
@@ -155,7 +156,7 @@ def lib_publishMyDynamic(co,dy):
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
-    print req
+    #print req
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
@@ -178,11 +179,11 @@ def lib_publishMyPayload(co,dy,payload):
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
-    print req
+    #print req
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
-        print 'Message to ' + co.myid + ': ' + msg
+        #print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
         print e.reason
 
@@ -201,11 +202,11 @@ def lib_publishMyLog(co, message ):
 
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
-    print req
+    #print req
     try:
         response = urllib2.urlopen(req)
         msg = response.read()
-        print 'Message to ' + co.myid + ': ' + msg
+        #print 'Message to ' + co.myid + ': ' + msg
         #evaluateAction(the_page)
     except urllib2.URLError as e:
         print e.reason
@@ -273,26 +274,26 @@ def lib_getDeviceStatus(ds,domain,device):
 #=====================================================
 def lib_apiListDomainTopics(co):
     url = 'http://' + co.mydomain + '/' + co.myserver + '?do=list_topics'
-    print url
+    #print url
     response = urllib2.urlopen(url)
     the_page = response.read()
     the_page = the_page.replace('.reg','')
     the_page = the_page.replace('_','/')
     list = the_page.split(':')
-    print co.domain
-    print the_page
+    #print co.domain
+    #print the_page
     return list
 #=====================================================
 def lib_apiSearchTopics(co,key):
     url = 'http://' + co.domain + '/' + co.myserver + '?do=search&search=' + key
-    print url
+    #print url
     response = urllib2.urlopen(url)
     the_page = response.read()
     the_page = the_page.replace('.reg','')
     the_page = the_page.replace('_','/')
     list = the_page.split(':')
-    print co.domain
-    print the_page
+    #print co.domain
+    #print the_page
     return list
 #===================================================
 def lib_common_action(co,feedback):
@@ -323,12 +324,12 @@ def lib_evaluateAction( action):
     print action
 #===================================================
 def lib_readConfiguration(confile,c1):
-    print confile
+    #print confile
     try:
         c1.nds = 0
         fh = open(confile, 'r')
         for line in fh:
-            print 'z' + line
+            #print 'z' + line
             if line[0] != '#':
                 word = line.split()
                 if word[0] == 'c_id':
@@ -388,11 +389,12 @@ def lib_readConfiguration(confile,c1):
                 if word[0] == 'c_dbpassword':
                     c1.dbpassword      = word[1]
 
-                if word[0] == 'c_fb_vector':
-                    c1.fb_domain.append(word[1])
-                    c1.fb_device.append(word[2])
-                    c1.fb_feedback.append(word[3])
-                    c1.nfb += 1
+                if word[0] == 'c_data':
+                    c1.data_domain.append(word[1])
+                    c1.data_device.append(word[2])
+                    c1.data_type.append(word[3])
+                    c1.data_parameter.append(word[4])
+                    c1.ndata += 1
 
                 if word[0] == 'c_stream':
                     c1.ds_domain.append(word[1])
@@ -442,7 +444,7 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_defsteps     30\n')
         fh.write('c_maxenergy    4.0\n')
 
-        fh.write('c_fb_vector  domain device feedback\n')
+        fh.write('c_data         domain device type parameter\n')
 
         fh.write('c_dbhost       192.168.1.85\n')
         fh.write('c_dbname       gow\n')
@@ -547,6 +549,25 @@ def lib_readPayloadParam(co,ds,domain,device,par):
     x = 'void'
     if ok == 0:
         x = j['msg'][par]
+    return x
+#=============================================
+def lib_readData(co,ds,index):
+#=============================================
+    if index >= co.ndata:
+        print "index too large"
+        return 0
+
+    domain    = co.data_domain[index]
+    device    = co.data_device[index]
+    parameter = co.data_parameter[index]
+    stdypa    = co.data_type[index]
+    x = 999
+    if stdypa == 'static':
+        x = lib_readStaticParam(co,ds,domain,device,parameter)
+    if stdypa == 'dynamic':
+        x = lib_readDynaimcParam(co,ds,domain,device,parameter)
+    if stdypa == 'payload':
+        x = lib_readPayloadParam(co,ds,domain,device,parameter)
     return x
 #===================================================
 def lib_placeOrder(domain, server, device, feedback):

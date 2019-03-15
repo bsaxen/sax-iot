@@ -1,9 +1,12 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-03-14
+# Date: 2019-03-15
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
+# Configuration:
+# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp2
+# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
 # =============================================
 import math
 import urllib
@@ -34,11 +37,11 @@ def control_algorithm(co,dy,hc):
     x_0 = float(co.x_0)
     y_0 = float(co.y_0)
 
-    y = 999
+    y = float(999)
 
-    coeff1 = (maxheat - y_0)/(mintemp - x_0)
+    coeff1  = float((maxheat - y_0)/(mintemp - x_0))
     mconst1 = y_0 - coeff1*x_0
-    coeff2 = (y_0 - minheat)/(x_0 - maxtemp)
+    coeff2  = (y_0 - minheat)/(x_0 - maxtemp)
     mconst2 = minheat - coeff2*maxtemp
 
     ndi = 0
@@ -60,7 +63,7 @@ def control_algorithm(co,dy,hc):
 
     old_data = 0
 
-    print ndi
+    #print ndi
 
     hc.timeout_temperature_indoor -= 1
     hc.timeout_temperature_outdoor -= 1
@@ -95,12 +98,12 @@ def control_algorithm(co,dy,hc):
 
         if dy.mystate == STATE_ON:
             hc.need = 1
-            if hc.temperature_indoor > 20:
-		hc.need = 0
-            if hc.temperature_indoor < hc.temperature_outdoor:
-		hc.need = 0
+            if float(hc.temperature_indoor) > 20.0:
+                hc.need = 0
+            if float(hc.temperature_indoor) < float(hc.temperature_outdoor):
+                hc.need = 0
 
-            temp = hc.temperature_outdoor
+            temp = float(hc.temperature_outdoor)
 
             if temp > maxtemp:
                 temp = maxtemp
@@ -112,7 +115,8 @@ def control_algorithm(co,dy,hc):
             else:
                 y = coeff2*temp + mconst2
 
-            y = y +hc.bias
+            y = y + hc.bias
+
             if dy.mystop == 1:
                 y = 999
 #========================================================================
@@ -133,7 +137,7 @@ def control_algorithm(co,dy,hc):
     payload += '"temperature_outdoor" : "' + str(hc.temperature_outdoor) + '",\n'
     payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
     payload += '}\n'
-	
+
     lib_publishMyPayload(co,dy,payload)
     msg = lib_publishMyDynamic(co,dy)
 
@@ -146,11 +150,11 @@ def control_algorithm(co,dy,hc):
 			if q[0] == 'stopcontrol':
 				message = 'Stop control: '
 				lib_publishMyLog(co, message )
-				md.mystop = 1
+				dy.mystop = 1
 			if q[0] == 'startcontrol':
 				message = 'Start control: '
 				lib_publishMyLog(co, message )
-				md.mystop = 0
+				dy.mystop = 0
 		if m == 2:
 			if q[0] == 'bias':
 				hc.bias = float(q[1])
@@ -158,7 +162,6 @@ def control_algorithm(co,dy,hc):
 				lib_publishMyLog(co, message )
 
     return
-
 #===================================================
 # Setup
 #===================================================
@@ -168,38 +171,42 @@ confile = "heatercontrol.conf"
 lib_readConfiguration(confile,co)
 lib_publishMyStatic(co)
 
-md.mymode = MODE_OFFLINE
-md.mystate = STATE_OFF
+dy.mymode = MODE_OFFLINE
+dy.mystate = STATE_OFF
 #===================================================
 # Loop
 #===================================================
 while True:
-    lib_increaseMyCounter(co,md)
+    lib_increaseMyCounter(co,dy)
 
     hc.temperature_indoor_prev = hc.temperature_indoor
-    hc.temperature_indoor = lib_readPayloadParam(co,ds,co.ds_domain[0],co.ds_device[0],co.ds_param[0])
-    print hc.temperature_indoor
+    #hc.temperature_indoor = lib_readPayloadParam(co,ds,co.data_domain[0],co.data_device[0],co.data_parameter[0])
+    hc.temperature_indoor = lib_readData(co,ds,0)
+    #print hc.temperature_indoor
     diff  = float(hc.temperature_indoor) - float(hc.temperature_indoor_prev)
     if abs(diff) > 10 and hc.temperature_indoor_prev != 999:
       message = 'Temperature indoor error: cur=' + str(hc.temperature_indoor) + ' prev=' + str(hc.temperature_indoor_prev)
-    	#publishLog(co, message )
-    	hc.temperature_indoor = hc.temperature_indoor_prev
-    	md.myerrors += 1
+      lib_publishMyLog(co, message)
+      hc.temperature_indoor = hc.temperature_indoor_prev
+      dy.myerrors += 1
+
     hc.timeout_temperature_indoor = 60
 
     hc.temperature_outdoor_prev = hc.temperature_outdoor
-    hc.temperature_indoor = lib_readPayloadParam(co,ds,co.ds_domain[1],co.ds_device[1],co.ds_param[1])
-    print hc.temperature_outdoor
+    #hc.temperature_outdoor = lib_readPayloadParam(co,ds,co.data_domain[1],co.data_device[1],co.data_parameter[1])
+    hc.temperature_outdoor = lib_readData(co,ds,1)
+    #print hc.temperature_outdoor
     diff  = float(hc.temperature_outdoor) - float(hc.temperature_outdoor_prev)
     if abs(diff) > 10 and hc.temperature_outdoor_prev != 999:
       message = 'Temperature outdoor error: cur=' + str(hc.temperature_outdoor) + ' prev=' + str(hc.temperature_outdoor_prev)
-    	#gowPublishLog(co, message )
-    	hc.temperature_outdoor = hc.temperature_outdoor_prev
-    	md.myerrors += 1
+      lib_publishMyLog(co, message)
+      hc.temperature_outdoor = hc.temperature_outdoor_prev
+      dy.myerrors += 1
+
     hc.timeout_temperature_outdoor = 60
 
-    heater_algorithm(co,md,hc)
-    print "sleep: " + str(co.myperiod) + " triggered: " + str(md.mycounter)
+    control_algorithm(co,dy,hc)
+    #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
     time.sleep(float(co.myperiod))
 
 #===================================================
