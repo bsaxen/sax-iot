@@ -3,7 +3,7 @@
 // Date.......: 2019-03-08
 // Author.....: Benny Saxen
 // Description:
-int verion = 1;
+int lib_version = 1;
 //=============================================
 #include <ESP8266WiFi.h>
 
@@ -27,7 +27,7 @@ struct Configuration
   int conf_kwh_pulses    = 0;
   int conf_sensors       = 0;
   String conf_mac        = "void";
-  int conf_library       = version;
+  int conf_library       = lib_version;
   int conf_sw            = 0;
 };
 
