@@ -4,8 +4,16 @@
 # Date: 2019-03-15
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
+#
 # Configuration:
+# 1 water_out
+# 2 water_in
+# 3 smoke
+# 4 target
+#
 # c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp2
+# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
+# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
 # c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
 # =============================================
 import math
@@ -16,41 +24,44 @@ import datetime
 from iotLib import *
 
 #=====================================================
-class HeaterControl:
-   bias    = 0.0
-   need    = 1
+class HeaterTwin:
 
-   temperature_indoor    = 999
-   temperature_outdoor   = 999
+   temperature_water_out_ix   = 0
+   temperature_water_in_ix    = 1
+   temperature_smoke_ix       = 2
+   temperature_target_ix      = 3
 
-   temperature_indoor_prev    = 999
-   temperature_outdoor_prev   = 999
+   temperature_water_out    = 999
+   temperature_water_in     = 999
+   temperature_smoke        = 999
+   temperature_target       = 999
 
-   timeout_temperature_indoor    = 60
-   timeout_temperature_outdoor   = 60
+   value         = []
+   value_prev    = []
+   value_timeout = []
+
+   inertia  = 0
+   warmcool = 0
+   steps = 0
+
 #=====================================================
-def control_algorithm(co,dy,hc):
-    mintemp = float(co.mintemp)
-    maxtemp = float(co.maxtemp)
-    minheat = float(co.minheat)
-    maxheat = float(co.maxheat)
-    x_0 = float(co.x_0)
-    y_0 = float(co.y_0)
-
-    y = float(999)
-
-    coeff1  = float((maxheat - y_0)/(mintemp - x_0))
-    mconst1 = y_0 - coeff1*x_0
-    coeff2  = (y_0 - minheat)/(x_0 - maxtemp)
-    mconst2 = minheat - coeff2*maxtemp
+def simulate(co,dy,ht):
 
     ndi = 0
-    if hc.temperature_outdoor == 999:
-        message = "No data - temperature_outdoor"
+    if ht.temperature_water_out == 999:
+        message = "No data - temperature_water_out"
         lib_publishMyLog(co, message )
         ndi = ndi + 1
-    if hc.temperature_indoor == 999:
-        message = "No data - temperature_indoor"
+    if ht.temperature_water_in == 999:
+        message = "No data - temperature_water_in"
+        lib_publishMyLog(co, message )
+        ndi = ndi + 1
+    if ht.temperature_smoke == 999:
+        message = "No data - temperature_smoke"
+        lib_publishMyLog(co, message )
+        ndi = ndi + 1
+    if ht.temperature_target == 999:
+        message = "No data - temperature_target"
         lib_publishMyLog(co, message )
         ndi = ndi + 1
 
@@ -63,79 +74,52 @@ def control_algorithm(co,dy,hc):
 
     old_data = 0
 
-    #print ndi
+    print ndi
 
-    hc.timeout_temperature_indoor -= 1
-    hc.timeout_temperature_outdoor -= 1
-
-    if hc.timeout_temperature_indoor < 1:
-	message = "Old data - temperature_indoor " + str(hc.timeout_temperature_indoor)
-	old_data= 1
-        lib_publishMyLog(co, message )
-
-    if hc.timeout_temperature_outdoor < 1:
-	message = "Old data - temperature_outdoor " + str(hc.timeout_temperature_outdoor)
-	old_data= 1
-	lib_publishMyLog(co, message )
+    for x in range(co.ndata):
+        ht.value_timeout[x] -= 1
+        if ht.value_timeout[x] < 1:
+            message = "Old data index=" + str(x)
+            old_data= 1
+            lib_publishMyLog(co, message )
 
     if dy.mymode == MODE_OFFLINE:
 	if all_data_is_available == 1 and old_data == 0:
 	    dy.mymode = MODE_ONLINE
-            message = 'MODE_ONLINE'
-	    lib_publishMyLog(co, message )
+        message = 'MODE_ONLINE'
+        lib_publishMyLog(co, message )
 
     if dy.mymode == MODE_ONLINE:
-	if old_data == 1:
-	    dy.mymode = MODE_OFFLINE
-	    message = 'MODE_OFFLINE'
-	    lib_publishMyLog(co, message )
+        if old_data == 1:
+            dy.mymode = MODE_OFFLINE
+            message = 'MODE_OFFLINE'
+            lib_publishMyLog(co, message )
 
         if dy.mystate == STATE_OFF:
-            if dy.mystop == 0:
-                dy.mystate = STATE_ON
-                message = 'STATE_ON'
+            ht.warmcool -= 1
+            if ht.warmcool < 0:
+                ht.warmcool = 0
+            if ht.temperature_smoke > co.minsmoke:
+                dy.mystate = STATE_WARMING
+                message = 'STATE_WARMING'
                 lib_publishMyLog(co, message )
 
         if dy.mystate == STATE_ON:
-            hc.need = 1
-            if float(hc.temperature_indoor) > 20.0:
-                hc.need = 0
-            if float(hc.temperature_indoor) < float(hc.temperature_outdoor):
-                hc.need = 0
 
-            temp = float(hc.temperature_outdoor)
-
-            if temp > maxtemp:
-                temp = maxtemp
-            if temp < mintemp:
-                temp = mintemp
-
-            if temp < x_0:
-                y = coeff1*temp + mconst1
-            else:
-                y = coeff2*temp + mconst2
-
-            y = y + hc.bias
-
-            if dy.mystop == 1:
-                y = 999
+            ht.steps = 10
 #========================================================================
     payload  = '{\n'
-    payload += '"mintemp" : "' + str(co.mintemp) + '",\n'
-    payload += '"maxtemp" : "' + str(co.maxtemp) + '",\n'
-    payload += '"minheat" : "' + str(co.minheat) + '",\n'
-    payload += '"maxheat" : "' + str(co.maxheat) + '",\n'
-    payload += '"x_0" : "' + str(co.x_0) + '",\n'
-    payload += '"y_0" : "' + str(co.y_0) + '",\n'
-    payload += '"need" : "' + str(hc.need) + '",\n'
-    payload += '"target" : "' + str(y) + '",\n'
     payload += '"mode" : "' + str(dy.mymode) + '",\n'
     payload += '"state" : "' + str(dy.mystate) + '",\n'
     payload += '"errors" : "' + str(dy.myerrors) + '",\n'
     payload += '"stop" : "' + str(dy.mystop) + '",\n'
-    payload += '"bias" : "' + str(hc.bias) + '",\n'
-    payload += '"temperature_outdoor" : "' + str(hc.temperature_outdoor) + '",\n'
-    payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
+    payload += '"inertia" : "' + str(ht.inertia) + '",\n'
+    payload += '"warmcool" : "' + str(ht.warmcool) + '",\n'
+    payload += '"steps" : "' + str(ht.steps) + '",\n'
+    payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
+    payload += '"temperature_water_in" : "' + str(ht.temperature_water_in) + '",\n'
+    payload += '"temperature_smoke" : "' + str(ht.temperature_smoke) + '",\n'
+    payload += '"temperature_target" : "' + str(ht.temperature_target) + '"\n'
     payload += '}\n'
 
     lib_publishMyPayload(co,dy,payload)
@@ -157,55 +141,69 @@ def control_algorithm(co,dy,hc):
 				dy.mystop = 0
 		if m == 2:
 			if q[0] == 'bias':
-				hc.bias = float(q[1])
-				message = 'Bias: ' + str(hc.bias)
+				ht.bias = float(q[1])
+				message = 'Bias: ' + str(ht.bias)
 				lib_publishMyLog(co, message )
 
     return
+#=====================================================
+def getLatestValue(co,dy,ht,ix):
+    ht.value_prev[ix] = ht.value[ix]
+    ht.value[ix] = lib_readData(co,ds,ix)
+    diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
+    if abs(diff) > 10 and ht.value_prev[ix] != 999:
+        message = 'value error: cur=' + str(ht.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
+        lib_publishMyLog(co, message)
+        ht.value[ix] = ht.value_prev[ix]
+        dy.myerrors += 1
+
+    ht.value_timeout[ix] = 60
+
+    return ht.value[ix]
+
 #===================================================
 # Setup
 #===================================================
-hc = HeaterControl()
+ht = HeaterTwin()
 
-confile = "heatercontrol.conf"
+confile = "heatertwin.conf"
 lib_readConfiguration(confile,co)
 lib_publishMyStatic(co)
 
-dy.mymode = MODE_OFFLINE
+for x in range(co.ndata):
+    ht.value.append(999)
+    ht.value_prev.append(999)
+    ht.value_timeout.append(60)
+
+print "ndata=" + str(co.ndata)
+dy.mymode  = MODE_OFFLINE
 dy.mystate = STATE_OFF
+
+ht.inertia = 0
+ht.warmcool = int(co.warmcool)
 #===================================================
 # Loop
 #===================================================
 while True:
     lib_increaseMyCounter(co,dy)
 
-    hc.temperature_indoor_prev = hc.temperature_indoor
-    #hc.temperature_indoor = lib_readPayloadParam(co,ds,co.data_domain[0],co.data_device[0],co.data_parameter[0])
-    hc.temperature_indoor = lib_readData(co,ds,0)
-    #print hc.temperature_indoor
-    diff  = float(hc.temperature_indoor) - float(hc.temperature_indoor_prev)
-    if abs(diff) > 10 and hc.temperature_indoor_prev != 999:
-      message = 'Temperature indoor error: cur=' + str(hc.temperature_indoor) + ' prev=' + str(hc.temperature_indoor_prev)
-      lib_publishMyLog(co, message)
-      hc.temperature_indoor = hc.temperature_indoor_prev
-      dy.myerrors += 1
+    res = getLatestValue(co,ds,ht,ht.temperature_water_out_ix)
+    print " water_out" + str(res)
+    ht.temperature_water_out = res
 
-    hc.timeout_temperature_indoor = 60
+    res = getLatestValue(co,ds,ht,ht.temperature_water_in_ix)
+    print "water_in" + str(res)
+    ht.temperature_water_in = res
 
-    hc.temperature_outdoor_prev = hc.temperature_outdoor
-    #hc.temperature_outdoor = lib_readPayloadParam(co,ds,co.data_domain[1],co.data_device[1],co.data_parameter[1])
-    hc.temperature_outdoor = lib_readData(co,ds,1)
-    #print hc.temperature_outdoor
-    diff  = float(hc.temperature_outdoor) - float(hc.temperature_outdoor_prev)
-    if abs(diff) > 10 and hc.temperature_outdoor_prev != 999:
-      message = 'Temperature outdoor error: cur=' + str(hc.temperature_outdoor) + ' prev=' + str(hc.temperature_outdoor_prev)
-      lib_publishMyLog(co, message)
-      hc.temperature_outdoor = hc.temperature_outdoor_prev
-      dy.myerrors += 1
+    res = getLatestValue(co,ds,ht,ht.temperature_smoke_ix)
+    print "smoke" + str(res)
+    ht.temperature_smoke = res
 
-    hc.timeout_temperature_outdoor = 60
+    res = getLatestValue(co,ds,ht,ht.temperature_target_ix)
+    print "target" + str(res)
+    ht.temperature_target = res
 
-    control_algorithm(co,dy,hc)
+    simulate(co,dy,ht)
     #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
     time.sleep(float(co.myperiod))
 

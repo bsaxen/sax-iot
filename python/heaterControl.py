@@ -17,17 +17,20 @@ from iotLib import *
 
 #=====================================================
 class HeaterControl:
-   bias    = 0.0
-   need    = 1
 
-   temperature_indoor    = 999
-   temperature_outdoor   = 999
+    temperature_indoor_ix     = 0
+    temperature_outdoor_ix    = 1
 
-   temperature_indoor_prev    = 999
-   temperature_outdoor_prev   = 999
+    value         = []
+    value_prev    = []
+    value_timeout = []
 
-   timeout_temperature_indoor    = 60
-   timeout_temperature_outdoor   = 60
+    bias    = 0.0
+    need    = 1
+
+    temperature_indoor    = 999
+    temperature_outdoor   = 999
+
 #=====================================================
 def control_algorithm(co,dy,hc):
     mintemp = float(co.mintemp)
@@ -81,8 +84,8 @@ def control_algorithm(co,dy,hc):
     if dy.mymode == MODE_OFFLINE:
 	if all_data_is_available == 1 and old_data == 0:
 	    dy.mymode = MODE_ONLINE
-            message = 'MODE_ONLINE'
-	    lib_publishMyLog(co, message )
+        message = 'MODE_ONLINE'
+        lib_publishMyLog(co, message )
 
     if dy.mymode == MODE_ONLINE:
 	if old_data == 1:
@@ -162,6 +165,21 @@ def control_algorithm(co,dy,hc):
 				lib_publishMyLog(co, message )
 
     return
+#=====================================================
+def getLatestValue(co,dy,hc,ix):
+    hc.value_prev[ix] = hc.value[ix]
+    hc.value[ix] = lib_readData(co,ds,ix)
+    diff  = float(hc.value[ix]) - float(hc.value_prev[ix])
+    if abs(diff) > 10 and ht.value_prev[ix] != 999:
+        message = 'value error: cur=' + str(hc.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
+        lib_publishMyLog(co, message)
+        hc.value[ix] = hc.value_prev[ix]
+        dy.myerrors += 1
+
+    hc.value_timeout[ix] = 60
+
+    return hc.value[ix]
+
 #===================================================
 # Setup
 #===================================================
@@ -171,6 +189,12 @@ confile = "heatercontrol.conf"
 lib_readConfiguration(confile,co)
 lib_publishMyStatic(co)
 
+for x in range(co.ndata):
+    ht.value.append(999)
+    ht.value_prev.append(999)
+    ht.value_timeout.append(60)
+
+print "ndata=" + str(co.ndata)
 dy.mymode = MODE_OFFLINE
 dy.mystate = STATE_OFF
 #===================================================
@@ -179,31 +203,13 @@ dy.mystate = STATE_OFF
 while True:
     lib_increaseMyCounter(co,dy)
 
-    hc.temperature_indoor_prev = hc.temperature_indoor
-    #hc.temperature_indoor = lib_readPayloadParam(co,ds,co.data_domain[0],co.data_device[0],co.data_parameter[0])
-    hc.temperature_indoor = lib_readData(co,ds,0)
-    #print hc.temperature_indoor
-    diff  = float(hc.temperature_indoor) - float(hc.temperature_indoor_prev)
-    if abs(diff) > 10 and hc.temperature_indoor_prev != 999:
-      message = 'Temperature indoor error: cur=' + str(hc.temperature_indoor) + ' prev=' + str(hc.temperature_indoor_prev)
-      lib_publishMyLog(co, message)
-      hc.temperature_indoor = hc.temperature_indoor_prev
-      dy.myerrors += 1
+    res = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
+    print " temperature_indoor" + str(res)
+    ht.temperature_water_out = res
 
-    hc.timeout_temperature_indoor = 60
-
-    hc.temperature_outdoor_prev = hc.temperature_outdoor
-    #hc.temperature_outdoor = lib_readPayloadParam(co,ds,co.data_domain[1],co.data_device[1],co.data_parameter[1])
-    hc.temperature_outdoor = lib_readData(co,ds,1)
-    #print hc.temperature_outdoor
-    diff  = float(hc.temperature_outdoor) - float(hc.temperature_outdoor_prev)
-    if abs(diff) > 10 and hc.temperature_outdoor_prev != 999:
-      message = 'Temperature outdoor error: cur=' + str(hc.temperature_outdoor) + ' prev=' + str(hc.temperature_outdoor_prev)
-      lib_publishMyLog(co, message)
-      hc.temperature_outdoor = hc.temperature_outdoor_prev
-      dy.myerrors += 1
-
-    hc.timeout_temperature_outdoor = 60
+    res = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
+    print "temperature_outdoor" + str(res)
+    ht.temperature_water_in = res
 
     control_algorithm(co,dy,hc)
     #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)

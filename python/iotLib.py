@@ -16,6 +16,7 @@ import json
 
 STATE_OFF     = 1
 STATE_ON      = 2
+STATE_WARMING = 3
 MODE_OFFLINE  = 1
 MODE_ONLINE   = 2
 
@@ -38,11 +39,11 @@ class ModuleDynamic:
 
 class Configuration:
     myid         = '1234'
-    mytitle      = 'title'
-    mytags       = 'tag'
-    mydesc       = 'some'
-    mydomain     = 'gow.simuino.com'
-    myserver     = 'gowServer.php'
+    mytitle      = 'x'
+    mytags       = 'y'
+    mydesc       = 'z'
+    mydomain     = 'iot.simuino.com'
+    myserver     = 'gateway.php'
     myplatform   = 'python'
     myperiod     = 10
     myfeedback   = 1
@@ -56,6 +57,7 @@ class Configuration:
     data_device    = []
     data_type      = [] # static, dynamic, payload
     ndata = 0
+
     # Heater algorithm
     mintemp = 0.0
     maxtemp = 0.0
@@ -63,12 +65,15 @@ class Configuration:
     maxheat = 0.0
     x_0     = 0.0
     y_0     = 0.0
-    relax   = 4.0
-    minsmoke = 0.0
+
+    # Heater Twin
+    relax     = 4.0
+    minsmoke  = 0.0
     minsteps  = 0
     maxsteps  = 0
-    defsteps  = 0
     maxenergy = 0
+    inertia   = 480
+    warmcool  = 720
 
     # database access
     dbhost     = '192.168.1.85'
@@ -80,6 +85,7 @@ class Configuration:
     ds_domain = []
     ds_device = []
     ds_param  = []
+
     # Database tables and parameters
     ds_db_table  = []
     ds_db_par    = []
@@ -366,6 +372,8 @@ def lib_readConfiguration(confile,c1):
                     c1.x_0              = word[1]
                 if word[0] == 'c_y_0':
                     c1.y_0              = word[1]
+
+                # Heater Twin
                 if word[0] == 'c_relax':
                     c1.relax            = word[1]
                 if word[0] == 'c_minsmoke':
@@ -374,8 +382,10 @@ def lib_readConfiguration(confile,c1):
                     c1.minsteps         = word[1]
                 if word[0] == 'c_maxsteps':
                     c1.maxsteps         = word[1]
-                if word[0] == 'c_defsteps':
-                    c1.defsteps         = word[1]
+                if word[0] == 'c_warmcool':
+                    c1.warmcool         = word[1]
+                if word[0] == 'c_inertia':
+                    c1.inertia         = word[1]
                 if word[0] == 'c_maxenergy':
                     c1.maxenergy        = word[1]
 
@@ -395,6 +405,7 @@ def lib_readConfiguration(confile,c1):
                     c1.data_type.append(word[3])
                     c1.data_parameter.append(word[4])
                     c1.ndata += 1
+                    print c1.ndata
 
                 if word[0] == 'c_stream':
                     c1.ds_domain.append(word[1])
@@ -441,7 +452,8 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_minsmoke     27\n')
         fh.write('c_minsteps     5\n')
         fh.write('c_maxsteps     40\n')
-        fh.write('c_defsteps     30\n')
+        fh.write('c_warmcool     720\n')
+        fh.write('c_inertia      480\n')
         fh.write('c_maxenergy    4.0\n')
 
         fh.write('c_data         domain device type parameter\n')
