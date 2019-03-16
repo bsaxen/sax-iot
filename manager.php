@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-03-10
+// Date.......: 2019-03-16
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
 $version = '2019-03-09';
@@ -389,7 +389,10 @@ if (isset($_POST['do'])) {
     $device   = $_POST['device'];
     $msg      = $_POST['message'];
     $tag      = $_POST['tag'];
-    if (strlen($msg) > 2)sendMessage($domain,$device,$msg,$tag);
+    if (strlen($msg) > 2)
+      sendMessage($domain,$device,$msg,$tag);
+    else
+      echo "Message to short";
   }
 
 }
