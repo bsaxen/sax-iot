@@ -3,7 +3,7 @@
 // Date.......: 2019-03-11
 // Author.....: Benny Saxen
 // Description: http client
-int version = 1;
+int sw_version = 1;
 //=============================================
 // Configuration
 //=============================================
@@ -21,7 +21,7 @@ String message = "nothing";
 //=============================================
 void setup() {
 //=============================================  
-  c1.conf_sw         = version;
+  c1.conf_sw         = sw_version;
   c1.conf_id         = "set_to_mac";
   c1.conf_period     = 10;
   c1.conf_wrap       = 999999;
