@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-03-16
+// Date.......: 2019-03-17
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -12,18 +12,7 @@ int sw_version = 1;
 //=============================================
 // Configuration
 //=============================================
-#include "iotLib.c"
-
-struct Configuration c1;
-struct Data d1;
-//=============================================
-String stat_url = " ";
-String dyn_url = " ";
-String pay_url = " ";
-String log_url = " ";
-String payload = "{\"no_data\":\"0\"}";
-String message = "nothing";
-
+//#include "iotLib.c"
 //================================================
 // Globals
 //================================================
@@ -183,33 +172,27 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
        Serial.println(current_pos);
 }
 //================================================
-void software_Reset() // Restarts program from beginning but does not reset the peripherals and registers
-//================================================
-{
-asm volatile ("  jmp 0");
-}
-
-//================================================
 void setup(void){
 //================================================
-  c1.conf_sw         = sw_version;
-  c1.conf_id         = "set_to_mac";
-  c1.conf_period     = 10;
-  c1.conf_wrap       = 999999;
-  c1.conf_feedback   = 1;
+    co.conf_sw         = sw_version;
+    co.conf_id         = "set_to_mac";
+    co.conf_period     = 60;
+    co.conf_wrap       = 999999;
+    co.conf_feedback   = 1;
 
-  c1.conf_title      = "title";
-  c1.conf_tags       = "tag1";
-  c1.conf_desc       = "your";
-  c1.conf_platform   = "esp8266";
-  c1.conf_ssid       = "bridge";
-  c1.conf_password   = "sdfsdf";
-  c1.conf_domain     = "iot.simuino.com";
-  c1.conf_server     = "gateway.php";
-  c1.conf_streamId   = "....................";
-  c1.conf_privateKey = "....................";
+    co.conf_title      = "test1";
+    co.conf_tags       = "test1";
+    co.conf_desc       = "test1";
+    co.conf_platform   = "esp8266";
+    co.conf_ssid       = "bridge";
+    co.conf_password   = "dfgdfg";
+    co.conf_domain     = "iot.simuino.com";
+    co.conf_server     = "gateway.php";
+    co.conf_streamId   = "....................";
+    co.conf_privateKey = "....................";
 
-   Serial.begin(9600);
+    lib_setup(&co, &da);
+  
     //Initialize
     pinMode(DIR,OUTPUT);
     pinMode(STEP,OUTPUT);
@@ -223,15 +206,8 @@ void setup(void){
     digitalWrite(SLEEP,LOW);
     digitalWrite(DIR,LOW);
     digitalWrite(STEP,LOW);
+  
     //Possible settings are (MS1/MS2) : full step (0,0), half step (1,0), 1/4 step (0,1), and 1/8 step (1,1)
-    //reset_pos();
-
-    lib_wifiBegin(&c1);
-    d1.counter = 0;
-    c1.conf_id = c1.conf_mac;
-    stat_url = lib_buildUrlStatic(c1);
-    Serial.println(stat_url);
-    String dont_care = lib_wifiConnectandSend(c1,d1, stat_url);
 }
 //================================================
 void loop(void){
@@ -239,25 +215,17 @@ void loop(void){
 
   int move = 0;
   
-  delay(c1.conf_period*1000);
-  ++d1.counter;
-  d1.rssi = WiFi.RSSI();
+  String msg;
+  delay(co.conf_period*1000);
   
-  if (d1.counter > c1.conf_wrap) d1.counter = 1;
-
-  String url = lib_buildUrlDynamic(c1, d1);
-
-  // Add payload
-  url += "&payload=";
-  url += "{";
-  url += "\"position";
-  url += "\":\"";
-  url += current_pos;
-  url += "\"";
-  url += "}";
-
-  String msg = lib_wifiConnectandSend(c1, url);
-
+  ++da.counter;
+  da.rssi = WiFi.RSSI();
+  if (da.counter > co.conf_wrap) da.counter = 1;
+  
+  dyn_url    = lib_buildUrlDynamic(&co, &da);  
+  msg = lib_wifiConnectandSend(&co,&da, dyn_url);
+  Serial.println(msg);
+  
   int res = lib_decode_STEPPER(msg);
 
   move = 0;
@@ -279,11 +247,13 @@ void loop(void){
   }
   if (move == 1)
   {
-   move_stepper(dir, step_size, number_of_step, delay_between_steps);
-   String msg = "Stepper moved: " + dir + " " + number_of_steps;
-   url = lib_buildUrlLog(c1,msg);
-   lib_wifiConnectandSend(c1, url);
+    move_stepper(dir, step_size, number_of_step, delay_between_steps);
+    String message = "Stepper moved: " + dir + " " + number_of_steps;
+    log_url = lib_buildUrlLog(&co,message);
+    msg = lib_wifiConnectandSend(&co,&da, log_url);
+    Serial.println(msg);
   }
+  
 }
 //=============================================
 // End of File
