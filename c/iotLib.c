@@ -47,6 +47,16 @@ struct Data
   int fail;
 };
 
+struct Configuration co;
+struct Data da;
+//=============================================
+String stat_url = " ";
+String dyn_url = " ";
+String pay_url = " ";
+String log_url = " ";
+String payload = "{\"no_data\":\"0\"}";
+String message = "nothing";
+
 //=============================================
 int lib_setup(struct Configuration *co,struct Data *da)
 //=============================================
