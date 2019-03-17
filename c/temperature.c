@@ -1,6 +1,6 @@
 //=============================================
 // File.......: temperature.c
-// Date.......: 2019-03-15
+// Date.......: 2019-03-17
 // Author.....: Benny Saxen
 int sw_version = 1;
 // Description: Signal from D1 pin.
@@ -10,36 +10,19 @@ int sw_version = 1;
 // Configuration
 //=============================================
 //#include "iotLib.c"
-
-struct Configuration c1;
-struct Data d1;
-
-String stat_url = " ";
-String dyn_url = " ";
-String pay_url = " ";
-String log_url = " ";
-String payload = "{\"no_data\":\"0\"}";
-String message = "nothing";
-//=============================================
-
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #define ONE_WIRE_BUS 5 // Pin for connecting one wire sensor
 #define TEMPERATURE_PRECISION 12
 
-///. CUSTOM variables
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensor(&oneWire);
 DeviceAddress device[10];
 int nsensors = 0;
-int counter = 0;
-/// END OF - CUSTOM variables
-
 //=============================================
 void SetUpTemperatureSensors()
 //=============================================
 {
-
     pinMode(ONE_WIRE_BUS, INPUT);
     sensor.begin();
     nsensors = sensor.getDeviceCount();
@@ -52,64 +35,47 @@ void SetUpTemperatureSensors()
         }
     }
 }
-
-
 //=============================================
 void setup()
 //=============================================
 {
-  c1.conf_sw         = sw_version;
-  c1.conf_id         = "set_to_mac";
-  c1.conf_period     = 10;
-  c1.conf_wrap       = 999999;
-  c1.conf_feedback   = 0;
+  co.conf_sw         = sw_version;
+  co.conf_id         = "set_to_mac";
+  co.conf_period     = 60;
+  co.conf_wrap       = 999999;
+  co.conf_feedback   = 1;
 
-  c1.conf_title      = "title";
-  c1.conf_tags       = "tag";
-  c1.conf_desc       = "your";
-  c1.conf_platform   = "esp8266";
-  c1.conf_ssid       = "bridge";
-  c1.conf_password   = "sdfsdf";
-  c1.conf_domain     = "iot.simuino.com";
-  c1.conf_server     = "gateway.php";
-  c1.conf_streamId   = "....................";
-  c1.conf_privateKey = "....................";
-  
-  Serial.begin(9600);
-  delay(100);
-  
+  co.conf_title      = "test1";
+  co.conf_tags       = "test1";
+  co.conf_desc       = "test1";
+  co.conf_platform   = "esp8266";
+  co.conf_ssid       = "bridge";
+  co.conf_password   = "dfgdfg";
+  co.conf_domain     = "iot.simuino.com";
+  co.conf_server     = "gateway.php";
+  co.conf_streamId   = "....................";
+  co.conf_privateKey = "....................";
+ 
+  lib_setup(&co, &da);
+    
   SetUpTemperatureSensors();
-  c1.conf_sensors = nsensors;
-  Serial.println(nsensors);
-  
-  lib_wifiBegin(&c1);
-  
-  d1.counter = 0;
-  c1.conf_id = c1.conf_mac;
-  
-  stat_url = lib_buildUrlStatic(c1);
-  String dont_care = lib_wifiConnectandSend(c1,d1, stat_url); 
-  
-  message = "Temperature_Client_Started";
-  log_url = lib_buildUrlLog(c1,message);
-  String msg = lib_wifiConnectandSend(c1,d1, log_url);
-  Serial.println(msg);
+  co.conf_sensors = nsensors;
 }
-
 //=============================================
 void loop()
 //=============================================
 {
+  String msg;
   float temps[10];
   int i;
   char order[10];
   char buf[100];
 
-  
-  ++d1.counter;
-  d1.rssi = WiFi.RSSI();
+  delay(c1.conf_period*1000);
+  ++da.counter;
+  da.rssi = WiFi.RSSI();
     
-  if (d1.counter > c1.conf_wrap) d1.counter = 1;
+  if (da.counter > co.conf_wrap) da.counter = 1;
 
   //Retrieve one or more temperature values
   sensor.requestTemperatures();
@@ -126,8 +92,8 @@ void loop()
   }
 
   
-  dyn_url = lib_buildUrlDynamic(c1, d1);
-  String msg = lib_wifiConnectandSend(c1, d1, dyn_url);
+  dyn_url = lib_buildUrlDynamic(&co, &da);
+  msg = lib_wifiConnectandSend(&co, &da, dyn_url);
 
   payload = "{";
   if (nsensors > 0)
@@ -148,13 +114,8 @@ void loop()
   }
   payload += "}";
   
-  pay_url = lib_buildUrlPayload(c1, d1, payload);
-
-  msg = lib_wifiConnectandSend(c1, d1, pay_url);
-  
-  delay(c1.conf_period*1000);
-  
-
+  pay_url = lib_buildUrlPayload(&co,&da, payload);
+  msg = lib_wifiConnectandSend(&co,&da, pay_url);
 }
 //=============================================
 // End of File
