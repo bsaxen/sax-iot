@@ -8,16 +8,6 @@ int sw_version = 1;
 // Configuration
 //=============================================
 //#include "iotLib.c"
-
-struct Configuration co;
-struct Data da;
-//=============================================
-String stat_url = " ";
-String dyn_url = " ";
-String pay_url = " ";
-String log_url = " ";
-String payload = "{\"no_data\":\"0\"}";
-String message = "nothing";
 //=============================================
 void setup() {
 //=============================================  
@@ -41,8 +31,6 @@ void setup() {
   lib_setup(&co, &da);
   
 }
-
-
 //=============================================
 void loop() {
 //=============================================
