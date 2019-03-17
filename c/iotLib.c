@@ -1,11 +1,20 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-03-08
+// Date.......: 2019-03-17
 // Author.....: Benny Saxen
 // Description:
-int lib_version = 1;
+int lib_version = 2;
 //=============================================
+#include <Arduino.h>
+
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
+#include <ESP8266HTTPClient.h>
+
+#include <WiFiClient.h>
+
+ESP8266WiFiMulti WiFiMulti;
 
 
 struct Configuration
@@ -39,6 +48,36 @@ struct Data
 };
 
 //=============================================
+int lib_setup(struct Configuration *co,struct Data *da)
+//=============================================
+{
+  Serial.begin(9600);
+
+  for (uint8_t t = 4; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(1000);
+  } 
+
+  WiFi.mode(WIFI_STA);
+
+  char ssid[100];
+  char password[100];
+  
+  Serial.print("Connecting to ");
+  Serial.println(co->conf_ssid);
+  
+  co->conf_ssid.toCharArray(ssid,100);
+  co->conf_password.toCharArray(password,100);
+  WiFiMulti.addAP(ssid, password);
+  
+  da->counter = 0;
+  co->conf_mac = WiFi.macAddress();
+  co->conf_id = co->conf_mac;
+  String stat_url = lib_buildUrlStatic(co);
+  String dont_care = lib_wifiConnectandSend(co,da, stat_url);
+}
+//=============================================
 int lib_decode_ON_OFF(String msg)
 //=============================================
 {
@@ -66,85 +105,86 @@ int lib_decode_STEPPER(String msg)
   int result = 0;
 
   //msg.toCharArray(buf,100);
-  //Serial.println(buf);
+  Serial.print(">>>>>>>>>>>");
+  Serial.println(msg);
   result = msg.toInt();
 
   return result;
 }
 //=============================================
-String lib_buildUrlStatic(struct Configuration c2)
+String lib_buildUrlStatic(struct Configuration *c2)
 //=============================================
 {
   //===================================
-  String url = '/'+ c2.conf_server;
+  String url = '/'+ c2->conf_server;
   //===================================
   url += "?do=static";
 
   url += "&id=";
-  url += c2.conf_id;
+  url += c2->conf_id;
   
   url += "&json=";
   url += "{";
   
   url += "\"title";
   url += "\":\"";
-  url += c2.conf_title;
+  url += c2->conf_title;
   url += "\",";
   
   url += "\"desc";
   url += "\":\"";
-  url += c2.conf_desc;
+  url += c2->conf_desc;
   url += "\",";
   
   url += "\"tags";
   url += "\":\"";
-  url += c2.conf_tags;
+  url += c2->conf_tags;
   url += "\",";
   
   url += "\"ssid";
   url += "\":\"";
-  url += c2.conf_ssid;
+  url += c2->conf_ssid;
   url += "\",";
   
   url += "\"wrap";
   url += "\":\"";
-  url += c2.conf_wrap;
+  url += c2->conf_wrap;
   url += "\",";
   
-  if (c2.conf_sensors != 0)
+  if (c2->conf_sensors != 0)
   {
     url += "\"sensors";
     url += "\":\"";
-    url += c2.conf_sensors;
+    url += c2->conf_sensors;
     url += "\",";
   }
   
-  if (c2.conf_kwh_pulses != 0)
+  if (c2->conf_kwh_pulses != 0)
   {
     url += "\"kwh_pulses";
     url += "\":\"";
-    url += c2.conf_kwh_pulses;
+    url += c2->conf_kwh_pulses;
     url += "\",";
   }  
   
   url += "\"feedback";
   url += "\":\"";
-  url += c2.conf_feedback;
+  url += c2->conf_feedback;
   url += "\",";
   
   url += "\"library";
   url += "\":\"";
-  url += c2.conf_library;
+  url += c2->conf_library;
   url += "\",";
   
   url += "\"sw";
   url += "\":\"";
-  url += c2.conf_sw;
+  url += c2->conf_sw;
   url += "\",";
   
   url += "\"period";
   url += "\":\"";
-  url += c2.conf_period;
+  url += c2->conf_period;
   url += "\"";
   
   url += "}";
@@ -152,144 +192,102 @@ String lib_buildUrlStatic(struct Configuration c2)
   return url;
 }
 //=============================================
-String lib_buildUrlDynamic(struct Configuration c2,struct Data d2)
+String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
 //=============================================
 {
   //===================================
-  String url = '/'+ c2.conf_server;
+  String url = '/'+ c2->conf_server;
   //===================================
   url += "?do=dynamic";
 
   url += "&id=";
-  url += c2.conf_id;
+  url += c2->conf_id;
   
   url += "&json=";
   url += "{";
   url += "\"counter";
   url += "\":\"";
-  url += d2.counter;
+  url += d2->counter;
   url += "\",";
   url += "\"fail";
   url += "\":\"";
-  url += d2.fail;
+  url += d2->fail;
   url += "\",";
   url += "\"rssi";
   url += "\":\"";
-  url += d2.rssi;
+  url += d2->rssi;
   url += "\"";
   url += "}";
   
   return url;
 }
 //=============================================
-String lib_buildUrlPayload(struct Configuration c2,struct Data d2, String payload)
+String lib_buildUrlPayload(struct Configuration *c2,struct Data *d2, String payload)
 //=============================================
 {
   //===================================
-  String url = '/'+ c2.conf_server;
+  String url = '/'+ c2->conf_server;
   //===================================
   url += "?do=payload";
 
   url += "&id=";
-  url += c2.conf_id;
+  url += c2->conf_id;
   
   url += "&json=" + payload;
   
   return url;
 }
 //=============================================
-String lib_buildUrlLog(struct Configuration c2, String message)
+String lib_buildUrlLog(struct Configuration *c2, String message)
 //=============================================
 {
   //===================================
-  String url = '/'+ c2.conf_server;
+  String url = '/'+ c2->conf_server;
   //===================================
   url += "?do=log";
 
   url += "&id=";
-  url += c2.conf_id;
+  url += c2->conf_id;
   
   url += "&log=";
   url += message;
 
   return url;
 }  
+
 //=============================================
-void lib_wifiBegin(struct Configuration *c2)
-//=============================================
-{
-  char ssid[100];
-  char password[100];
-  
-  Serial.print("Connecting to ");
-  Serial.println(c2->conf_ssid);
-
-   c2->conf_ssid.toCharArray(ssid,100);
-   c2->conf_password.toCharArray(password,100);
-
-  /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
-   would try to act as both a client and an access-point and could cause
-   network-issues with your other WiFi-devices on your WiFi-network. */
-   WiFi.mode(WIFI_STA);
-   WiFi.begin(ssid, password);
-
-   while (WiFi.status() != WL_CONNECTED) {
-     delay(500);
-     Serial.print(".");
-   }
-
-   Serial.println("WiFi connected");
-   Serial.println("IP address: ");
-   Serial.println(WiFi.localIP());
-   c2->conf_mac = WiFi.macAddress();
-   //c2->conf_id = c2->conf_mac;
-   Serial.println(WiFi.macAddress());
-}
-//=============================================
-String lib_wifiConnectandSend(struct Configuration c2,struct Data d2, String cur_url)
+String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
 //=============================================
 {
   String sub = "-";
-  Serial.print(c2.conf_domain);
-  //cur_url = "/gowServer.php";
-  Serial.println(cur_url);
-  // Use WiFiClient class to create TCP connections
+  String url = "http://"+co->conf_domain+cur_url;
+  
+  Serial.println(url);
   WiFiClient client;
-  const int httpPort = 80;
-  if (!client.connect(c2.conf_domain,httpPort)) {
-    Serial.print(c2.conf_domain);
-    Serial.println("connection failed");
-    d2.fail += 1;
-    return sub;
-  }
+  HTTPClient http;
 
-  // This will send the request to the server
-  client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
-             "Host: " + c2.conf_domain + "\r\n" +
-             "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-     if (millis() - timeout > 5000) {
-        Serial.println(">>> Client Timeout !");
-        client.stop();
-        return sub;
-     }
-     delay(5);
-  }
+  da->rssi = WiFi.RSSI();
 
-  // Read all the lines of the reply from server and print them to Serial
-  while (client.available()) {
-    String action = client.readStringUntil('\r');
-    Serial.print(action);
-    if (action.indexOf('[') == 1)
-    {
-      int b = action.indexOf(':')+1;
-      int x = action.lastIndexOf(':');
-      sub = action.substring(b,x);
-    }
-    // Do something based upon the action string
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+    //Serial.print("[HTTP] begin...\n");
+    if (http.begin(client, url)) {  // HTTP
+      int httpCode = http.GET();
+      if (httpCode > 0) {
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          String payload = http.getString();
+          //Serial.println(payload);
+          sub = payload;
+        }
+      } else {
+        da->fail += 1;
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
+      http.end();
+    } else {
+      da->fail += 1;
+      Serial.printf("[HTTP} Unable to connect\n");
+    }     
   }
-
-  Serial.println("closing connection");
+  //Serial.println("closing connection");
   return sub;
 }
