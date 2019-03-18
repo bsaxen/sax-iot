@@ -186,8 +186,8 @@ def getLatestValue(co,dy,hc,ix):
 hc = HeaterControl()
 
 confile = "heatercontrol.conf"
-lib_readConfiguration(confile,co)
-lib_publishMyStatic(co)
+version = 1
+lib_setup(co,confile,version)
 
 for x in range(co.ndata):
     ht.value.append(999)
