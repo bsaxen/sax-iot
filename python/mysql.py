@@ -1,10 +1,9 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-03-09
+# Date.......: 2019-03-18
 # Author.....: Benny Saxen
 # Description:
-version = 1
 #=============================================
 # Libraries
 #=============================================
@@ -19,11 +18,10 @@ running  = []
 # setup
 #=============================================
 confile = 'mysql.conf'
-lib_readConfiguration(confile,co)
-co.mysw = version
-print "Number of datastreams: " + str(co.nds)
-lib_publishMyStatic(co)
+version = 1
+lib_setup(co,confile,version)
 
+print "Number of datastreams: " + str(co.nds)
 message = 'mysql_started_streams_' + str(co.nds)
 msg = lib_publishMyLog(co,message)
 
@@ -33,15 +31,15 @@ for num in range(0,co.nds):
     domain = co.ds_domain[num]
     device = co.ds_device[num]
     param  = co.ds_db_par[num]
-    period = float(lib_readStaticParam(co,ds,domain,device,'period'))
+    period = float(lib_readStaticParam(domain,device,'period'))
     print period
-    desc = lib_readStaticParam(co,ds,domain,device,'desc')
+    desc = lib_readStaticParam(domain,device,'desc')
     schedule.append(period)
     work.append(period)
-    counter = float(lib_readDynamicParam(co,ds,domain,device,'counter'))
+    counter = float(lib_readDynamicParam(domain,device,'counter'))
     running.append(counter)
     print counter
-    x      = float(lib_readPayloadParam(co,ds,domain,device,param))
+    x      = float(lib_readPayloadParam(domain,device,param))
     print x
     if co.ds_db_table[num] == 'auto':
         table = desc
@@ -80,13 +78,13 @@ while True:
         if work[num] == 0:
             work[num] = schedule[num]
             
-            period = float(lib_readStaticParam(co,ds,domain,device,'period'))
+            period = float(lib_readStaticParam(domain,device,'period'))
             print period
             desc = lib_readStaticParam(co,ds,domain,device,'desc')
             print desc
             schedule[num] = period
 
-            counter = float(lib_readDynamicParam(co,ds,domain,device,'counter'))
+            counter = float(lib_readDynamicParam(domain,device,'counter'))
             print counter
             delta_counter = counter - running[num]
             ok = 0
@@ -107,7 +105,7 @@ while True:
                 ok = 1
             if ok == 1:
                 running[num] = counter
-                x  = float(lib_readPayloadParam(co,ds,domain,device,param))
+                x  = float(lib_readPayloadParam(domain,device,param))
                 print x
                 if co.ds_db_table[num] == 'auto':
                     table = desc
