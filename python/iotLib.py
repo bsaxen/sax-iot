@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-15
+# Date: 2019-03-18
 # Description: IoT python library
 version = 2
 # =============================================
@@ -112,6 +112,12 @@ co.mylibrary = version
 ds = Datastreams()
 dy = ModuleDynamic()
 
+#===================================================
+def lib_setup(co,confile,version):
+#===================================================
+    lib_readConfiguration(confile,co)
+    lib_publishMyStatic(co)
+    co.mysw = version
 #===================================================
 def lib_increaseMyCounter(co,dy):
 #===================================================
@@ -547,34 +553,39 @@ def lib_checkSequenceNumber(co,ds,domain,device):
         res = 1
     return res
 #=============================================
-def lib_readDynamicParam(co,ds,domain,device,par):
+def lib_readDynamicParam(domain,device,par):
 #=============================================
     j = lib_getDynamicDeviceJson(domain,device)
-    #ok = lib_checkSequenceNumber(co,ds,domain,device)
+    #ok = lib_checkSequenceNumber(domain,device)
     ok = 0
     x = 'void'
     if ok == 0:
         x = j['msg'][par]
     return x
 #=============================================
-def lib_readStaticParam(co,ds,domain,device,par):
+def lib_readStaticParam(domain,device,par):
 #=============================================
     j = lib_getStaticDeviceJson(domain,device)
-    #ok = lib_checkSequenceNumber(co,ds,domain,device)
+    #ok = lib_checkSequenceNumber(domain,device)
     ok = 0
     x = 'void'
     if ok == 0:
         x = j['msg'][par]
     return x
 #=============================================
-def lib_readPayloadParam(co,ds,domain,device,par):
+def lib_readPayloadParam(domain,device,par):
 #=============================================
     j = lib_getPayloadDeviceJson(domain,device)
-    #ok = lib_checkSequenceNumber(co,ds,domain,device)
+    #ok = lib_checkSequenceNumber(domain,device)
     ok = 0
     x = 'void'
     if ok == 0:
         x = j['msg'][par]
+    return x
+#=============================================
+def lib_searchLogKey(domain,device,par):
+#=============================================
+    x = 0
     return x
 #=============================================
 def lib_readData(co,ds,index):
