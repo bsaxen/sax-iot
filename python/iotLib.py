@@ -253,6 +253,11 @@ def lib_buildAnyUrl(domain,device,dynstat):
     url =  'http://' + domain + '/devices/' + device + '/' + dynstat +'.json'
     return url
 #=====================================================
+def lib_buildLogUrl(domain,device):
+#===================================================
+    url =  'http://' + domain + '/devices/' + device + '/' + 'log.txt'
+    return url
+#=====================================================
 def lib_init_history(fname):
     try:
         f = open(fname,'w')
@@ -586,6 +591,8 @@ def lib_readPayloadParam(domain,device,par):
 def lib_searchLogKey(domain,device,par):
 #=============================================
     x = 0
+    url = lib_buildLogUrl(domain,device)
+    r = urllib2.urlopen(url)
     return x
 #=============================================
 def lib_readData(co,ds,index):
