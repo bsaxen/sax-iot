@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-03-15
+# Date: 2019-03-18
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -25,7 +25,8 @@ import urllib2
 import time
 import datetime
 from iotLib import *
-
+confile = "heatertwin.conf"
+version = 1
 #=====================================================
 class HeaterTwin:
 
@@ -255,10 +256,7 @@ def getLatestValue(co,dy,ht,ix):
 # Setup
 #===================================================
 ht = HeaterTwin()
-
-confile = "heatertwin.conf"
-lib_readConfiguration(confile,co)
-lib_publishMyStatic(co)
+lib_setup(co,confile,version)
 
 for x in range(co.ndata):
     ht.value.append(999)
