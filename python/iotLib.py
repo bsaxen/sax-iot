@@ -258,7 +258,7 @@ def lib_buildLogUrl(domain,device):
     url =  'http://' + domain + '/devices/' + device + '/' + 'log.txt'
     return url
 #=====================================================
-def lib_init_history(fname):
+def lib_initFile(fname):
     try:
         f = open(fname,'w')
         f.write(fname)
@@ -280,13 +280,8 @@ def lib_writeFile(fname,message,ts):
         print "ERROR write to file " + fname
     return
 #=====================================================
-def lib_log(application,message):
-    msg = application + " " + message
-    lib_writeFile('gow.log',msg,1)
-    return
-#=====================================================
 def lib_getDeviceStatus(ds,domain,device):
-    url = lib_gowCreateAnyUrl(domain,device)
+    url = lib_createAnyUrl(domain,device)
     nu = datetime.datetime.now()
     then = lib_consumeDatastream(ds,url,'sys_ts')
     period = lib_consumeDatastream(ds,url,'period')
@@ -321,7 +316,7 @@ def lib_apiSearchTopics(co,key):
     #print the_page
     return list
 #===================================================
-def lib_common_action(co,feedback):
+def lib_commonAction(co,feedback):
     action = ' '
     if ":" in feedback:
         p = feedback.split(':')
@@ -522,11 +517,11 @@ def lib_getPayloadDeviceJson(domain,device):
     return j
 
 #=============================================
-def lib_checkMessageAge(co,ds,domain,device):
+def lib_checkDeviceOnline(domain,device):
 #=============================================
     now = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    ts = lib_readDynamicParam(co,ds,domain,device,'sys_ts')
-    period = lib_readStaticParam(co,ds,domain,device,'period')
+    ts = lib_readDynamicParam(domain,device,'sys_ts')
+    period = lib_readStaticParam(domain,device,'period')
     xts1 = time.mktime(datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").timetuple())
     xts2 = time.mktime(datetime.datetime.strptime(now, "%Y-%m-%d %H:%M:%S").timetuple())
     diff = xts2 - xts1
@@ -539,22 +534,20 @@ def lib_checkMessageAge(co,ds,domain,device):
 #=============================================
 def lib_checkSequenceNumber(co,ds,domain,device):
 #=============================================
-    j = lib_getDynamicDeviceJson(domain,device)
-
-    n = j['msg']['counter']
+    n = lib_readDynamicParam(domain,device,'counter')
     m = ds.no[device]
     k = m + 1
 
     if n < m and n != 1: # Out of order
         message = "Sequence number out of order " + domain + ' ' + device + ' n='+n + ' old='+m
-        lib_gowPublishMyLog(co, message)
+        lib_publishMyLog(co, message)
         res = 2
     if n == k or n == 1: # Expected number
         ds.no[device] = n
         res = 0
     if n > k: # Missed number
         message = "Missed seuence number " + domain + ' ' + device + ' n='+n + ' old='+m
-        lib_gowPublishMyLog(co, message)
+        lib_publishMyLog(co, message)
         res = 1
     return res
 #=============================================
