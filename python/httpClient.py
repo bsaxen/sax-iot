@@ -23,7 +23,7 @@ while True:
     print payload
     msg = lib_publishMyPayload(co,dy,payload)
 
-    lib_common_action(co,msg)
+    lib_commonAction(co,msg)
 
     message = 'counter:' + str(dy.mycounter)
     lib_publishMyLog(co, message)
