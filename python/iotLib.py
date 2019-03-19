@@ -1,11 +1,10 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-18
+# Date: 2019-03-19
 # Description: IoT python library
 version = 2
 # =============================================
-import MySQLdb
 import urllib
 import urllib2
 import time
@@ -621,18 +620,6 @@ def lib_placeOrder(domain, server, device, message):
         response = urllib2.urlopen(req)
     except urllib2.URLError as e:
         print e.reason
-#=============================================
-def lib_mysqlInsert(c1,cr,xTable,xPar,xValue):
-    db = MySQLdb.connect(host=c1.dbhost,user=c1.dbuser,db=c1.dbname)
-    cursor = db.cursor()
-    if cr == 1:
-        sql = "CREATE TABLE IF NOT EXISTS " + xTable + " (id int(11) NOT NULL AUTO_INCREMENT,value float,ts timestamp, PRIMARY KEY (id))"
-        cursor.execute(sql)
-    sql = "INSERT INTO "+ xTable + " (`id`, " + xPar + ", `ts`) VALUES (NULL," + str(xValue) + ", CURRENT_TIMESTAMP)"
-    cursor.execute(sql)
-    db.commit()
-    db.close()
-
 #=============================================
 def lib_generateRandomString():
 #=============================================
