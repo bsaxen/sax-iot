@@ -170,8 +170,8 @@ def getLatestValue(co,dy,hc,ix):
     hc.value_prev[ix] = hc.value[ix]
     hc.value[ix] = lib_readData(co,ds,ix)
     diff  = float(hc.value[ix]) - float(hc.value_prev[ix])
-    if abs(diff) > 10 and ht.value_prev[ix] != 999:
-        message = 'value error: cur=' + str(hc.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
+    if abs(diff) > 10 and hc.value_prev[ix] != 999:
+        message = 'value error: cur=' + str(hc.value[ix]) + ' prev=' + str(hc.value_prev[ix] + ' ix=' + str(ix))
         lib_publishMyLog(co, message)
         hc.value[ix] = hc.value_prev[ix]
         dy.myerrors += 1
