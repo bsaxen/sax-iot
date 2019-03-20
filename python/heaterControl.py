@@ -190,9 +190,9 @@ version = 1
 lib_setup(co,confile,version)
 
 for x in range(co.ndata):
-    ht.value.append(999)
-    ht.value_prev.append(999)
-    ht.value_timeout.append(60)
+    hc.value.append(999)
+    hc.value_prev.append(999)
+    hc.value_timeout.append(60)
 
 print "ndata=" + str(co.ndata)
 dy.mymode = MODE_OFFLINE
