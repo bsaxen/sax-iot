@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-03-15
+# Date: 2019-03-20
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -205,11 +205,11 @@ while True:
 
     res = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
     print " temperature_indoor" + str(res)
-    ht.temperature_water_out = res
+    hc.temperature_water_out = res
 
     res = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
     print "temperature_outdoor" + str(res)
-    ht.temperature_water_in = res
+    hc.temperature_water_in = res
 
     control_algorithm(co,dy,hc)
     #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
