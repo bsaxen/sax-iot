@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-03-18
+# Date: 2019-03-20
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -179,7 +179,7 @@ def simulate(co,dy,ht):
             if ht.steps > 0:
                 direction = COUNTERCLOCKWISE
             if ht.steps < 0:
-                diection = CLOCKWISE
+                direction = CLOCKWISE
 
             if ht.steps == 0:
                 action += 32
@@ -194,7 +194,8 @@ def simulate(co,dy,ht):
                 #send message to stepper devices
                 print "========= Stepper Move ======" + str(direction) + ' steps=' + str(steps)
                 message = "STEPPER"+','+str(direction)+','+str(steps)
-                lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], message )
+		code = steps + direction*100
+                lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
 #========================================================================
     payload  = '{\n'
     payload += '"mode" : "' + str(dy.mymode) + '",\n'
