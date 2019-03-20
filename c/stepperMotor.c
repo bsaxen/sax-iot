@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-03-17
+// Date.......: 2019-03-20
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -235,7 +235,7 @@ void loop(void){
     number_of_step = res;
     move = 1;
   }
-  else if (res > 100 && res <200)
+  else if (res > 100 && res < 200)
   {
     dir = COUNTER_CLOCKWISE;
     number_of_step = res - 100;
