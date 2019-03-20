@@ -75,26 +75,26 @@ def control_algorithm(co,dy,hc):
     hc.timeout_temperature_outdoor -= 1
 
     if hc.timeout_temperature_indoor < 1:
-	message = "Old data - temperature_indoor " + str(hc.timeout_temperature_indoor)
-	old_data= 1
+        message = "Old data - temperature_indoor " + str(hc.timeout_temperature_indoor)
+        old_data= 1
         lib_publishMyLog(co, message )
 
     if hc.timeout_temperature_outdoor < 1:
-	message = "Old data - temperature_outdoor " + str(hc.timeout_temperature_outdoor)
-	old_data= 1
-	lib_publishMyLog(co, message )
-
-    if dy.mymode == MODE_OFFLINE:
-	if all_data_is_available == 1 and old_data == 0:
-	    dy.mymode = MODE_ONLINE
-        message = 'MODE_ONLINE'
+        message = "Old data - temperature_outdoor " + str(hc.timeout_temperature_outdoor)
+        old_data= 1
         lib_publishMyLog(co, message )
 
+    if dy.mymode == MODE_OFFLINE:
+        if all_data_is_available == 1 and old_data == 0:
+            dy.mymode = MODE_ONLINE
+            message = 'MODE_ONLINE'
+            lib_publishMyLog(co, message )
+
     if dy.mymode == MODE_ONLINE:
-	if old_data == 1:
-	    dy.mymode = MODE_OFFLINE
-	    message = 'MODE_OFFLINE'
-	    lib_publishMyLog(co, message )
+        if old_data == 1:
+            dy.mymode = MODE_OFFLINE
+            message = 'MODE_OFFLINE'
+            lib_publishMyLog(co, message )
 
         if dy.mystate == STATE_OFF:
             if dy.mystop == 0:
@@ -192,10 +192,14 @@ confile = "heatercontrol.conf"
 version = 1
 lib_setup(co,confile,version)
 
-for x in range(co.ndata):
-    hc.value.append(999)
-    hc.value_prev.append(999)
-    hc.value_timeout.append(60)
+if co.ndata != 2:
+    print "Configuration missing c_data"
+
+if co.ndata  > 0:
+    for x in range(co.ndata):
+        hc.value.append(999)
+        hc.value_prev.append(999)
+        hc.value_timeout.append(60)
 
 print "ndata=" + str(co.ndata)
 dy.mymode = MODE_OFFLINE
@@ -207,17 +211,17 @@ while True:
     lib_increaseMyCounter(co,dy)
 
     res = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
-    print " temperature_indoor" + str(res)
-    hc.temperature_water_out = res
+    print "temperature_indoor" + str(res)
+    hc.temperature_indoor = res
 
     res = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
     print "temperature_outdoor" + str(res)
-    hc.temperature_water_in = res
+    hc.temperature_outdoor = res
 
     control_algorithm(co,dy,hc)
-    #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
-    time.sleep(float(co.myperiod))
 
+  #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
+    time.sleep(float(co.myperiod))
 #===================================================
 # End of file
 #===================================================

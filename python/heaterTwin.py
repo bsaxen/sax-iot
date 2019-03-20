@@ -191,10 +191,12 @@ def simulate(co,dy,ht):
 
             if action == 0 and dy.mystop == 0:
                 steps = abs(ht.steps)
+                message = "Stepper_"+str(steps)+"_"+str(direction)
+                lib_publishMyLog(co, message )
                 #send message to stepper devices
                 print "========= Stepper Move ======" + str(direction) + ' steps=' + str(steps)
                 message = "STEPPER"+','+str(direction)+','+str(steps)
-		code = steps + direction*100
+                code = steps + direction*100
                 lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
 #========================================================================
     payload  = '{\n'
@@ -259,12 +261,21 @@ def getLatestValue(co,dy,ht,ix):
 ht = HeaterTwin()
 lib_setup(co,confile,version)
 
+if co.ndata != 4:
+    print "Configuration missing c_data"
+    exit()
+if co.nsend != 1:
+    print "Configuration missing c_send"
+    exit()
+
 for x in range(co.ndata):
     ht.value.append(999)
     ht.value_prev.append(999)
     ht.value_timeout.append(60)
 
 print "ndata=" + str(co.ndata)
+print "nsend=" + str(co.nsend)
+
 dy.mymode  = MODE_OFFLINE
 dy.mystate = STATE_OFF
 
@@ -293,6 +304,7 @@ while True:
     ht.temperature_target = res
 
     simulate(co,dy,ht)
+
     #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
     time.sleep(float(co.myperiod))
 

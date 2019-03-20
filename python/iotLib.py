@@ -473,9 +473,9 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_inertia      480\n')
         fh.write('c_maxenergy    4.0\n')
 
-        fh.write('c_send         domain device\n')
+        fh.write('#c_send         domain device\n')
 
-        fh.write('c_data         domain device type parameter\n')
+        fh.write('#c_data         domain device type parameter\n')
 
         fh.write('c_dbhost       192.168.1.85\n')
         fh.write('c_dbname       gow\n')
@@ -511,6 +511,7 @@ def lib_getDynamicDeviceJson(domain,device):
 def lib_getPayloadDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'payload')
+    #print url
     r = urllib2.urlopen(url)
     j = json.load(r)
     return j
