@@ -599,11 +599,11 @@ def lib_readData(co,ds,index):
     stdypa    = co.data_type[index]
     x = 999
     if stdypa == 'static':
-        x = lib_readStaticParam(co,ds,domain,device,parameter)
+        x = lib_readStaticParam(domain,device,parameter)
     if stdypa == 'dynamic':
-        x = lib_readDynaimcParam(co,ds,domain,device,parameter)
+        x = lib_readDynaimcParam(domain,device,parameter)
     if stdypa == 'payload':
-        x = lib_readPayloadParam(co,ds,domain,device,parameter)
+        x = lib_readPayloadParam(domain,device,parameter)
     return x
 #===================================================
 def lib_placeOrder(domain, server, device, message):
