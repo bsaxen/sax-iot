@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-03-20
+# Date: 2019-03-21
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -241,7 +241,7 @@ def simulate(co,dy,ht):
 
     return
 #=====================================================
-def getLatestValue(co,dy,ht,ix):
+def getLatestValue(co,dy,ds,ht,ix):
     ht.value_prev[ix] = ht.value[ix]
     ht.value[ix] = lib_readData(co,ds,ix)
     diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
@@ -287,19 +287,19 @@ ht.warmcool = int(co.warmcool)*int(co.myperiod)
 while True:
     lib_increaseMyCounter(co,dy)
 
-    res = getLatestValue(co,ds,ht,ht.temperature_water_out_ix)
+    res = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix)
     print "water_out" + str(res)
     ht.temperature_water_out = 29.3 #res
 
-    res = getLatestValue(co,ds,ht,ht.temperature_water_in_ix)
+    res = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix)
     print "water_in" + str(res)
     ht.temperature_water_in = 27.3 #res
 
-    res = getLatestValue(co,ds,ht,ht.temperature_smoke_ix)
+    res = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix)
     print "smoke" + str(res)
     ht.temperature_smoke = 40.0 #res
 
-    res = getLatestValue(co,ds,ht,ht.temperature_target_ix)
+    res = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix)
     print "target" + str(res)
     ht.temperature_target = res
 
