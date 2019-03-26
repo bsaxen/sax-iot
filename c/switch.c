@@ -10,7 +10,7 @@ int sw_version = 1;
 //#include "iotLib.c"
 //=============================================
 
-#define FAN_PIN 5  // D1 pin on NodeMCU 1.0
+#define SWITCH_PIN 5  // D1 pin on NodeMCU 1.0
 int g_status = 1;
 
 //=============================================
@@ -35,12 +35,12 @@ void setup() {
 
   lib_setup(&co, &da);
   
-  pinMode(FAN_PIN, OUTPUT);
-  digitalWrite(FAN_PIN,HIGH);
+  pinMode(SWITCH_PIN, OUTPUT);
+  digitalWrite(SWITCH_PIN,HIGH);
   delay(2000);
-  digitalWrite(FAN_PIN,LOW);
+  digitalWrite(SWITCH_PIN,LOW);
   delay(2000);
-  digitalWrite(FAN_PIN,HIGH);
+  digitalWrite(SWITCH_PIN,HIGH);
   g_status = 1;
 }
 
@@ -49,7 +49,7 @@ void loop()
 //=============================================
 {
   
-  String msg;
+  String msg,message;
   delay(co.conf_period*1000);
   
   ++da.counter;
@@ -60,43 +60,37 @@ void loop()
   msg = lib_wifiConnectandSend(&co,&da, dyn_url);
   Serial.println(msg);
   int res = lib_decode_ON_OFF(msg);
+  
+  g_status = res;
   int event = 0;
   if (res == 1) 
   {
-    digitalWrite(FAN_PIN,HIGH);
-    g_status = res;
+    digitalWrite(SWITCH_PIN,HIGH);
     event = 1;
+    message = "Switch is set to HIGH";
   }
   if (res == 2) 
   {
-    digitalWrite(FAN_PIN,LOW);
-    g_status = res;
+    digitalWrite(SWITCH_PIN,LOW);
     event = 2;
+    message = "Switch is set to LOW";
   }
   
-  if (event == 1)
+  if (event != 0)
   { 
-  }
-  if (event == 1)
-  { 
+    payload = "{";
+    payload += "\"status\":\"";
+    payload += g_status;
+    payload += "\"";
+    payload += "}";
     pay_url    = lib_buildUrlPayload(&co,&da,payload);  
     msg = lib_wifiConnectandSend(&co,&da, pay_url);
     Serial.println(msg);
     
-    String message  = 
     log_url = lib_buildUrlLog(&co,message);
     msg = lib_wifiConnectandSend(&co,&da, log_url);
     Serial.println(msg);
   }
-
-  payload = "{";
-  payload += "\"status\":\"";
-  payload += g_status;
-  payload += "\"";
-  payload += "}";
-  
-  String msg = lib_wifiConnectandSend(c1,d1, dyn_url);
-
 
 }
 //=============================================
