@@ -715,8 +715,8 @@ window.onload = function(){
           echo "<td>$nn</td>";
           $device = $id;
           
-          $feedback = restApi('list_feedback',$sel_domain,$device);
-          echo "<td>$feedback</td>";
+          //$feedback = restApi('list_feedback',$sel_domain,$device);
+          //echo "<td>$feedback</td>";
           
           $doc = 'http://'.$sel_domain.'/devices/'.$device;
           $status = getStatus($doc);
