@@ -214,7 +214,7 @@ function listAllDevices()
   }
 }
 //=============================================
-function listAllFeedback()
+function listAllFeedback($id)
 //=============================================
 {
   $do = "ls devices/".$id."/"."*.feedback > devices/".$id."/feedback.work";
@@ -237,12 +237,7 @@ if (isset($_GET['do']))
        listAllDevices();
        exit;
      }
-    $do = $_GET['do'];
-     if ($do == 'list_feedback')
-     {
-       listAllFeedback();
-       exit;
-     }
+
     // Check if id is given
     $error = 1;
     if (isset($_GET['id']))
@@ -291,9 +286,15 @@ if (isset($_GET['do']))
     }
 
 
-    // API when topic is available
+    // API when id is available
     if($error == 0)
     {
+      if ($do == 'list_feedback')
+      {
+        listAllFeedback($obj->id);
+        exit;
+      }
+        
       if ($do == 'feedback')
       {
         $msg   = $_GET['msg'];
