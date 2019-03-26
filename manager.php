@@ -1,10 +1,10 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-03-16
+// Date.......: 2019-03-26
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
-$version = '2019-03-09';
+$version = '2019-03-26';
 //=============================================
 session_start();
 
@@ -713,8 +713,11 @@ window.onload = function(){
         {
           $nn += 1;
           echo "<td>$nn</td>";
- 
           $device = $id;
+          
+          $feedback = restApi('list_feedback',$sel_domain,$device)
+          echo "<td>$feedback</td>";
+          
           $doc = 'http://'.$sel_domain.'/devices/'.$device;
           $status = getStatus($doc);
           $desc = getDesc($doc);
