@@ -11,7 +11,7 @@ from iotLib import *
 #===================================================
 def sendFeedback():
     global co
-    lib_placeOrder(co.mydomain, co.myserver, co.device[0], co.feedback[0])
+    lib_placeOrder(co.mydomain, co.myserver, '2001', 'hello')
 
 #===================================================
 # Setup
