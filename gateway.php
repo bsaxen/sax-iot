@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-03-13
+// Date.......: 2019-03-26
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -214,6 +214,17 @@ function listAllDevices()
   }
 }
 //=============================================
+function listAllFeedback()
+//=============================================
+{
+  $do = "ls devices/".$id."/"."*.feedback > devices/".$id."/feedback.work";
+  //echo $do;
+  system($do);
+  $list_file = 'devices/'.$id.'/feedback.work';
+  $no_of_lines = count(file($list_file));
+  echo $no_of_lines;
+}
+//=============================================
 // End of library
 //=============================================
 
@@ -224,6 +235,12 @@ if (isset($_GET['do']))
      if ($do == 'list_devices')
      {
        listAllDevices();
+       exit;
+     }
+    $do = $_GET['do'];
+     if ($do == 'list_feedback')
+     {
+       listAllFeedback();
        exit;
      }
     // Check if id is given
