@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-03-19
+# Date.......: 2019-03-28
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -81,7 +81,7 @@ while True:
             
             period = float(lib_readStaticParam(domain,device,'period'))
             print period
-            desc = lib_readStaticParam(co,ds,domain,device,'desc')
+            desc = lib_readStaticParam(domain,device,'desc')
             print desc
             schedule[num] = period
 
