@@ -52,6 +52,7 @@ struct Data
   int counter;
   int rssi;
   int fail;
+  String fail_msg;
   String ssid;
 };
 
@@ -237,6 +238,13 @@ String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
   url += "\":\"";
   url += d2->fail;
   url += "\",";
+  if (d2->fail > 0)
+  {
+    url += "\"fail_msg";
+    url += "\":\"";
+    url += d2->fail_msg;
+    url += "\",";
+  }
   url += "\"ssid";
   url += "\":\"";
   url += d2->ssid;
@@ -287,10 +295,10 @@ String lib_buildUrlLog(struct Configuration *c2, String message)
 String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
 //=============================================
 {
-  String sub = "-";
+  String payload = "-";
   String url = "http://"+co->conf_domain+cur_url;
   
-  Serial.println(url);
+  //Serial.println(url);
   WiFiClient client;
   HTTPClient http;
 
@@ -303,20 +311,23 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
       int httpCode = http.GET();
       if (httpCode > 0) {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println(payload);
-          sub = payload;
+          payload = http.getString();
+          //Serial.println(payload);
         }
       } else {
         da->fail += 1;
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        //Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        //String code = http.errorToString(httpCode);
+        //code.replace(" ","_");
+        da->fail_msg = httpCode;
       }
       http.end();
     } else {
       da->fail += 1;
-      Serial.printf("[HTTP} Unable to connect\n");
+      da->fail_msg = 6301;
+      //Serial.printf("[HTTP} Unable to connect\n");
     }     
   }
   //Serial.println("closing connection");
-  return sub;
+  return payload;
 }
