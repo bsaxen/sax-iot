@@ -27,12 +27,19 @@ struct Configuration
   String conf_tags       = "tag1";
   String conf_desc       = "your_description";
   String conf_platform   = "esp8266";
-  String conf_ssid       = "bridge";
-  String conf_password   = "qweqwe";
+  
+  String conf_ssid_1     = "bridge";
+  String conf_password_1 = "qweqwe";
+  
+  String conf_ssid_2     = "bridge";
+  String conf_password_2 = "qweqwe";
+  
+  String conf_ssid_3     = "bridge";
+  String conf_password_3 = "qweqwe";
+  
   String conf_domain     = "iot.simuino.com";
   String conf_server     = "gateway.php";
-  String conf_streamId   = "....................";
-  String conf_privateKey = "....................";
+ 
   int conf_kwh_pulses    = 0;
   int conf_sensors       = 0;
   String conf_mac        = "void";
@@ -45,6 +52,7 @@ struct Data
   int counter;
   int rssi;
   int fail;
+  String ssid;
 };
 
 struct Configuration co;
@@ -75,14 +83,25 @@ int lib_setup(struct Configuration *co,struct Data *da)
   char password[100];
   
   Serial.print("Connecting to ");
-  Serial.println(co->conf_ssid);
+  Serial.println(co->conf_ssid_1);
+  Serial.println(co->conf_ssid_2);
+  Serial.println(co->conf_ssid_3);
   
-  co->conf_ssid.toCharArray(ssid,100);
-  co->conf_password.toCharArray(password,100);
+  co->conf_ssid_1.toCharArray(ssid,100);
+  co->conf_password_1.toCharArray(password,100);
+  WiFiMulti.addAP(ssid, password);
+
+  co->conf_ssid_2.toCharArray(ssid,100);
+  co->conf_password_2.toCharArray(password,100);
+  WiFiMulti.addAP(ssid, password);
+
+  co->conf_ssid_3.toCharArray(ssid,100);
+  co->conf_password_3.toCharArray(password,100);
   WiFiMulti.addAP(ssid, password);
   
   da->counter = 0;
   co->conf_mac = WiFi.macAddress();
+  da->ssid = WiFi.SSID();
   co->conf_id = co->conf_mac;
   String stat_url = lib_buildUrlStatic(co);
   String dont_care = lib_wifiConnectandSend(co,da, stat_url);
@@ -149,11 +168,6 @@ String lib_buildUrlStatic(struct Configuration *c2)
   url += "\"tags";
   url += "\":\"";
   url += c2->conf_tags;
-  url += "\",";
-  
-  url += "\"ssid";
-  url += "\":\"";
-  url += c2->conf_ssid;
   url += "\",";
   
   url += "\"wrap";
@@ -223,6 +237,10 @@ String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
   url += "\":\"";
   url += d2->fail;
   url += "\",";
+  url += "\"ssid";
+  url += "\":\"";
+  url += d2->ssid;
+  url += "\",";
   url += "\"rssi";
   url += "\":\"";
   url += d2->rssi;
@@ -280,13 +298,13 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
 
   if ((WiFiMulti.run() == WL_CONNECTED)) {
     //Serial.print("[HTTP] begin...\n");
-    delay(100); // Important delay to avoid timeout
+    delay(100);
     if (http.begin(client, url)) {  // HTTP
       int httpCode = http.GET();
       if (httpCode > 0) {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = http.getString();
-          //Serial.println(payload);
+          Serial.println(payload);
           sub = payload;
         }
       } else {
