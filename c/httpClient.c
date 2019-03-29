@@ -1,6 +1,6 @@
 //=============================================
 // File.......: httpClient.c
-// Date.......: 2019-03-17
+// Date.......: 2019-03-29
 // Author.....: Benny Saxen
 // Description: http client
 int sw_version = 1;
@@ -21,12 +21,18 @@ void setup() {
   co.conf_tags       = "test1";
   co.conf_desc       = "test1";
   co.conf_platform   = "esp8266";
-  co.conf_ssid       = "bridge";
-  co.conf_password   = "dfgdfg";
+
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
-  co.conf_streamId   = "....................";
-  co.conf_privateKey = "....................";
+  
+  co.conf_ssid_1     = "bridge";
+  co.conf_password_1 = "dfgdfg";
+  
+  co.conf_ssid_2     = "bridge";
+  co.conf_password_2 = "dfgdfg";
+  
+  co.conf_ssid_3     = "bridge";
+  co.conf_password_3 = "dfgdfg";
 
   lib_setup(&co, &da);
   
