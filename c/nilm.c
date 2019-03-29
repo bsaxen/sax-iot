@@ -42,21 +42,27 @@ void ICACHE_RAM_ATTR measure(){
 void setup(){
 //===============================================================
     co.conf_sw         = sw_version;
-    co.conf_id         = "set_to_mac";
-    co.conf_period     = 60;
+    co.conf_id         = "-";
+    co.conf_period     = 5;
     co.conf_wrap       = 999999;
     co.conf_feedback   = 1;
 
-    co.conf_title      = "test1";
-    co.conf_tags       = "test1";
-    co.conf_desc       = "test1";
+    co.conf_title      = "kvv32_nilm";
+    co.conf_tags       = "kvv32_nilm";
+    co.conf_desc       = "kvv32_nilm";
     co.conf_platform   = "esp8266";
-    co.conf_ssid       = "bridge";
-    co.conf_password   = "dfgdfg";
+    
+    co.conf_ssid_1     = "NABTON";
+    co.conf_password_1 = "123";
+    
+    co.conf_ssid_2     = "bridge";
+    co.conf_password_2 = "1234";
+    
+    co.conf_ssid_3     = "ASUS";
+    co.conf_password_3 = "123";
+    
     co.conf_domain     = "iot.simuino.com";
     co.conf_server     = "gateway.php";
-    co.conf_streamId   = "....................";
-    co.conf_privateKey = "....................";
 
     lib_setup(&co, &da);
 
