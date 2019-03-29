@@ -1,6 +1,6 @@
 //=============================================
 // File.......: nilm.c
-// Date.......: 2019-03-17
+// Date.......: 2019-03-29
 // Author.....: Benny Saxen
 // Description: nilm - electricity
 // Sensor pin.: D1 NodeMcu
@@ -34,7 +34,7 @@ void ICACHE_RAM_ATTR measure(){
         digitalWrite(led_pin,LOW);
         return;
     }
-    elpow = 3600.*1000.*1000./(co.conf_em_pulses*dt);
+    elpow = 3600.*1000.*1000./(co.conf_kwh_pulses*dt);
     interrupt_counter++;
     //digitalWrite(led_pin,LOW);
 }
@@ -60,9 +60,9 @@ void setup(){
 
     lib_setup(&co, &da);
 
-    co.conf_em_pulses  = 1000; //1000 pulses/kWh
+    co.conf_kwh_pulses  = 1000; //1000 pulses/kWh
     
-    bounce_value = 36000./co.conf_em_pulses; // based on max power = 100 000 Watt
+    bounce_value = 36000./co.conf_kwh_pulses; // based on max power = 100 000 Watt
 
     pinMode(interrupt_pin, INPUT_PULLUP);
     pinMode(led_pin, OUTPUT);
