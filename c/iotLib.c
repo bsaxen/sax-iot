@@ -1,9 +1,9 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-03-17
+// Date.......: 2019-03-29
 // Author.....: Benny Saxen
 // Description:
-int lib_version = 2;
+int lib_version = 3;
 //=============================================
 #include <Arduino.h>
 
@@ -280,6 +280,7 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
 
   if ((WiFiMulti.run() == WL_CONNECTED)) {
     //Serial.print("[HTTP] begin...\n");
+    delay(100); // Important delay to avoid timeout
     if (http.begin(client, url)) {  // HTTP
       int httpCode = http.GET();
       if (httpCode > 0) {
