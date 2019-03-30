@@ -33,7 +33,7 @@ int SW    = 15;  // D8
 int dir = 0;
 int step_size = FULL_STEP;
 int number_of_step = 0;
-int delay_between_steps = 5
+int delay_between_steps = 5;
 
 //================================================
 int stepCW(int steps,int dd)
@@ -176,26 +176,26 @@ void setup(void){
 //================================================
   co.conf_sw         = sw_version;
   co.conf_id         = "set_to_mac";
-  co.conf_period     = 60;
+  co.conf_period     = 15;
   co.conf_wrap       = 999999;
   co.conf_feedback   = 1;
 
   co.conf_title      = "test1";
   co.conf_tags       = "test1";
-  co.conf_desc       = "test1";
+  co.conf_desc       = "newHC";
   co.conf_platform   = "esp8266";
 
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
   
   co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "dfgdfg";
+  co.conf_password_1 = "sdf";
   
-  co.conf_ssid_2     = "bridge";
-  co.conf_password_2 = "dfgdfg";
+  co.conf_ssid_2     = "NABTON";
+  co.conf_password_2 = "a1b2c3d4e5f6g7";
   
-  co.conf_ssid_3     = "bridge";
-  co.conf_password_3 = "dfgdfg";
+  co.conf_ssid_3     = "ASUS";
+  co.conf_password_3 = "sdf";
 
   lib_setup(&co, &da);
   
@@ -235,16 +235,16 @@ void loop(void){
   int res = lib_decode_STEPPER(msg);
 
   move = 0;
-  if (res < 100 && res > 0)
+  if (res < 200 && res > 100)
   {
     dir = CLOCKWISE;
-    number_of_step = res;
+    number_of_step = res - 100;
     move = 1;
   }
-  else if (res > 100 && res < 200)
+  else if (res > 200 && res < 300)
   {
     dir = COUNTER_CLOCKWISE;
-    number_of_step = res - 100;
+    number_of_step = res - 200;
     move = 1;
   }
   else
@@ -254,7 +254,10 @@ void loop(void){
   if (move == 1)
   {
     move_stepper(dir, step_size, number_of_step, delay_between_steps);
-    String message = "Stepper moved: " + dir + " " + number_of_steps;
+    String message = "Stepper moved: ";
+    message += dir;
+    message += " ";
+    message += number_of_step;
     log_url = lib_buildUrlLog(&co,message);
     msg = lib_wifiConnectandSend(&co,&da, log_url);
     Serial.println(msg);
