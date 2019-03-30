@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-03-20
+// Date.......: 2019-03-30
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -174,24 +174,30 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
 //================================================
 void setup(void){
 //================================================
-    co.conf_sw         = sw_version;
-    co.conf_id         = "set_to_mac";
-    co.conf_period     = 60;
-    co.conf_wrap       = 999999;
-    co.conf_feedback   = 1;
+  co.conf_sw         = sw_version;
+  co.conf_id         = "set_to_mac";
+  co.conf_period     = 60;
+  co.conf_wrap       = 999999;
+  co.conf_feedback   = 1;
 
-    co.conf_title      = "test1";
-    co.conf_tags       = "test1";
-    co.conf_desc       = "test1";
-    co.conf_platform   = "esp8266";
-    co.conf_ssid       = "bridge";
-    co.conf_password   = "dfgdfg";
-    co.conf_domain     = "iot.simuino.com";
-    co.conf_server     = "gateway.php";
-    co.conf_streamId   = "....................";
-    co.conf_privateKey = "....................";
+  co.conf_title      = "test1";
+  co.conf_tags       = "test1";
+  co.conf_desc       = "test1";
+  co.conf_platform   = "esp8266";
 
-    lib_setup(&co, &da);
+  co.conf_domain     = "iot.simuino.com";
+  co.conf_server     = "gateway.php";
+  
+  co.conf_ssid_1     = "bridge";
+  co.conf_password_1 = "dfgdfg";
+  
+  co.conf_ssid_2     = "bridge";
+  co.conf_password_2 = "dfgdfg";
+  
+  co.conf_ssid_3     = "bridge";
+  co.conf_password_3 = "dfgdfg";
+
+  lib_setup(&co, &da);
   
     //Initialize
     pinMode(DIR,OUTPUT);
