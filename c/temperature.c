@@ -1,6 +1,6 @@
 //=============================================
 // File.......: temperature.c
-// Date.......: 2019-03-17
+// Date.......: 2019-03-30
 // Author.....: Benny Saxen
 int sw_version = 1;
 // Description: Signal from D1 pin.
@@ -77,7 +77,7 @@ void loop()
   char order[10];
   char buf[100];
 
-  delay(c1.conf_period*1000);
+  delay(co.conf_period*1000);
   ++da.counter;
   da.rssi = WiFi.RSSI();
     
