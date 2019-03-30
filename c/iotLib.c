@@ -1,21 +1,15 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-03-29
+// Date.......: 2019-03-30
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
 //=============================================
-#include <Arduino.h>
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 
-#include <ESP8266HTTPClient.h>
-
-#include <WiFiClient.h>
-
 ESP8266WiFiMulti WiFiMulti;
-
 
 struct Configuration
 {
@@ -72,7 +66,7 @@ int lib_setup(struct Configuration *co,struct Data *da)
 {
   Serial.begin(9600);
 
-  for (uint8_t t = 4; t > 0; t--) {
+  for (uint8_t t = 3; t > 0; t--) {
     Serial.printf("[SETUP] WAIT %d...\n", t);
     Serial.flush();
     delay(1000);
@@ -135,7 +129,7 @@ int lib_decode_STEPPER(String msg)
   int result = 0;
 
   //msg.toCharArray(buf,100);
-  Serial.print(">>>>>>>>>>>");
+  Serial.print("Decode Stepper:");
   Serial.println(msg);
   result = msg.toInt();
 
@@ -295,39 +289,45 @@ String lib_buildUrlLog(struct Configuration *c2, String message)
 String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
 //=============================================
 {
-  String payload = "-";
-  String url = "http://"+co->conf_domain+cur_url;
-  
-  //Serial.println(url);
+  String sub = "-";
+  Serial.print("Requesting URL: ");
+  Serial.println(cur_url);
+  // Use WiFiClient class to create TCP connections
   WiFiClient client;
-  HTTPClient http;
-
-  da->rssi = WiFi.RSSI();
-
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
-    //Serial.print("[HTTP] begin...\n");
-    delay(100);
-    if (http.begin(client, url)) {  // HTTP
-      int httpCode = http.GET();
-      if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          payload = http.getString();
-          //Serial.println(payload);
-        }
-      } else {
-        da->fail += 1;
-        //Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        //String code = http.errorToString(httpCode);
-        //code.replace(" ","_");
-        da->fail_msg = httpCode;
-      }
-      http.end();
-    } else {
-      da->fail += 1;
-      da->fail_msg = 6301;
-      //Serial.printf("[HTTP} Unable to connect\n");
-    }     
+  const int httpPort = 80;
+  if (!client.connect(co->conf_domain,httpPort)) {
+    Serial.println("connection failed");
+    da->fail += 1;
+    return sub;
   }
-  //Serial.println("closing connection");
-  return payload;
+
+  // This will send the request to the server
+  client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
+             "Host: " + co->conf_domain + "\r\n" +
+             "Connection: close\r\n\r\n");
+  unsigned long timeout = millis();
+  while (client.available() == 0) {
+     if (millis() - timeout > 5000) {
+        Serial.println(">>> Client Timeout !");
+        client.stop();
+        return sub;
+     }
+     delay(5);
+  }
+
+  // Read all the lines of the reply from server and print them to Serial
+  while (client.available()) {
+    String action = client.readStringUntil('\r');
+    Serial.print(action);
+    if (action.indexOf('[') == 1)
+    {
+      int b = action.indexOf(':')+1;
+      int x = action.lastIndexOf(':');
+      sub = action.substring(b,x);
+    }
+    // Do something based upon the action string
+  }
+
+  Serial.println("closing connection");
+  return sub;
 }
