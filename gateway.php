@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-03-26
+// Date.......: 2019-03-30
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -42,7 +42,7 @@ function saveStaticMsg($obj)
 //=============================================
 {
   $f_file = 'devices/'.$obj->id.'/static.json';
-  echo $f_file;
+  //echo $f_file;
   $doc = fopen($f_file, "w");
   if ($doc)
   {
