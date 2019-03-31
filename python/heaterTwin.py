@@ -259,7 +259,7 @@ def getLatestValue(co,dy,ds,ht,ix):
         ht.value[ix] = ht.value_prev[ix]
         dy.myerrors += 1
 
-    ht.value_timeout[ix] = 60
+    ht.value_timeout[ix] = 120
 
     return ht.value[ix]
 
