@@ -501,6 +501,7 @@ def lib_getStaticDeviceJson(domain,device):
         r = urllib2.urlopen(url)
     except urllib2.URLError as e:
         print e.reason
+        return 60
         
     j = json.load(r)
     return j
@@ -512,6 +513,7 @@ def lib_getDynamicDeviceJson(domain,device):
         r = urllib2.urlopen(url)
     except urllib2.URLError as e:
         print e.reason
+        return 0
 
     j = json.load(r)
     return j
@@ -525,6 +527,7 @@ def lib_getPayloadDeviceJson(domain,device):
         r = urllib2.urlopen(url)
     except urllib2.URLError as e:
         print e.reason
+        return 0
     
     j = json.load(r)
     return j
