@@ -38,6 +38,7 @@ class ModuleDynamic:
     myerrors  = 0
     mydev_ts = ""
     mywifi_ss = 0
+    myresult  = 0
 
 class Configuration:
     myid         = '1234'
@@ -52,6 +53,7 @@ class Configuration:
     mywrap       = 999999
     mysw         = 0
     mylibrary    = 0
+    myresult     = 0
 
     # Data sources
     data_parameter = []
@@ -242,16 +244,15 @@ def lib_buildMyUrl(co,dynstat):
     url =  'http://' + co.mydomain + '/devices/' + co.myid + '/' + dynstat +'.json'
     return url
 #===================================================
-def lib_createAnyUrl(domain,device,result):
+def lib_createAnyUrl(co,domain,device):
 #===================================================
-    error = 0
-    result = 'http://' + domain + '/devices/' + device + '/'
-    return error
+    co.myresult = 'http://' + domain + '/devices/' + device + '/'
+    return
 #=====================================================
-def lib_buildAnyUrl(domain,device,dynstat):
+def lib_buildAnyUrl(co,domain,device,dynstat):
 #===================================================
-    url =  'http://' + domain + '/devices/' + device + '/' + dynstat +'.json'
-    return url
+    co.myresult =  'http://' + domain + '/devices/' + device + '/' + dynstat +'.json'
+    return 
 #=====================================================
 def lib_buildLogUrl(domain,device):
 #===================================================
@@ -495,43 +496,52 @@ def lib_readConfiguration(confile,c1):
         exit()
     return
 #=============================================
-def lib_getStaticDeviceJson(domain,device,result):
+def lib_getStaticDeviceJson(co,domain,device):
 #=============================================
-    error = lib_buildAnyUrl(domain,device,'static',result)
-    if error == 0:
-        try:
-           r = urllib2.urlopen(url,timeout=5)
-        except urllib2.URLError as e:
-           print e.reason
-           error = 1
+    lib_buildAnyUrl(co,domain,device,'static')
+    error = 0
+    try:
+        r = urllib2.urlopen(co.myresult,timeout=5)
+    except urllib2.URLError as e:
+        print e.reason
+        error = 1
+        co.myresult = 1234
+
     if error == 0:    
-       result = json.load(r)
+       co.myresult = json.load(r)
+    print error
     return error
 #=============================================
-def lib_getDynamicDeviceJson(domain,device,result):
+def lib_getDynamicDeviceJson(co,domain,device):
 #=============================================
-    error = lib_buildAnyUrl(domain,device,'dynamic',result)
-    if error == 0:
-        try:
-           r = urllib2.urlopen(url,timeout=5)
-        except urllib2.URLError as e:
-           print e.reason
-           error = 1
+    lib_buildAnyUrl(co,domain,device,'dynamic')
+    error = 0
+    try:
+        r = urllib2.urlopen(co.myresult,timeout=5)
+    except urllib2.URLError as e:
+        print e.reason
+        error = 1
+        co.myresult = 1234
+
     if error == 0:    
-       result = json.load(r)
+       co.myresult = json.load(r)
+    print error
     return error
 #=============================================
-def lib_getPayloadDeviceJson(domain,device,result):
+def lib_getPayloadDeviceJson(co,domain,device):
 #=============================================
-    error = lib_buildAnyUrl(domain,device,'payload',result)
-    if error == 0:
-        try:
-           r = urllib2.urlopen(url,timeout=5)
-        except urllib2.URLError as e:
-           print e.reason
-           error = 1
+    lib_buildAnyUrl(co,domain,device,'payload')
+    error = 0
+    try:
+        r = urllib2.urlopen(co.myresult,timeout=5)
+    except urllib2.URLError as e:
+        print e.reason
+        error = 1
+        co.myresult = 1234
+
     if error == 0:    
-       result = json.load(r)
+       co.myresult = json.load(r)
+    print error
     return error
 
 #=============================================
@@ -569,25 +579,28 @@ def lib_checkSequenceNumber(co,ds,domain,device):
         res = 1
     return res
 #=============================================
-def lib_readDynamicParam(domain,device,par,result):
+def lib_readDynamicParam(co,domain,device,par):
 #=============================================
-    error = lib_getDynamicDeviceJson(domain,device,result)
+    error = lib_getDynamicDeviceJson(co,domain,device)
     if error == 0:
-        x = result['msg'][par]
+        co.myresult = co.myresult['msg'][par]
+    print error
     return error
 #=============================================
-def lib_readStaticParam(domain,device,par,result):
+def lib_readStaticParam(co,domain,device,par):
 #=============================================
-    error = lib_getStaticDeviceJson(domain,device,result)
+    error = lib_getStaticDeviceJson(co,domain,device)
     if error == 0:
-        x = result['msg'][par]
+        co.myresult = co.myresult['msg'][par]
+    print error
     return error
 #=============================================
-def lib_readPayloadParam(domain,device,par,result):
+def lib_readPayloadParam(co,domain,device,par):
 #=============================================
-    error = lib_getPayloadDeviceJson(domain,device,result)
+    error = lib_getPayloadDeviceJson(co,domain,device)
     if error == 0:
-        x = result['msg'][par]
+        co.myresult = co.myresult['msg'][par]
+    print error
     return error
 #=============================================
 def lib_searchLogKey(domain,device,par):
@@ -597,26 +610,28 @@ def lib_searchLogKey(domain,device,par):
     r = urllib2.urlopen(url)
     return x
 #=============================================
-def lib_readData(co,ds,index,result):
+def lib_readData(co,ds,index):
 #=============================================
-    error = 0
+    index_error = 0
     if index >= co.ndata:
         print "index too large"
-        error = 1
-    if error == 0:
-       domain    = co.data_domain[index]
-       device    = co.data_device[index]
-       parameter = co.data_parameter[index]
-       stdypa    = co.data_type[index]
+        index_error = 1
+    if index_error == 0:
+        domain    = co.data_domain[index]
+        device    = co.data_device[index]
+        parameter = co.data_parameter[index]
+        stdypa    = co.data_type[index]
 
-       if stdypa == 'static':
-          error = lib_readStaticParam(domain,device,parameter,result)
-       if stdypa == 'dynamic':
-          error = lib_readDynaimcParam(domain,device,parameter,result)
-       if stdypa == 'payload':
-          error = lib_readPayloadParam(domain,device,parameter,result)
-            
-     return error
+        if stdypa == 'static':
+          error = lib_readStaticParam(co,domain,device,parameter)
+        if stdypa == 'dynamic':
+          error = lib_readDynaimcParam(co,domain,device,parameter)
+        if stdypa == 'payload':
+          error = lib_readPayloadParam(co,domain,device,parameter)
+    else:
+        error = 1001 
+    print error       
+    return error
 #===================================================
 def lib_placeOrder(domain, server, device, message):
 #===================================================
