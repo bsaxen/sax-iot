@@ -497,8 +497,9 @@ def lib_readConfiguration(confile,c1):
 def lib_getStaticDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'static')
+    r = "{}"
     try:
-        r = urllib2.urlopen(url)
+        r = urllib2.urlopen(url,timeout=5)
     except urllib2.URLError as e:
         print e.reason
         
@@ -508,8 +509,9 @@ def lib_getStaticDeviceJson(domain,device):
 def lib_getDynamicDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'dynamic')
+    r = "{}"
     try:
-        r = urllib2.urlopen(url)
+        r = urllib2.urlopen(url,timeout=5)
     except urllib2.URLError as e:
         print e.reason
 
@@ -520,9 +522,9 @@ def lib_getPayloadDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'payload')
     print url
-
+    r = "{}"
     try:
-        r = urllib2.urlopen(url)
+        r = urllib2.urlopen(url,timeout=5)
     except urllib2.URLError as e:
         print e.reason
     
