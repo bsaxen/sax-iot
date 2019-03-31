@@ -154,7 +154,7 @@ def simulate(co,dy,ht):
 
         action = 0
         if dy.mystate == STATE_ON:
-            ht.inertia = int(ht.inertia) - int(co.period)
+            ht.inertia = int(ht.inertia) - int(co.myperiod)
 
             if ht.inertia < 0:
                 ht.inertia = 0
