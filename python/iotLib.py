@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-19
+# Date: 2019-03-31
 # Description: IoT python library
 version = 2
 # =============================================
@@ -497,22 +497,35 @@ def lib_readConfiguration(confile,c1):
 def lib_getStaticDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'static')
-    r = urllib2.urlopen(url)
+    try:
+        r = urllib2.urlopen(url)
+    except urllib2.URLError as e:
+        print e.reason
+        
     j = json.load(r)
     return j
 #=============================================
 def lib_getDynamicDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'dynamic')
-    r = urllib2.urlopen(url)
+    try:
+        r = urllib2.urlopen(url)
+    except urllib2.URLError as e:
+        print e.reason
+
     j = json.load(r)
     return j
 #=============================================
 def lib_getPayloadDeviceJson(domain,device):
 #=============================================
     url = lib_buildAnyUrl(domain,device,'payload')
-    #print url
-    r = urllib2.urlopen(url)
+    print url
+
+    try:
+        r = urllib2.urlopen(url)
+    except urllib2.URLError as e:
+        print e.reason
+    
     j = json.load(r)
     return j
 
