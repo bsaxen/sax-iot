@@ -32,7 +32,7 @@ int SW    = 15;  // D8
 
 int dir = 0;
 int step_size = FULL_STEP;
-int number_of_step = 0;
+int number_of_steps = 0;
 int delay_between_steps = 5;
 
 //================================================
@@ -113,30 +113,30 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
 
         Serial.print( " dir=");Serial.println( dir);
         Serial.print( " step_size=");Serial.println( step_size);
-        Serial.print( " steps=");Serial.println( number_of_step);
+        Serial.print( " steps=");Serial.println( number_of_steps);
         Serial.print( " delay=");Serial.println( delay_between_steps);
 
         if(step_size == FULL_STEP)
         {
-            Serial.println( "Stepstepper FULL STEP");
+            Serial.println( "FULL STEP");
             digitalWrite(MS1,LOW);
             digitalWrite(MS2,LOW);
         }
         else if (step_size == HALF_STEP)
         {
-            Serial.println( "Stepper HALF STEP");
+            Serial.println( "HALF STEP");
             digitalWrite(MS1,HIGH);
             digitalWrite(MS2,LOW);
         }
         else if (step_size == QUARTER_STEP)
         {
-            Serial.println( "Stepper QUARTER STEP");
+            Serial.println( "QUARTER STEP");
             digitalWrite(MS1,LOW);
             digitalWrite(MS2,HIGH);
         }
         else // default fullstep
         {
-            Serial.println( "Steppernumber_of_step DEFAULT FULL STEP");
+            Serial.println( "DEFAULT FULL STEP");
             digitalWrite(MS1,LOW);
             digitalWrite(MS2,LOW);
         }
@@ -146,14 +146,14 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
             current_pos +=  number_of_step;
 
             Serial.println( "Stepper motor CW -->");
-            sw = stepCW(number_of_step, delay_between_steps);
+            sw = stepCW(number_of_steps, delay_between_steps);
         }
         else if(dir == COUNTER_CLOCKWISE)
         {
-            current_pos -=  number_of_step;
+            current_pos -=  number_of_steps;
 
             Serial.println( "Stepper motor CCW  <--");
-            sw = stepCCW(number_of_step, delay_between_steps);
+            sw = stepCCW(number_of_steps, delay_between_steps);
         }
         else
             Serial.println( "ERROR: Unknown direction for stepper motor");
@@ -176,26 +176,26 @@ void setup(void){
 //================================================
   co.conf_sw         = sw_version;
   co.conf_id         = "set_to_mac";
-  co.conf_period     = 15;
+  co.conf_period     = 20;
   co.conf_wrap       = 999999;
   co.conf_feedback   = 1;
 
   co.conf_title      = "test1";
   co.conf_tags       = "test1";
-  co.conf_desc       = "newHC";
+  co.conf_desc       = "stepper";
   co.conf_platform   = "esp8266";
 
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
   
   co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "sdf";
+  co.conf_password_1 = "123";
   
   co.conf_ssid_2     = "NABTON";
   co.conf_password_2 = "a1b2c3d4e5f6g7";
   
   co.conf_ssid_3     = "ASUS";
-  co.conf_password_3 = "sdf";
+  co.conf_password_3 = "123";
 
   lib_setup(&co, &da);
   
@@ -238,13 +238,13 @@ void loop(void){
   if (res < 200 && res > 100)
   {
     dir = CLOCKWISE;
-    number_of_step = res - 100;
+    number_of_steps = res - 100;
     move = 1;
   }
   else if (res > 200 && res < 300)
   {
     dir = COUNTER_CLOCKWISE;
-    number_of_step = res - 200;
+    number_of_steps = res - 200;
     move = 1;
   }
   else
@@ -253,14 +253,42 @@ void loop(void){
   }
   if (move == 1)
   {
-    move_stepper(dir, step_size, number_of_step, delay_between_steps);
-    String message = "Stepper moved: ";
+    move_stepper(dir, step_size, number_of_steps, delay_between_steps);
+
+    payload = "{";
+
+    payload += "\"counter";
+    payload += "\":\"";
+    payload += da.counter;
+    payload += "\",";
+
+    payload += "\"position";
+    payload += "\":\"";
+    payload += current_pos;
+    payload += "\",";
+    
+    payload += "\"steps";
+    payload += "\":\"";
+    payload += number_of_steps;
+    payload += "\",";
+    
+    payload += "\"direction";
+    payload += "\":\"";
+    payload += dir;
+    payload += "\"";
+    
+    payload += "}";
+    
+    pay_url = lib_buildUrlPayload(&co,&da, payload);
+    msg = lib_wifiConnectandSend(&co,&da, pay_url);
+    //Serial.println(msg);
+
+    String message = "stepper_";
     message += dir;
-    message += " ";
-    message += number_of_step;
+    message += "_";
+    message += number_of_steps;
     log_url = lib_buildUrlLog(&co,message);
     msg = lib_wifiConnectandSend(&co,&da, log_url);
-    Serial.println(msg);
   }
   
 }
