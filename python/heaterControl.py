@@ -43,7 +43,7 @@ def control_algorithm(co,dy,hc):
     x_0 = float(co.x_0)
     y_0 = float(co.y_0)
 
-    y = float(999)
+    y = float(30)
 
     coeff1  = float((maxheat - y_0)/(mintemp - x_0))
     mconst1 = y_0 - coeff1*x_0
@@ -124,7 +124,7 @@ def control_algorithm(co,dy,hc):
             y = y + hc.bias
 
             if dy.mystop == 1:
-                y = 999
+                y = 31
 #========================================================================
     payload  = '{\n'
     payload += '"mintemp" : "' + str(co.mintemp) + '",\n'
@@ -171,18 +171,19 @@ def control_algorithm(co,dy,hc):
 #=====================================================
 def getLatestValue(co,dy,hc,ix):
     hc.value_prev[ix] = hc.value[ix]
-    hc.value[ix] = lib_readData(co,ds,ix)
-    diff  = float(hc.value[ix]) - float(hc.value_prev[ix])
-    if abs(diff) > 10 and hc.value_prev[ix] != 999:
-        message = 'value error: cur=' + str(hc.value[ix]) + ' prev=' + str(hc.value_prev[ix] + ' ix=' + str(ix))
-        lib_publishMyLog(co, message)
-        hc.value[ix] = hc.value_prev[ix]
-        dy.myerrors += 1
+    error = lib_readData(co,ds,ix)
+    if error == 0:
+        hc.value[ix] = co.myresult
+        diff  = float(hc.value[ix]) - float(hc.value_prev[ix])
+        if abs(diff) > 10 and hc.value_prev[ix] != 999:
+            message = 'value error: cur=' + str(hc.value[ix]) + ' prev=' + str(hc.value_prev[ix] + ' ix=' + str(ix))
+            lib_publishMyLog(co, message)
+            hc.value[ix] = hc.value_prev[ix]
+            dy.myerrors += 1
 
     hc.value_timeout[ix] = 120
 
-    return hc.value[ix]
-
+    return error
 #===================================================
 # Setup
 #===================================================
@@ -208,19 +209,22 @@ dy.mystate = STATE_OFF
 # Loop
 #===================================================
 while True:
+    error = 0
     lib_increaseMyCounter(co,dy)
 
-    res = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
-    print "temperature_indoor" + str(res)
-    hc.temperature_indoor = res
+    error = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
+    hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
+    print "temperature_indoor  " + str(hc.temperature_indoor)
 
-    res = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
-    print "temperature_outdoor" + str(res)
-    hc.temperature_outdoor = res
+    error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
+    hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
+    print "temperature_outdoor " + str(hc.temperature_outdoor)
 
-    control_algorithm(co,dy,hc)
+    if error == 0:
+        control_algorithm(co,dy,hc)
 
   #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
+    print "error " + str(error)
     time.sleep(float(co.myperiod))
 #===================================================
 # End of file
