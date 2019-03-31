@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-03-21
+# Date: 2019-03-31
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -11,10 +11,11 @@
 # 3 smoke
 # 4 target
 #
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp2
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
+#c_send       iot.simuino.com A0_20_A6_13_0D_76
+#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp1
+#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp2
+#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp3
+#c_data       iot.simuino.com 1002 payload target
 #
 # Stepper device
 # c_send       iot.simuino.com 103
@@ -153,8 +154,14 @@ def simulate(co,dy,ht):
 
         action = 0
         if dy.mystate == STATE_ON:
+            ht.inertia = int(ht.inertia) - 1
+
+            if ht.inertia < 0:
+                ht.inertia = 0
+
             if ht.inertia > 0:
                 action += 1
+
             if ht.temperature_smoke < float(co.minsmoke):
                 action += 2
                 dy.mystate = STATE_OFF
@@ -190,6 +197,7 @@ def simulate(co,dy,ht):
             why = show_action_bit_info(action)
 
             if action == 0 and dy.mystop == 0:
+                ht.inertia = co.inertia
                 steps = abs(ht.steps)
                 message = "Stepper_"+str(steps)+"_"+str(direction)
                 lib_publishMyLog(co, message )
