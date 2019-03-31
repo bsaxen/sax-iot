@@ -297,15 +297,15 @@ while True:
 
     res = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix)
     print "water_out" + str(res)
-    ht.temperature_water_out = 29.3 #res
+    ht.temperature_water_out = res
 
     res = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix)
     print "water_in" + str(res)
-    ht.temperature_water_in = 27.3 #res
+    ht.temperature_water_in = res
 
     res = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix)
     print "smoke" + str(res)
-    ht.temperature_smoke = 40.0 #res
+    ht.temperature_smoke = res
 
     res = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix)
     print "target" + str(res)
