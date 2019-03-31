@@ -1,12 +1,12 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-03-20
+# Date: 2019-03-31
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp2
-# c_data       iot.simuino.com A0_20_A6_10_3C_36 payload temp1
+#c_data         iot.simuino.com 60_01_94_17_88_05 payload temp2
+#c_data         iot.simuino.com 60_01_94_17_88_05 payload temp1
 # =============================================
 import math
 import urllib
