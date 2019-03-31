@@ -521,7 +521,7 @@ def lib_getDynamicDeviceJson(domain,device,result):
        result = json.load(r)
     return error
 #=============================================
-def lib_getPayloadDeviceJson(domain,device,result:
+def lib_getPayloadDeviceJson(domain,device,result):
 #=============================================
     error = lib_buildAnyUrl(domain,device,'payload',result)
     if error == 0:
