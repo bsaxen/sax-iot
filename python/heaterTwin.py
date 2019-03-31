@@ -249,19 +249,21 @@ def simulate(co,dy,ht):
 
     return
 #=====================================================
-def getLatestValue(co,dy,ds,ht,ix):
+def getLatestValue(co,dy,ds,ht,ix,result):
     ht.value_prev[ix] = ht.value[ix]
-    ht.value[ix] = lib_readData(co,ds,ix)
-    diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
-    if abs(diff) > 10 and ht.value_prev[ix] != 999:
-        message = 'value error: cur=' + str(ht.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
-        lib_publishMyLog(co, message)
-        ht.value[ix] = ht.value_prev[ix]
-        dy.myerrors += 1
+    error = lib_readData(co,ds,ix,result)
+    if error == 0:
+	ht.value[ix] = result
+	diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
+	if abs(diff) > 10 and ht.value_prev[ix] != 999:
+		message = 'value error: cur=' + str(ht.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
+		lib_publishMyLog(co, message)
+		ht.value[ix] = ht.value_prev[ix]
+		dy.myerrors += 1
 
-    ht.value_timeout[ix] = 120
+        ht.value_timeout[ix] = 120
 
-    return ht.value[ix]
+    return error
 
 #===================================================
 # Setup
@@ -293,25 +295,27 @@ ht.warmcool = int(co.warmcool)*int(co.myperiod)
 # Loop
 #===================================================
 while True:
+    error = 0
     lib_increaseMyCounter(co,dy)
 
-    res = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix)
-    print "water_out" + str(res)
-    ht.temperature_water_out = res
+    error = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix,result)
+    print "water_out" + str(result)
+    ht.temperature_water_out = result
 
-    res = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix)
-    print "water_in" + str(res)
-    ht.temperature_water_in = res
+    error = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix,result)
+    print "water_in" + str(result)
+    ht.temperature_water_in = result
 
-    res = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix)
-    print "smoke" + str(res)
-    ht.temperature_smoke = res
+    error = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix,result)
+    print "smoke" + str(result)
+    ht.temperature_smoke = result
 
-    res = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix)
-    print "target" + str(res)
-    ht.temperature_target = res
+    error = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix,result)
+    print "target" + str(result)
+    ht.temperature_target = result
 
-    simulate(co,dy,ht)
+    if error == 0:
+	simulate(co,dy,ht)
 
     #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
     time.sleep(float(co.myperiod))
