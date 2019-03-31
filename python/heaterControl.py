@@ -31,8 +31,8 @@ class HeaterControl:
     temperature_indoor    = 999
     temperature_outdoor   = 999
 
-    timeout_temperature_indoor    = 60
-    timeout_temperature_outdoor   = 60
+    timeout_temperature_indoor    = 120
+    timeout_temperature_outdoor   = 120
 
 #=====================================================
 def control_algorithm(co,dy,hc):
