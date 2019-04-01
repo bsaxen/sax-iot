@@ -76,7 +76,7 @@ def show_action_bit_info(a):
         message +=  "|energy_limit_reached"
     c = a & 128
     if c == 128:
-        message +=  "|no_need"
+        message +=  "|128_not_used"
     print message
     return message
 #=====================================================
@@ -99,7 +99,11 @@ def simulate(co,dy,ht):
         message = "No data - temperature_target"
         lib_publishMyLog(co, message )
         ndi = ndi + 1
-
+    if ht.need == 999:
+        message = "No data - need"
+        lib_publishMyLog(co, message )
+        ndi = ndi + 1
+	
     if ndi > 0:
         print ndi
     if ndi == 0:
@@ -187,7 +191,7 @@ def simulate(co,dy,ht):
                 action += 32
 		
             if ht.need == 0:
-                action += 128
+                action += 4
 		
             if abs(ht.steps) > int(co.maxsteps):
                 ht.steps = int(co.maxsteps)
