@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-03-31
+# Date: 2019-04-01
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -213,10 +213,14 @@ while True:
     lib_increaseMyCounter(co,dy)
 
     error = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
+    if error == 0:
+	hc.timeout_temperature_indoor = 120
     hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
     print "temperature_indoor  " + str(hc.temperature_indoor)
 
     error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
+    if error == 0:
+        hc.timeout_temperature_outdoor = 120
     hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
     print "temperature_outdoor " + str(hc.temperature_outdoor)
 
