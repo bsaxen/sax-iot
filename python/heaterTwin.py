@@ -16,6 +16,7 @@
 #c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp2
 #c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp3
 #c_data       iot.simuino.com 1002 payload target
+#c_data       iot.simuino.com 1002 payload need
 #
 # Stepper device
 # c_send       iot.simuino.com 103
@@ -35,18 +36,20 @@ class HeaterTwin:
    temperature_water_in_ix    = 1
    temperature_smoke_ix       = 2
    temperature_target_ix      = 3
+   need_ix                    = 4
 
    temperature_water_out    = 999
    temperature_water_in     = 999
    temperature_smoke        = 999
    temperature_target       = 999
+   need                     = 999
 
    value         = []
    value_prev    = []
 
    inertia  = 0
    warmcool = 0
-   steps = 0
+   steps    = 0
 #=====================================================
 def show_action_bit_info(a):
     message = ''
@@ -73,7 +76,7 @@ def show_action_bit_info(a):
         message +=  "|energy_limit_reached"
     c = a & 128
     if c == 128:
-        message +=  "|128_no_defined"
+        message +=  "|no_need"
     print message
     return message
 #=====================================================
@@ -146,7 +149,7 @@ def simulate(co,dy,ht):
 
         action = 0
         if dy.mystate == STATE_ON:
-            ht.inertia = ht.inertia - int(co.myperiod)
+            ht.inertia = int(ht.inertia) - int(co.myperiod)
 
             if ht.inertia < 0:
                 ht.inertia = 0
@@ -182,7 +185,10 @@ def simulate(co,dy,ht):
 
             if ht.steps == 0:
                 action += 32
-
+		
+            if ht.need == 0:
+                action += 128
+		
             if abs(ht.steps) > int(co.maxsteps):
                 ht.steps = int(co.maxsteps)
 
@@ -200,20 +206,21 @@ def simulate(co,dy,ht):
                 lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
 #========================================================================
     payload  = '{\n'
-    payload += '"mode" : "' + str(dy.mymode) + '",\n'
-    payload += '"state" : "' + str(dy.mystate) + '",\n'
-    payload += '"errors" : "' + str(dy.myerrors) + '",\n'
-    payload += '"stop" : "' + str(dy.mystop) + '",\n'
-    payload += '"inertia" : "' + str(ht.inertia) + '",\n'
+    payload += '"mode"     : "' + str(dy.mymode) + '",\n'
+    payload += '"state"    : "' + str(dy.mystate) + '",\n'
+    payload += '"errors"   : "' + str(dy.myerrors) + '",\n'
+    payload += '"stop"     : "' + str(dy.mystop) + '",\n'
+    payload += '"inertia"  : "' + str(ht.inertia) + '",\n'
     payload += '"warmcool" : "' + str(ht.warmcool) + '",\n'
-    payload += '"steps" : "' + str(ht.steps) + '",\n'
-    payload += '"action" : "' + str(action) + '",\n'
-    payload += '"why" : "' + str(why) + '",\n'
-    payload += '"energy" : "' + str(energy) + '",\n'
+    payload += '"steps"    : "' + str(ht.steps) + '",\n'
+    payload += '"action"   : "' + str(action) + '",\n'
+    payload += '"why"      : "' + str(why) + '",\n'
+    payload += '"energy"   : "' + str(energy) + '",\n'
+    payload += '"need"     : "' + str(ht.need) + '",\n'
     payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
-    payload += '"temperature_water_in" : "' + str(ht.temperature_water_in) + '",\n'
-    payload += '"temperature_smoke" : "' + str(ht.temperature_smoke) + '",\n'
-    payload += '"temperature_target" : "' + str(ht.temperature_target) + '"\n'
+    payload += '"temperature_water_in"  : "' + str(ht.temperature_water_in) + '",\n'
+    payload += '"temperature_smoke"     : "' + str(ht.temperature_smoke) + '",\n'
+    payload += '"temperature_target"    : "' + str(ht.temperature_target) + '"\n'
     payload += '}\n'
 
     lib_publishMyPayload(co,dy,payload)
@@ -261,7 +268,7 @@ def getLatestValue(co,dy,ds,ht,ix):
 ht = HeaterTwin()
 lib_setup(co,confile,version)
 
-if co.ndata != 4:
+if co.ndata != 5:
     print "Configuration missing c_data"
     exit()
 if co.nsend != 1:
@@ -303,6 +310,10 @@ while True:
     ht.temperature_target = ht.value[ht.temperature_target_ix]
     print "target    " + str(ht.temperature_target)
 
+    error = getLatestValue(co,dy,ds,ht,ht.need_ix)
+    ht.need = ht.value[ht.need_ix]
+    print "need    " + str(ht.need)
+	
     if error == 0:
         simulate(co,dy,ht)
 
