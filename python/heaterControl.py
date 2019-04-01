@@ -57,7 +57,7 @@ def control_algorithm(co,dy,hc):
 
     if ndi > 0:
         print ndi
-    if ndi == 2:
+    if ndi == 0:
         all_data_is_available = 1
     else:
         all_data_is_available = 0
@@ -147,7 +147,10 @@ def control_algorithm(co,dy,hc):
 				hc.bias = float(q[1])
 				message = 'Bias: ' + str(hc.bias)
 				lib_publishMyLog(co, message )
-
+			if q[0] == 'period':
+				co.myperiod = float(q[1])
+				message = 'New Period: ' + str(co.myperiod)
+				lib_publishMyLog(co, message )
     return
 #=====================================================
 def getLatestValue(co,dy,hc,ix):
