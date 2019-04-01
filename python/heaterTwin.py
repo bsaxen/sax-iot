@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-03-31
+# Date: 2019-04-01
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -43,7 +43,6 @@ class HeaterTwin:
 
    value         = []
    value_prev    = []
-   value_timeout = []
 
    inertia  = 0
    warmcool = 0
@@ -109,21 +108,14 @@ def simulate(co,dy,ht):
 
     print ndi
 
-    for x in range(co.ndata):
-        ht.value_timeout[x] -= 1
-        if ht.value_timeout[x] < 1:
-            message = "Old data index=" + str(x)
-            old_data= 1
+    if dy.mymode == MODE_OFFLINE:
+	if all_data_is_available == 1:
+	    dy.mymode = MODE_ONLINE
+            message = 'MODE_ONLINE'
             lib_publishMyLog(co, message )
 
-    if dy.mymode == MODE_OFFLINE:
-	if all_data_is_available == 1 and old_data == 0:
-	    dy.mymode = MODE_ONLINE
-        message = 'MODE_ONLINE'
-        lib_publishMyLog(co, message )
-
     if dy.mymode == MODE_ONLINE:
-        if old_data == 1:
+        if all_data_is_available == 0:
             dy.mymode = MODE_OFFLINE
             message = 'MODE_OFFLINE'
             lib_publishMyLog(co, message )
@@ -154,7 +146,7 @@ def simulate(co,dy,ht):
 
         action = 0
         if dy.mystate == STATE_ON:
-            ht.inertia = int(ht.inertia) - int(co.myperiod)
+            ht.inertia -= int(co.myperiod)
 
             if ht.inertia < 0:
                 ht.inertia = 0
@@ -202,7 +194,7 @@ def simulate(co,dy,ht):
                 message = "Stepper_"+str(steps)+"_"+str(direction)
                 lib_publishMyLog(co, message )
                 #send message to stepper devices
-                print "========= Stepper Move ======" + str(direction) + ' steps=' + str(steps)
+                print "========= Stepper Move ====== " + str(direction) + ' steps=' + str(steps)
                 message = "STEPPER"+','+str(direction)+','+str(steps)
                 code = steps + direction*100
                 lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
@@ -242,9 +234,9 @@ def simulate(co,dy,ht):
 				lib_publishMyLog(co, message )
 				dy.mystop = 0
 		if m == 2:
-			if q[0] == 'bias':
-				ht.bias = float(q[1])
-				message = 'Bias: ' + str(ht.bias)
+			if q[0] == 'period':
+				co.myperiod = float(q[1])
+				message = 'New Period: ' + str(co.myperiod)
 				lib_publishMyLog(co, message )
 
     return
@@ -260,8 +252,6 @@ def getLatestValue(co,dy,ds,ht,ix):
             lib_publishMyLog(co, message)
             ht.value[ix] = ht.value_prev[ix]
             dy.myerrors += 1
-
-        ht.value_timeout[ix] = 120
 
     return error
 
@@ -281,7 +271,6 @@ if co.nsend != 1:
 for x in range(co.ndata):
     ht.value.append(999)
     ht.value_prev.append(999)
-    ht.value_timeout.append(60)
 
 print "ndata=" + str(co.ndata)
 print "nsend=" + str(co.nsend)
