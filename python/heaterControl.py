@@ -23,10 +23,9 @@ class HeaterControl:
 
     value         = []
     value_prev    = []
-    value_timeout = []
 
-    bias    = 0.0
-    need    = 1
+    bias  = 0.0
+    need  = 1
 
     temperature_indoor    = 999
     temperature_outdoor   = 999
@@ -58,36 +57,19 @@ def control_algorithm(co,dy,hc):
 
     if ndi > 0:
         print ndi
-    if ndi == 0:
+    if ndi == 2:
         all_data_is_available = 1
     else:
         all_data_is_available = 0
 
-    old_data = 0
-
-    #print ndi
-
-    hc.timeout_temperature_indoor -= 1
-    hc.timeout_temperature_outdoor -= 1
-
-    if hc.timeout_temperature_indoor < 1:
-        message = "Old data - temperature_indoor " + str(hc.timeout_temperature_indoor)
-        old_data= 1
-        lib_publishMyLog(co, message )
-
-    if hc.timeout_temperature_outdoor < 1:
-        message = "Old data - temperature_outdoor " + str(hc.timeout_temperature_outdoor)
-        old_data= 1
-        lib_publishMyLog(co, message )
-
     if dy.mymode == MODE_OFFLINE:
-        if all_data_is_available == 1 and old_data == 0:
+        if all_data_is_available == 1:
             dy.mymode = MODE_ONLINE
             message = 'MODE_ONLINE'
             lib_publishMyLog(co, message )
 
     if dy.mymode == MODE_ONLINE:
-        if old_data == 1:
+        if all_data_is_available == 0:
             dy.mymode = MODE_OFFLINE
             message = 'MODE_OFFLINE'
             lib_publishMyLog(co, message )
@@ -99,7 +81,13 @@ def control_algorithm(co,dy,hc):
                 lib_publishMyLog(co, message )
 
         if dy.mystate == STATE_ON:
-            hc.need = 1
+		
+            if dy.mystop == 1:
+                dy.mystate = STATE_OFF
+                message = 'STATE_OFF'
+                lib_publishMyLog(co, message )
+		
+	    hc.need = 1
             if float(hc.temperature_indoor) > 20.0:
                 hc.need = 0
             if float(hc.temperature_indoor) < float(hc.temperature_outdoor):
@@ -118,9 +106,6 @@ def control_algorithm(co,dy,hc):
                 y = coeff2*temp + mconst2
 
             y = y + hc.bias
-
-            if dy.mystop == 1:
-                y = 31
 #========================================================================
     payload  = '{\n'
     payload += '"mintemp" : "' + str(co.mintemp) + '",\n'
@@ -176,9 +161,7 @@ def getLatestValue(co,dy,hc,ix):
             lib_publishMyLog(co, message)
             hc.value[ix] = hc.value_prev[ix]
             dy.myerrors += 1
-
-    hc.value_timeout[ix] = 120
-
+		
     return error
 #===================================================
 # Setup
@@ -196,10 +179,9 @@ if co.ndata  > 0:
     for x in range(co.ndata):
         hc.value.append(999)
         hc.value_prev.append(999)
-        hc.value_timeout.append(60)
 
 print "ndata=" + str(co.ndata)
-dy.mymode = MODE_OFFLINE
+dy.mymode  = MODE_OFFLINE
 dy.mystate = STATE_OFF
 #===================================================
 # Loop
@@ -209,21 +191,17 @@ while True:
     lib_increaseMyCounter(co,dy)
 
     error = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
-    if error == 0:
-	hc.timeout_temperature_indoor = 120
     hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
     print "temperature_indoor  " + str(hc.temperature_indoor)
 
     error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
-    if error == 0:
-        hc.timeout_temperature_outdoor = 120
     hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
     print "temperature_outdoor " + str(hc.temperature_outdoor)
 
     if error == 0:
         control_algorithm(co,dy,hc)
 
-  #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
+    #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
     print "error " + str(error)
     time.sleep(float(co.myperiod))
 #===================================================
