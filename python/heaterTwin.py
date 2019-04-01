@@ -190,8 +190,7 @@ def simulate(co,dy,ht):
             if ht.steps == 0:
                 action += 32
 		
-	    print "benny" + str(ht.need)
-            if int(ht.need) == 0:
+            if int(ht.need) == 0 and ht.steps > 0:
                 action += 4
 		
             if abs(ht.steps) > int(co.maxsteps):
