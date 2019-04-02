@@ -74,8 +74,11 @@ while True:
         domain = co.ds_domain[num]
         device = co.ds_device[num]
         param  = co.ds_db_par[num]
+        print domain
+        print device
+        print param
         work[num] -= 1
-        #print str(num) + " " + str(work[num])
+        print str(num) + " " + str(work[num])
         if work[num] == 0:
             work[num] = schedule[num]
             
