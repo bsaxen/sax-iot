@@ -41,7 +41,7 @@ void setup() {
 void loop() {
 //=============================================
   String msg;
-  mesg = lib_loop(&co,&da);
+  msg = lib_loop(&co,&da);
   Serial.println(msg);
   
   if (da.counter%10 == 0)
