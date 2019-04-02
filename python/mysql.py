@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-03-28
+# Date.......: 2019-04-02
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -32,15 +32,15 @@ for num in range(0,co.nds):
     domain = co.ds_domain[num]
     device = co.ds_device[num]
     param  = co.ds_db_par[num]
-    period = float(lib_readStaticParam(domain,device,'period'))
+    period = float(lib_readStaticParam(co,domain,device,'period'))
     print period
-    desc = lib_readStaticParam(domain,device,'desc')
+    desc = lib_readStaticParam(co,domain,device,'desc')
     schedule.append(period)
     work.append(period)
-    counter = float(lib_readDynamicParam(domain,device,'counter'))
+    counter = float(lib_readDynamicParam(co,domain,device,'counter'))
     running.append(counter)
     print counter
-    x      = float(lib_readPayloadParam(domain,device,param))
+    x      = float(lib_readPayloadParam(co,domain,device,param))
     print x
     if co.ds_db_table[num] == 'auto':
         table = desc
@@ -79,13 +79,13 @@ while True:
         if work[num] == 0:
             work[num] = schedule[num]
             
-            period = float(lib_readStaticParam(domain,device,'period'))
+            period = float(lib_readStaticParam(co,domain,device,'period'))
             print period
-            desc = lib_readStaticParam(domain,device,'desc')
+            desc = lib_readStaticParam(co,domain,device,'desc')
             print desc
             schedule[num] = period
 
-            counter = float(lib_readDynamicParam(domain,device,'counter'))
+            counter = float(lib_readDynamicParam(co,domain,device,'counter'))
             print counter
             delta_counter = counter - running[num]
             ok = 0
@@ -106,7 +106,7 @@ while True:
                 ok = 1
             if ok == 1:
                 running[num] = counter
-                x  = float(lib_readPayloadParam(domain,device,param))
+                x  = float(lib_readPayloadParam(co,domain,device,param))
                 print x
                 if co.ds_db_table[num] == 'auto':
                     table = desc
