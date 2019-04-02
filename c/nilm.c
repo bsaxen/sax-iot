@@ -81,14 +81,7 @@ void loop()
 //=============================================
 {
     String msg;
-    delay(co.conf_period*1000);
-  
-    ++da.counter;
-    da.rssi = WiFi.RSSI();
-    if (da.counter > co.conf_wrap) da.counter = 1;
- 
-    dyn_url    = lib_buildUrlDynamic(&co, &da);  
-    msg = lib_wifiConnectandSend(&co,&da, dyn_url);
+    msg = lib_loop(&co,&da);
     Serial.println(msg);
     
     payload = "{";
