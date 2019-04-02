@@ -50,15 +50,10 @@ void loop()
 {
   
   String msg,message;
-  delay(co.conf_period*1000);
   
-  ++da.counter;
-  da.rssi = WiFi.RSSI();
-  if (da.counter > co.conf_wrap) da.counter = 1;
-  
-  dyn_url    = lib_buildUrlDynamic(&co, &da);  
-  msg = lib_wifiConnectandSend(&co,&da, dyn_url);
+  msg = lib_loop(&co,&da);
   Serial.println(msg);
+
   int res = lib_decode_ON_OFF(msg);
   
   g_status = res;
