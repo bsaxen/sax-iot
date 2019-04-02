@@ -83,16 +83,16 @@ while True:
         #print device
         #print param
         work[num] -= 1.0
-        print str(num) + " " + str(work[num])
+        #print str(num) + " " + str(work[num])
         if work[num] == 0:
             work[num] = schedule[num]
             
             error = lib_readStaticParam(co,domain,device,'period')
             period = int(co.myresult)
-            print period
+            #print period
             error = lib_readStaticParam(co,domain,device,'desc')
             desc = co.myresult
-            print desc
+            #print desc
             schedule[num] = period
 
             error = lib_readDynamicParam(co,domain,device,'counter')
