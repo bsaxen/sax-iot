@@ -77,11 +77,8 @@ void loop()
   char order[10];
   char buf[100];
 
-  delay(co.conf_period*1000);
-  ++da.counter;
-  da.rssi = WiFi.RSSI();
-    
-  if (da.counter > co.conf_wrap) da.counter = 1;
+  msg = lib_loop(&co,&da);
+  Serial.println(msg);
 
   //Retrieve one or more temperature values
   sensor.requestTemperatures();
@@ -96,10 +93,6 @@ void loop()
         Serial.println(temperature);
       }
   }
-
-  
-  dyn_url = lib_buildUrlDynamic(&co, &da);
-  msg = lib_wifiConnectandSend(&co, &da, dyn_url);
 
   payload = "{";
   if (nsensors > 0)
