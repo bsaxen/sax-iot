@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-03-30
+// Date.......: 2019-04-02
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -61,7 +61,30 @@ String payload = "{\"no_data\":\"0\"}";
 String message = "nothing";
 
 //=============================================
-int lib_setup(struct Configuration *co,struct Data *da)
+String lib_loop(struct Configuration *co,struct Data *da)
+//=============================================
+{
+  String msg;
+  delay(co->conf_period*1000);
+  
+  ++da->counter;
+  da->rssi = WiFi.RSSI();
+  if (da->counter > co->conf_wrap) da->counter = 1;
+  
+  String url = lib_buildUrlDynamic(&co, &da);  
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  //Serial.println(msg); 
+  
+  if (da->counter%50 == 0)
+  {
+    url = lib_buildUrlStatic(&co);
+    String dont_care = lib_wifiConnectandSend(&co,&da,url);
+  }
+  
+  return msg;
+}
+//=============================================
+void lib_setup(struct Configuration *co,struct Data *da)
 //=============================================
 {
   Serial.begin(9600);
