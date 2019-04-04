@@ -39,14 +39,14 @@ function readDomainUrl($file)
 {
   $file = $file.'.domain';
   //echo $file;
-  $file = fopen($file, "r");
-  if ($file)
+  $fh = fopen($file, "r");
+  if ($fh)
   {
-      while(! feof($file))
+      while(! feof($fh))
       {
-        $url = fgets($file);
+        $url = fgets($fh);
       }
-      fclose($file);
+      fclose($fh);
   }
   //echo $url;
   return $url;
