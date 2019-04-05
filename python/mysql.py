@@ -12,9 +12,10 @@ from mysqlLib import *
 #=============================================
 # Configuration
 #=============================================
-schedule = []
-work     = []
-running  = []
+schedule    = []
+work        = []
+running     = []
+description = []
 #=============================================
 # setup
 #=============================================
@@ -32,27 +33,48 @@ for num in range(0,co.nds):
     domain = co.ds_domain[num]
     device = co.ds_device[num]
     param  = co.ds_db_par[num]
-    error = float(lib_readStaticParam(co,domain,device,'period'))
-    period = int(co.myresult)
-    print period
-    error = lib_readStaticParam(co,domain,device,'desc')
-    desc = co.myresult
-    schedule.append(period)
-    print "period="+str(period)
-    work.append(period)
-    error = float(lib_readDynamicParam(co,domain,device,'counter'))
-    counter = int(co.myresult)
-    running.append(counter)
-    print counter
-    error = lib_readPayloadParam(co,domain,device,param)
-    x = float(co.myresult)
-    print x
-    if co.ds_db_table[num] == 'auto':
-        table = desc
+    roger = 1
+    
+    error = lib_readStaticParam(co,domain,device,'period')
+    if error == 0:
+        period = int(co.myresult)
+        schedule.append(period)
+        work.append(period)
+        print "period="+str(period)
     else:
-        table = co.ds_db_table[num]
+        roger = 0
+    
+    error = lib_readStaticParam(co,domain,device,'desc')
+    if error == 0:
+        desc = co.myresult
+        description.append(desc)
+    else:
+        roger = 0
+
+    error = float(lib_readDynamicParam(co,domain,device,'counter'))
+    if error == 0:
+        counter = int(co.myresult)
+        running.append(counter)
+        print counter
+    else:
+        roger = 0
+
+    error = lib_readPayloadParam(co,domain,device,param)
+    if error == 0:
+        x = float(co.myresult)
+        print x
+    else:
+        roger = 0
         
-    lib_mysqlInsert(co,1,table,'value',x)
+    if roger == 1:
+        if co.ds_db_table[num] == 'auto':
+            table = desc
+         else:
+            table = co.ds_db_table[num]
+        
+        lib_mysqlInsert(co,1,table,'value',x)
+    else:
+        print "Error during setup reading data: " + str(num)
 #=============================================
 # loop
 #=============================================
@@ -86,46 +108,59 @@ while True:
         #print str(num) + " " + str(work[num])
         if work[num] == 0:
             work[num] = schedule[num]
-            
-            error = lib_readStaticParam(co,domain,device,'period')
-            period = int(co.myresult)
-            #print period
+            roger = 1
+                     
             error = lib_readStaticParam(co,domain,device,'desc')
-            desc = co.myresult
+            if error == 0:
+                desc = co.myresult
+            else:
+                roger = 0
             #print desc
-            schedule[num] = period
+            
+            
 
             error = lib_readDynamicParam(co,domain,device,'counter')
-            counter = int(co.myresult)
-            print counter
-            delta_counter = counter - running[num]
-            ok = 0
-            if delta_counter == 1:
-                print "Correct data: " + str(delta_counter)
-                ok = 1
-            if delta_counter > 1:
-                print "Missing data: " + str(delta_counter)
-                message = str(counter) + "_Missing_data_" + desc + " " + str(delta_counter)
-                msg = lib_publishMyLog(co,message)
-                ok = 1
-            if delta_counter == 0:
-                print "No update of data: " + str(delta_counter)
-            if delta_counter < 0:
-                print "Wrap around of data: " + str(delta_counter)
-                message = str(counter) + "_Wrap_data_" + desc
-                msg = lib_publishMyLog(co,message)
-                ok = 1
-            if ok == 1:
-                running[num] = counter
-                error  = lib_readPayloadParam(co,domain,device,param)
-                x = float(co.myresult)
-                print x
-                if co.ds_db_table[num] == 'auto':
-                    table = desc
-                else:
-                    table = co.ds_db_table[num]
+            if error == 0:
+                counter = int(co.myresult)
+                print counter
+            else:
+                roger = 0
+                
+            
+            if roger == 1:
+                delta_counter = counter - running[num]
+                ok = 0
+                if delta_counter == 1:
+                    print "Correct data: " + str(delta_counter)
+                    ok = 1
+                if delta_counter > 1:
+                    print "Missing data: " + str(delta_counter)
+                    message = str(counter) + "_Missing_data_" + description[num] + " " + str(delta_counter)
+                    msg = lib_publishMyLog(co,message)
+                    ok = 1
+                if delta_counter == 0:
+                    print "No update of data: " + str(delta_counter)
+                if delta_counter < 0:
+                    print "Wrap around of data: " + str(delta_counter)
+                    message = str(counter) + "_Wrap_data_" + description[num]
+                    msg = lib_publishMyLog(co,message)
+                    ok = 1
+                if ok == 1:
+                    running[num] = counter
+                    error  = lib_readPayloadParam(co,domain,device,param)
+                    if error == 0:
+                        x = float(co.myresult)
+                        print x
+                        if co.ds_db_table[num] == 'auto':
+                            table = description[num]
+                        else:
+                            table = co.ds_db_table[num]
                     
-                lib_mysqlInsert(co,0,table,'value',x)
+                        lib_mysqlInsert(co,0,table,'value',x)
+                    else:
+                        print "Error reading data during loop " + str(num) + " " + description[num] 
+            else:
+                print "Error roger in loop " + str(num) + " " + description[num]
 #===================================================
 # End of file
 #===================================================
