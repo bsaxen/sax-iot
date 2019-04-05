@@ -69,7 +69,7 @@ for num in range(0,co.nds):
     if roger == 1:
         if co.ds_db_table[num] == 'auto':
             table = desc
-         else:
+        else:
             table = co.ds_db_table[num]
         
         lib_mysqlInsert(co,1,table,'value',x)
