@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-04-01
+# Date: 2019-04-05
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -190,22 +190,30 @@ dy.mystate = STATE_OFF
 # Loop
 #===================================================
 while True:
-    error = 0
+    roger = 0
     lib_increaseMyCounter(co,dy)
 
     error = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
-    hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
-    print "temperature_indoor  " + str(hc.temperature_indoor)
+    if error == 0:
+	hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
+        print "temperature_indoor  " + str(hc.temperature_indoor)
+    else:
+	roger = 1
 
     error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
-    hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
-    print "temperature_outdoor " + str(hc.temperature_outdoor)
-
     if error == 0:
-        control_algorithm(co,dy,hc)
+        hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
+        print "temperature_outdoor " + str(hc.temperature_outdoor)
+    else:
+	roger = 1
 
-    #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
-    print "error " + str(error)
+    if roger == 0:
+        control_algorithm(co,dy,hc)
+    else:
+        message = 'ROGER_LOOP_ERROR'
+        lib_publishMyLog(co, message)	
+
+
     time.sleep(float(co.myperiod))
 #===================================================
 # End of file
