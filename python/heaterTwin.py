@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-01
+# Date: 2019-04-05
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -295,34 +295,50 @@ ht.warmcool = int(co.warmcool)*int(co.myperiod)
 # Loop
 #===================================================
 while True:
-    error = 0
+    roger = 0
     lib_increaseMyCounter(co,dy)
 
     error = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix)
-    ht.temperature_water_out = ht.value[ht.temperature_water_out_ix]
-    print "water_out " + str(ht.temperature_water_out)
+    if error == 0:
+	ht.temperature_water_out = ht.value[ht.temperature_water_out_ix]
+	print "water_out " + str(ht.temperature_water_out)
+    else:
+	roger = 1
 
     error = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix)
-    ht.temperature_water_in = ht.value[ht.temperature_water_in_ix]
-    print "water_in  " + str(ht.temperature_water_in)
+    if error == 0:
+        ht.temperature_water_in = ht.value[ht.temperature_water_in_ix]
+        print "water_in  " + str(ht.temperature_water_in)
+    else:
+	roger = 1
 
     error = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix)
-    ht.temperature_smoke = ht.value[ht.temperature_smoke_ix]
-    print "smoke     " + str(ht.temperature_smoke)
+    if error == 0:
+        ht.temperature_smoke = ht.value[ht.temperature_smoke_ix]
+        print "smoke     " + str(ht.temperature_smoke)
+    else:
+	roger = 1
 
     error = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix)
-    ht.temperature_target = ht.value[ht.temperature_target_ix]
-    print "target    " + str(ht.temperature_target)
+    if error == 0:
+        ht.temperature_target = ht.value[ht.temperature_target_ix]
+        print "target    " + str(ht.temperature_target)
+    else:
+	roger = 1
 
     error = getLatestValue(co,dy,ds,ht,ht.need_ix)
-    ht.need = ht.value[ht.need_ix]
-    print "need    " + str(ht.need)
-	
     if error == 0:
+        ht.need = ht.value[ht.need_ix]
+        print "need    " + str(ht.need)
+    else:
+	roger = 1
+	
+    if roger == 0:
         simulate(co,dy,ht)
+    else:
+        message = 'ROGER_LOOP_ERROR'
+        lib_publishMyLog(co, message)	
 
-    #print "sleep: " + str(co.myperiod) + " triggered: " + str(dy.mycounter)
-    print "error " + str(error)
     time.sleep(float(co.myperiod))
 
 #===================================================
