@@ -135,7 +135,7 @@ while True:
                 if delta_counter == 1:
                     print "Correct data: " + str(delta_counter)
                     ok = 1
-                if delta_counter > 1:
+                if delta_counter > 2:
                     print "Missing data: " + str(delta_counter)
                     message = str(counter) + "_Missing_data_" + description[num] + " " + str(delta_counter)
                     msg = lib_publishMyLog(co,message)
