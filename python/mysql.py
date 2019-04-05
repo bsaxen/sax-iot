@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-04-04
+# Date.......: 2019-04-05
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -75,6 +75,8 @@ for num in range(0,co.nds):
         lib_mysqlInsert(co,1,table,'value',x)
     else:
         print "Error during setup reading data: " + str(num)
+        message = str(counter) + "_ERROR_SETUP_" + description[num]
+        msg = lib_publishMyLog(co,message)
 #=============================================
 # loop
 #=============================================
@@ -158,9 +160,13 @@ while True:
                     
                         lib_mysqlInsert(co,0,table,'value',x)
                     else:
-                        print "Error reading data during loop " + str(num) + " " + description[num] 
+                        print "Error reading data during loop " + str(num) + " " + description[num]
+                        message = str(counter) + "_ERROR_LOOP_" + description[num]
+                        msg = lib_publishMyLog(co,message)
             else:
                 print "Error roger in loop " + str(num) + " " + description[num]
+                message = str(counter) + "_ERROR_ROGER_LOOP" + description[num]
+                msg = lib_publishMyLog(co,message)
 #===================================================
 # End of file
 #===================================================
