@@ -1,39 +1,27 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <title>OpenLayers Basic Example</title>
+<?php
+$label  = $_GET['label'];
+$lat    = $_GET['lat'];
+$lon    = $_GET['lon'];
+$status = $_GET['status'];
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.11/lib/OpenLayers.js"></script>
-    <script>
-      function init() {
-        map = new OpenLayers.Map("mapdiv");
-        var mapnik = new OpenLayers.Layer.OSM();
-        map.addLayer(mapnik);
+$roger = 1;
+if (!isset($_GET['label']))  $roger  += 2;
+if (!isset($_GET['lat']))    $roger  += 4;
+if (!isset($_GET['lon']))    $roger  += 8;
+if (!isset($_GET['status'])) $roger  += 16;
 
-        var lonlat = new OpenLayers.LonLat(-1.788, 53.571).transform(
-            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-            new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator
-          );
+if ($roger == 1)
+{
+    $filename = $label.'.map';
+    //echo $filename;
+    $fh = fopen($filename, 'w') or die("Open file error");
+    fwrite($fh, "$lat,$lon,$status");
+    fclose($fh);
+    print "ok";
+}
+else
+{
+    print "err=$roger";
+}  
+?>
 
-        var zoom = 13;
-
-        var markers = new OpenLayers.Layer.Markers( "Markers" );
-        map.addLayer(markers);
-        markers.addMarker(new OpenLayers.Marker(lonlat));
-
-        map.setCenter(lonlat, zoom);
-      }
-    </script>
-
-    <style>
-    #mapdiv { width:350px; height:250px; }
-    div.olControlAttribution { bottom:3px; }
-    </style>
-
-</head>
-
-<body onload="init();">
-    <p>My HTML page with an embedded map</p>
-    <div id="mapdiv"></div>
-</body>
-</html>
