@@ -1,6 +1,10 @@
 <?php
 
-$sel_label = "benny";
+$sel_label = "default";
+//$do = "ls *.map > map.work";
+//echo $do;
+//system($do);
+
 
 ?>
 <!DOCTYPE html>
@@ -18,14 +22,14 @@ $sel_label = "benny";
 <script type="text/javascript">
 window.onload = function()
 {
-    initialize_map(13.317,59.502); 
+    initialize_map(14.317,59.502); 
     //add_map_point(-31.8688, 151.2093);
 
-    var tid = setInterval(getData, 2000);
+    var tid = setInterval(getData, 5000);
     var counter = parseFloat(0.0);
     function getData() 
     {
-        counter = parseFloat(counter) + parseFloat(0.0001);
+        //counter = parseFloat(counter) + parseFloat(0.0001);
         console.log("Getting  data");
         $.ajax({
             url:		'mapAjax.php',
@@ -46,7 +50,8 @@ window.onload = function()
         var n = resArray.length;
         console.log(n);
       
-        var lat = (parseFloat(resArray[0]) + parseFloat(counter)).toFixed(4);
+        //var lat = (parseFloat(resArray[0]) + parseFloat(counter)).toFixed(4);
+        var lat = resArray[0];
         var lon = resArray[1];
         var status = resArray[2];
         console.log(lat);
@@ -88,7 +93,7 @@ function initialize_map (lat,lon)
             map.getProjectionObject() // to Spherical Mercator Projection
           );
           
-    zoom=14;
+    zoom=8;
 
     markers = new OpenLayers.Layer.Markers( "Markers" );
     map.addLayer(markers);
