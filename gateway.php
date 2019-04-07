@@ -73,7 +73,8 @@ function saveDynamicMsg($obj)
   $json      = utf8_encode($obj->msg_dynamic);
   $dec       = json_decode($json, TRUE);
   $counter   = $dec['counter'];
-  saveLog($counter);
+  $obj->log  = $counter;
+  saveLog($obj);
     
   return;
 }
