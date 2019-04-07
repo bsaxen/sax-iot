@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-03-31
+# Date: 2019-04-07
 # Description: IoT python library
 version = 2
 # =============================================
@@ -509,7 +509,8 @@ def lib_getStaticDeviceJson(co,domain,device):
 
     if error == 0:    
        co.myresult = json.load(r)
-    print error
+    else:
+        print error
     return error
 #=============================================
 def lib_getDynamicDeviceJson(co,domain,device):
@@ -525,7 +526,8 @@ def lib_getDynamicDeviceJson(co,domain,device):
 
     if error == 0:    
        co.myresult = json.load(r)
-    print error
+    else:
+        print error
     return error
 #=============================================
 def lib_getPayloadDeviceJson(co,domain,device):
@@ -541,7 +543,8 @@ def lib_getPayloadDeviceJson(co,domain,device):
 
     if error == 0:    
        co.myresult = json.load(r)
-    print error
+    else:
+        print error
     return error
 
 #=============================================
@@ -584,7 +587,8 @@ def lib_readDynamicParam(co,domain,device,par):
     error = lib_getDynamicDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
-    print error
+    else:
+        print error
     return error
 #=============================================
 def lib_readStaticParam(co,domain,device,par):
@@ -592,7 +596,8 @@ def lib_readStaticParam(co,domain,device,par):
     error = lib_getStaticDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
-    print error
+    else:
+        print error
     return error
 #=============================================
 def lib_readPayloadParam(co,domain,device,par):
@@ -600,7 +605,8 @@ def lib_readPayloadParam(co,domain,device,par):
     error = lib_getPayloadDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
-    print error
+    else:
+        print error
     return error
 #=============================================
 def lib_searchLogKey(domain,device,par):
@@ -630,7 +636,7 @@ def lib_readData(co,ds,index):
           error = lib_readPayloadParam(co,domain,device,parameter)
     else:
         error = 1001 
-    print error       
+        print error       
     return error
 #===================================================
 def lib_placeOrder(domain, server, device, message):
