@@ -124,7 +124,7 @@ while True:
             error = lib_readDynamicParam(co,domain,device,'counter')
             if error == 0:
                 counter = int(co.myresult)
-                print counter
+                #print counter
             else:
                 roger = 0
                 
@@ -153,7 +153,7 @@ while True:
                     error  = lib_readPayloadParam(co,domain,device,param)
                     if error == 0:
                         x = float(co.myresult)
-                        print x
+                        #print x
                         if co.ds_db_table[num] == 'auto':
                             table = description[num]
                         else:
