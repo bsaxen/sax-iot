@@ -12,7 +12,8 @@ if (!isset($_GET['status'])) $roger  += 16;
 
 if ($roger == 1)
 {
-    $filename = $label.'.map';
+    //$filename = $label.'.map';
+    $filename = "default.map";
     //echo $filename;
     $fh = fopen($filename, 'w') or die("Open file error");
     fwrite($fh, "$lat,$lon,$status");
@@ -24,4 +25,5 @@ else
     print "err=$roger";
 }  
 ?>
+
 
