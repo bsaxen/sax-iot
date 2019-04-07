@@ -131,9 +131,10 @@ while True:
             
             if roger == 1:
                 delta_counter = counter - running[num]
+                print str(counter) + " " + str(running[num])
                 ok = 0
                 if delta_counter == 1:
-                    print "Correct data: " + str(delta_counter) + " " + description[num] + " " + param
+                    #print "Correct data: " + str(delta_counter) + " " + description[num] + " " + param
                     ok = 1
                 if delta_counter > 1:
                     print "**** Missing data: " + str(delta_counter) + " " + description[num] + " " + param
