@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-03-30
+// Date.......: 2019-04-07
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -69,6 +69,12 @@ function saveDynamicMsg($obj)
         fwrite($doc, "}\n ");
         fclose($doc);
   }
+    
+  $json      = utf8_encode($obj->msg_dynamic);
+  $dec       = json_decode($json, TRUE);
+  $counter   = $dec['counter'];
+  saveLog($counter);
+    
   return;
 }
 //=============================================
