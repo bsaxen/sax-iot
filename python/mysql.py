@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-04-05
+# Date.......: 2019-04-07
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -136,7 +136,7 @@ while True:
                     print "Correct data: " + str(delta_counter)
                     ok = 1
                 if delta_counter > 2:
-                    print "Missing data: " + str(delta_counter)
+                    print "Missing data: " + str(delta_counter) + " " + description[num]
                     message = str(counter) + "_Missing_data_" + description[num] + " " + str(delta_counter)
                     msg = lib_publishMyLog(co,message)
                     ok = 1
