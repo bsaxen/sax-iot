@@ -70,11 +70,11 @@ function saveDynamicMsg($obj)
         fclose($doc);
   }
     
-  $json      = utf8_encode($obj->msg_dynamic);
-  $dec       = json_decode($json, TRUE);
-  $counter   = $dec['counter'];
-  $obj->log  = $counter;
-  saveLog($obj);
+  //$json      = utf8_encode($obj->msg_dynamic);
+  //$dec       = json_decode($json, TRUE);
+  //$counter   = $dec['counter'];
+  //$obj->log  = $counter;
+  //saveLog($obj);
     
   return;
 }
