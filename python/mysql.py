@@ -32,6 +32,7 @@ for num in range(0,co.nds):
     print num
     domain = co.ds_domain[num]
     device = co.ds_device[num]
+    source = co.ds_source[num]
     param  = co.ds_db_par[num]
     roger = 1
     
@@ -59,7 +60,11 @@ for num in range(0,co.nds):
     else:
         roger = 0
 
-    error = lib_readPayloadParam(co,domain,device,param)
+    if source == 'dynamic':
+        error = lib_readDynamicParam(co,domain,device,param)
+    else:
+        error = lib_readPayloadParam(co,domain,device,param)
+        
     if error == 0:
         x = float(co.myresult)
         print x
@@ -102,10 +107,9 @@ while True:
     for num in range(0,co.nds):
         domain = co.ds_domain[num]
         device = co.ds_device[num]
+        source = co.ds_source[num]
         param  = co.ds_db_par[num]
-        #print domain
-        #print device
-        #print param
+
         work[num] -= 1.0
         #print str(num) + " " + str(work[num])
         if work[num] == 0:
@@ -142,7 +146,10 @@ while True:
                     ok = 1
                 if ok == 1:
                     running[num] = counter
-                    error  = lib_readPayloadParam(co,domain,device,param)
+                    if source == 'dynamic':
+                        error  = lib_readDynamicParam(co,domain,device,param)
+                    else:
+                        error  = lib_readPayloadParam(co,domain,device,param)
                     if error == 0:
                         x = float(co.myresult)
                         #print x
