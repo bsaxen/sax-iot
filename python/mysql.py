@@ -110,17 +110,9 @@ while True:
         #print str(num) + " " + str(work[num])
         if work[num] == 0:
             work[num] = schedule[num]
+            
             roger = 1
-                     
-            error = lib_readStaticParam(co,domain,device,'desc')
-            if error == 0:
-                desc = co.myresult
-            else:
-                roger = 0
-            #print desc
             
-            
-
             error = lib_readDynamicParam(co,domain,device,'counter')
             if error == 0:
                 counter = int(co.myresult)
