@@ -209,7 +209,10 @@ def lib_publishMyPayload(co,dy,payload):
     req = 'http://' + domain + '/' + server + '?' + values
     #print req
     try:
+        t1 = int(round(time.time() * 1000))     
         response = urllib2.urlopen(req)
+        t2 = int(round(time.time() * 1000))
+        dy.myuplink_time = t2 - t1
         msg = response.read()
         #print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
@@ -232,8 +235,11 @@ def lib_publishMyLog(co, message ):
     req = 'http://' + domain + '/' + server + '?' + values
     #print req
     try:
+        t1 = int(round(time.time() * 1000))     
         response = urllib2.urlopen(req)
         msg = response.read()
+        t2 = int(round(time.time() * 1000))
+        dy.myuplink_time = t2 - t1
         #print 'Message to ' + co.myid + ': ' + msg
         #evaluateAction(the_page)
     except urllib2.URLError as e:
@@ -545,7 +551,10 @@ def lib_getPayloadDeviceJson(co,domain,device):
     lib_buildAnyUrl(co,domain,device,'payload')
     error = 0
     try:
+        t1 = int(round(time.time() * 1000))
         r = urllib2.urlopen(co.myresult,timeout=5)
+        t2 = int(round(time.time() * 1000))
+        dy.mydownlink_time = t2 - t1
     except urllib2.URLError as e:
         print e.reason
         error = 1
