@@ -96,6 +96,7 @@ class Configuration:
     ds_domain = []
     ds_device = []
     ds_param  = []
+    ds_source = []
 
     # Database tables and parameters
     ds_db_table  = []
@@ -442,8 +443,9 @@ def lib_readConfiguration(confile,c1):
                 if word[0] == 'c_stream':
                     c1.ds_domain.append(word[1])
                     c1.ds_device.append(word[2])
-                    c1.ds_db_table.append(word[3])
-                    c1.ds_db_par.append(word[4])
+                    c1.ds_source.append(word[3])
+                    c1.ds_db_table.append(word[4])
+                    c1.ds_db_par.append(word[5])
                     c1.nds += 1
 
                 # Image
@@ -496,7 +498,7 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_dbname       gow\n')
         fh.write('c_dbuser       folke\n')
         fh.write('c_dbpassword   something\n')
-        fh.write('c_stream       domain device table param\n')
+        fh.write('#c_stream       domain device source table param\n')
 
         fh.write('c_image_user   folke\n')
         fh.write('c_image_url    gow.test.com\n')
