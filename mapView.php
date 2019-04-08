@@ -75,10 +75,10 @@ function update_map(lat,lon)
             map.getProjectionObject() // to Spherical Mercator Projection
           );
   markers.removeMarker(old_mm);
-  zoom = 16;
+  //zoom = 16;
   new_mm = new OpenLayers.Marker(lonLat);
   markers.addMarker(new_mm); 
-  map.setCenter (lonLat, zoom);
+  //map.setCenter (lonLat, zoom);
   old_mm = new_mm;
 }
 
