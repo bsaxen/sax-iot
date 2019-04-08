@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-04-07
+# Date: 2019-04-08
 # Description: IoT python library
 version = 2
 # =============================================
@@ -39,6 +39,8 @@ class ModuleDynamic:
     mydev_ts = ""
     mywifi_ss = 0
     myresult  = 0
+    myuplink_time   = 0
+    mydownlink_time = 0
 
 class Configuration:
     myid         = '1234'
@@ -170,8 +172,10 @@ def lib_publishMyDynamic(co,dy):
     data['do']       = 'dynamic'
     data['id']       = co.myid
     payload  = '{'
-    payload += '"counter" : "'  + str(dy.mycounter) + '",'
-    payload += '"errors" : "'  + str(dy.myerrors) + '"'
+    payload += '"counter" : "'   + str(dy.mycounter)       + '",'
+    payload += '"uplink" : "'    + str(dy.myuplink_time)   + '",'
+    payload += '"downlink" : "'  + str(dy.mydownlink_time) + '",'
+    payload += '"errors" : "'    + str(dy.myerrors)        + '"'
     payload += '}'
     data['json']     = payload
 
@@ -179,8 +183,11 @@ def lib_publishMyDynamic(co,dy):
     req = 'http://' + domain + '/' + server + '?' + values
     #print req
     try:
+        t1 = int(round(time.time() * 1000))     
         response = urllib2.urlopen(req)
         msg = response.read()
+        t2 = int(round(time.time() * 1000))
+        dy.myuplink_time = t2 - t1
         print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
         print e.reason
@@ -518,7 +525,10 @@ def lib_getDynamicDeviceJson(co,domain,device):
     lib_buildAnyUrl(co,domain,device,'dynamic')
     error = 0
     try:
+        t1 = int(round(time.time() * 1000))
         r = urllib2.urlopen(co.myresult,timeout=5)
+        t2 = int(round(time.time() * 1000))
+        dy.mydownlink_time = t2 - t1
     except urllib2.URLError as e:
         print e.reason
         error = 1
