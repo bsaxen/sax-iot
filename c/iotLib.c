@@ -54,12 +54,9 @@ struct Data
 struct Configuration co;
 struct Data da;
 //=============================================
-String stat_url = " ";
-String dyn_url = " ";
-String pay_url = " ";
-String log_url = " ";
-String payload = "{\"no_data\":\"0\"}";
-String message = "nothing";
+
+String g_payload = "{\"no_data\":\"0\"}";
+String g_message = "nothing";
 
 //=============================================
 String lib_loop(struct Configuration *co,struct Data *da)
