@@ -1,6 +1,6 @@
 //=============================================
 // File.......: nilm.c
-// Date.......: 2019-03-29
+// Date.......: 2019-04-10
 // Author.....: Benny Saxen
 // Description: nilm - electricity
 // Sensor pin.: D1 NodeMcu
@@ -84,22 +84,21 @@ void loop()
     msg = lib_loop(&co,&da);
     Serial.println(msg);
     
-    payload = "{";
-    
-    payload += "\"elpow";
-    payload += "\":\"";
-    payload += elpow;
-    payload += "\",";
-    
-    payload += "\"pulses";
-    payload += "\":\"";
-    payload += interrupt_counter;
-    payload += "\"";
+    g_payload = "{";
   
-    payload += "}";
+    g_payload += "\"elpow";
+    g_payload += "\":\"";
+    g_payload += elpow;
+    g_payload += "\",";
+    
+    g_payload += "\"pulses";
+    g_payload += "\":\"";
+    g_payload += interrupt_counter;
+    g_payload += "\"";
+  
+    g_payload += "}";
  
-    pay_url    = lib_buildUrlPayload(&co,&da,payload);  
-    msg = lib_wifiConnectandSend(&co,&da, pay_url);
+    lib_publishPayload(&co,&da,g_payload);
     
     interrupt_counter = 0;
 
