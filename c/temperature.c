@@ -1,6 +1,6 @@
 //=============================================
 // File.......: temperature.c
-// Date.......: 2019-03-30
+// Date.......: 2019-04-10
 // Author.....: Benny Saxen
 int sw_version = 1;
 // Description: Signal from D1 pin.
@@ -94,27 +94,26 @@ void loop()
       }
   }
 
-  payload = "{";
+  g_payload = "{";
   if (nsensors > 0)
   {
     for (int i=1;i<=nsensors;i++)
     {
-        payload += "\"temp";
-        payload += i;
-        payload += "\":\"";
-        payload += temps[i-1];
-        payload += "\"";
-        if(i < nsensors)payload += ",";
+        g_payload += "\"temp";
+        g_payload += i;
+        g_payload += "\":\"";
+        g_payload += temps[i-1];
+        g_payload += "\"";
+        if(i < nsensors)g_payload += ",";
     }
   }
   else
   {
-    payload +=  "\"no_temperatures\":\"0\""; 
+    g_payload +=  "\"no_temperatures\":\"0\""; 
   }
-  payload += "}";
+  g_payload += "}";
   
-  pay_url = lib_buildUrlPayload(&co,&da, payload);
-  msg = lib_wifiConnectandSend(&co,&da, pay_url);
+  lib_publishPayload(&co,&da,g_payload);
 }
 //=============================================
 // End of File
