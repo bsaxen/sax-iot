@@ -1,9 +1,9 @@
 //=============================================
 // File.......: httpClient.c
-// Date.......: 2019-03-29
+// Date.......: 2019-04-10
 // Author.....: Benny Saxen
 // Description: http client
-int sw_version = 1;
+int sw_version = 2;
 //=============================================
 // Configuration
 //=============================================
@@ -40,24 +40,32 @@ void setup() {
 //=============================================
 void loop() {
 //=============================================
-  String msg;
-  msg = lib_loop(&co,&da);
-  Serial.println(msg);
+  String message,payload;
+  
+  message = 'test';
+  payload = '{}';
+  
+  lib_loop(&co,&da);
   
   if (da.counter%10 == 0)
-  { 
-    pay_url    = lib_buildUrlPayload(&co,&da,payload);  
-    msg = lib_wifiConnectandSend(&co,&da, pay_url);
-    Serial.println(msg);
+  {
+    lib_publishPayload(&co,&da,payload);
   }
 
   if (da.counter%50 == 0)
   {
-    log_url = lib_buildUrlLog(&co,message);
-    msg = lib_wifiConnectandSend(&co,&da, log_url);
-    Serial.println(msg);
+    lib_publishDynamic(&co,&da);
+  }
+  
+  if (da.counter%100 == 0)
+  {
+    lib_publishLog(&co,&da,message);
   }
 
+  if (da.counter%200 == 0)
+  {
+    lib_publishStatic(&co,&da);
+  }
 }
 //=============================================
 // End of File
