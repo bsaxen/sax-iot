@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-03-30
+// Date.......: 2019-04-10
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -249,40 +249,38 @@ void loop(void){
   {
     move_stepper(dir, step_size, number_of_steps, delay_between_steps);
 
-    payload = "{";
+    g_payload = "{";
 
-    payload += "\"counter";
-    payload += "\":\"";
-    payload += da.counter;
-    payload += "\",";
+    g_payload += "\"counter";
+    g_payload += "\":\"";
+    g_payload += da.counter;
+    g_payload += "\",";
 
-    payload += "\"position";
-    payload += "\":\"";
-    payload += current_pos;
-    payload += "\",";
+    g_payload += "\"position";
+    g_payload += "\":\"";
+    g_payload += current_pos;
+    g_payload += "\",";
     
-    payload += "\"steps";
-    payload += "\":\"";
-    payload += number_of_steps;
-    payload += "\",";
+    g_payload += "\"steps";
+    g_payload += "\":\"";
+    g_payload += number_of_steps;
+    g_payload += "\",";
     
-    payload += "\"direction";
-    payload += "\":\"";
-    payload += dir;
-    payload += "\"";
+    g_payload += "\"direction";
+    g_payload += "\":\"";
+    g_payload += dir;
+    g_payload += "\"";
     
-    payload += "}";
+    g_payload += "}";
     
-    pay_url = lib_buildUrlPayload(&co,&da, payload);
-    msg = lib_wifiConnectandSend(&co,&da, pay_url);
+    lib_publishPayload(&co,&da,g_payload);
     //Serial.println(msg);
 
-    String message = "stepper_";
-    message += dir;
-    message += "_";
-    message += number_of_steps;
-    log_url = lib_buildUrlLog(&co,message);
-    msg = lib_wifiConnectandSend(&co,&da, log_url);
+    g_message = "stepper_";
+    g_message += dir;
+    g_message += "_";
+    g_message += number_of_steps;
+    lib_publishLog(&co,&da,g_message);
   }
   
 }
