@@ -40,11 +40,7 @@ void setup() {
 //=============================================
 void loop() {
 //=============================================
-  String message,payload;
-  
-  message = 'test';
-  payload = '{}';
-  
+
   lib_loop(&co,&da);
   
   if (da.counter%10 == 0)
