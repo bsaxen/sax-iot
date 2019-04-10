@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-04-05
+// Date.......: 2019-04-10
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -46,6 +46,7 @@ struct Data
   int counter;
   int rssi;
   int fail;
+  int latency;
   String fail_msg;
   String ssid;
 };
@@ -262,10 +263,16 @@ String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
     url += d2->fail_msg;
     url += "\",";
   }
+  url += "\"latency";
+  url += "\":\"";
+  url += d2->latency;
+  url += "\",";
+  
   url += "\"ssid";
   url += "\":\"";
   url += d2->ssid;
   url += "\",";
+  
   url += "\"rssi";
   url += "\":\"";
   url += d2->rssi;
@@ -312,6 +319,8 @@ String lib_buildUrlLog(struct Configuration *c2, String message)
 String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
 //=============================================
 {
+  unsigned long t1,t2;
+  
   String sub = "-";
   Serial.print("Requesting URL: ");
   Serial.println(cur_url);
@@ -325,6 +334,7 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
   }
 
   // This will send the request to the server
+  t1 = millis();
   client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
              "Host: " + co->conf_domain + "\r\n" +
              "Connection: close\r\n\r\n");
@@ -337,7 +347,8 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
      }
      delay(5);
   }
-
+  t2 = millis();
+  da->latency = t2 - t1;
   // Read all the lines of the reply from server and print them to Serial
   while (client.available()) {
     String action = client.readStringUntil('\r');
