@@ -126,6 +126,42 @@ void lib_setup(struct Configuration *co,struct Data *da)
   String dont_care = lib_wifiConnectandSend(co,da, stat_url);
 }
 //=============================================
+String lib_publishStatic(struct Configuration *c2,struct Data *d2)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlStatic(&co);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishDynamic(struct Configuration *c2,struct Data *d2)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlDynamic(&co,&da);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishPayload(struct Configuration *c2,struct Data *d2,String payload)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlPayload(&co,&da, payload);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishLog(struct Configuration *c2,struct Data *d2,String message)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlLog(&co, message);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
 int lib_decode_ON_OFF(String msg)
 //=============================================
 {
