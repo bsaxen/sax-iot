@@ -45,7 +45,7 @@ void loop() {
   
   if (da.counter%10 == 0)
   {
-    lib_publishPayload(&co,&da,payload);
+    lib_publishPayload(&co,&da,g_payload);
   }
 
   if (da.counter%50 == 0)
@@ -55,7 +55,7 @@ void loop() {
   
   if (da.counter%100 == 0)
   {
-    lib_publishLog(&co,&da,message);
+    lib_publishLog(&co,&da,g_message);
   }
 
   if (da.counter%200 == 0)
