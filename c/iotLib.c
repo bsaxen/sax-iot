@@ -69,14 +69,12 @@ String lib_loop(struct Configuration *co,struct Data *da)
   da->rssi = WiFi.RSSI();
   if (da->counter > co->conf_wrap) da->counter = 1;
   
-  String url = lib_buildUrlDynamic(co, da);  
-  msg = lib_wifiConnectandSend(co,da, url);
+  msg = lib_publishDynamic(&co,&da);
   //Serial.println(msg); 
   
   if (da->counter%50 == 0)
   {
-    url = lib_buildUrlStatic(co);
-    String dont_care = lib_wifiConnectandSend(co,da,url);
+      lib_publishStatic(co,da);
   }
   
   return msg;
