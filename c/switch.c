@@ -1,9 +1,9 @@
 //=============================================
 // File.......: switch.c
-// Date.......: 2019-02-26
+// Date.......: 2019-04-10
 // Author.....: Benny Saxen
 // Description:
-int sw_version = 1;
+int sw_version = 2;
 //=============================================
 // Configuration
 //=============================================
@@ -49,7 +49,7 @@ void loop()
 //=============================================
 {
   
-  String msg,message;
+  String msg;
   
   msg = lib_loop(&co,&da);
   Serial.println(msg);
@@ -62,13 +62,13 @@ void loop()
   {
     digitalWrite(SWITCH_PIN,HIGH);
     event = 1;
-    message = "Switch is set to HIGH";
+    g_message = "Switch is set to HIGH";
   }
   if (res == 2) 
   {
     digitalWrite(SWITCH_PIN,LOW);
     event = 2;
-    message = "Switch is set to LOW";
+    g_message = "Switch is set to LOW";
   }
   
   if (event != 0)
@@ -78,13 +78,10 @@ void loop()
     payload += g_status;
     payload += "\"";
     payload += "}";
-    pay_url    = lib_buildUrlPayload(&co,&da,payload);  
-    msg = lib_wifiConnectandSend(&co,&da, pay_url);
-    Serial.println(msg);
     
-    log_url = lib_buildUrlLog(&co,message);
-    msg = lib_wifiConnectandSend(&co,&da, log_url);
-    Serial.println(msg);
+    lib_publishPayload(&co,&da,g_payload);
+   
+    lib_publishLog(&co,&da,g_message);
   }
 
 }
