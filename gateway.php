@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-04-07
+// Date.......: 2019-04-11
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -10,6 +10,7 @@
 // Library
 class iotDoc {
     public $sys_ts;
+    public $entity;
     public $id;
     public $msg_static;
     public $msg_dynamic;
@@ -41,7 +42,7 @@ function deleteDevice($id)
 function saveStaticMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/static.json';
+  $f_file = $obj->entity.'/'.$obj->id.'/static.json';
   //echo $f_file;
   $doc = fopen($f_file, "w");
   if ($doc)
@@ -59,7 +60,7 @@ function saveStaticMsg($obj)
 function saveDynamicMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/dynamic.json';
+  $f_file = $obj->entity.'/'.$obj->id.'/dynamic.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -82,7 +83,7 @@ function saveDynamicMsg($obj)
 function savePayloadMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/payload.json';
+  $f_file = $obj->entity.'/'.$obj->id.'/payload.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -98,7 +99,7 @@ function savePayloadMsg($obj)
 function initLog($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/log.txt';
+  $f_file = $obj->entity.'/'.$obj->id.'/log.txt';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -111,7 +112,7 @@ function initLog($obj)
 function saveLog($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/log.txt';
+  $f_file = $obj->entity.'/'.$obj->id.'/log.txt';
   $doc = fopen($f_file, "a");
   if ($doc)
   {
