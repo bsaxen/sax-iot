@@ -14,6 +14,9 @@ from iotLib import *
 confile = "nilmtwin.conf"
 version = 1
 lib_setup(co,confile,version)
+if co.ndata != 3:
+    print "Configuration missmatch  c_data"
+    exit()
 
 missed = 0
 kwh = 0
