@@ -626,7 +626,7 @@ def lib_searchLogKey(domain,device,par):
     r = urllib2.urlopen(url)
     return x
 #=============================================
-def lib_readData(co,ds,index):
+def lib_readData(co,index):
 #=============================================
     index_error = 0
     if index >= co.ndata:
