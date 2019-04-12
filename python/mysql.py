@@ -93,6 +93,9 @@ while True:
     if dy.mycounter > co.mywrap:
         dy.mycounter = 1
         
+    if dy.mycounter%60 == 0:
+        lib_publishMyDynamic(co,dy)
+        
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
     #print now
