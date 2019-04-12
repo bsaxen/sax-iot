@@ -11,37 +11,55 @@ from iotLib import *
 confile = "nilmtwin.conf"
 version = 1
 lib_setup(co,confile,version)
+
+missed = 0
+kwh = 0
+
+error = lib_readStaticParam(co,domain,device,'period')
+if error == 0:
+    period = int(co.myresult)
+    print "period="+str(period)
+ else:
+    print "Not able to read period " + str(error)
+    exit()
 #===================================================
 # Loop
 #===================================================
 while True:
+    roger = 0
+	
     lib_increaseMyCounter(co,dy)
 
     msg = lib_publishMyDynamic(co,dy)
 
-    error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
+    prev_counter = counter
+    error = lib_readData(co,ds,0)
     if error == 0:
-        hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
-        print "temperature_outdoor " + str(hc.temperature_outdoor)
+        counter = co.myresult
     else:
+	print "Error reading counter"
+    
+    diff = counter  - prev_counter
+    if diff == 1:
+       error = lib_readData(co,ds,1)
+       if error == 0:
+          pulses = co.myresult
+	  kwh += pulses
 	  roger = 1
-
+       else:
+	   print "Error reading pulses"
+    else diff > 1:
+	print "Missed information: " + str(diff)
+	missed += 1
+    else:
+	print "Information sync problem: " + str(diff)
+    
+	
     payload  = '{\n'
-    payload += '"mintemp" : "' + str(co.mintemp) + '",\n'
-    payload += '"maxtemp" : "' + str(co.maxtemp) + '",\n'
-    payload += '"minheat" : "' + str(co.minheat) + '",\n'
-    payload += '"maxheat" : "' + str(co.maxheat) + '",\n'
-    payload += '"x_0" : "' + str(co.x_0) + '",\n'
-    payload += '"y_0" : "' + str(co.y_0) + '",\n'
-    payload += '"need" : "' + str(hc.need) + '",\n'
-    payload += '"target" : "' + str(y) + '",\n'
-    payload += '"mode" : "' + str(dy.mymode) + '",\n'
-    payload += '"state" : "' + str(dy.mystate) + '",\n'
-    payload += '"errors" : "' + str(dy.myerrors) + '",\n'
-    payload += '"stop" : "' + str(dy.mystop) + '",\n'
-    payload += '"bias" : "' + str(hc.bias) + '",\n'
-    payload += '"temperature_outdoor" : "' + str(hc.temperature_outdoor) + '",\n'
-    payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
+    payload += '"pulses": "'  + str(pulses)  + '",\n'
+    payload += '"counter": "' + str(counter) + '",\n'
+    payload += '"missed": "'  + str(missed)  + '",\n'
+    payload += '"kwh": "'     + str(123)     + '"\n'
     payload += '}\n'
 
     msg = lib_publishMyPayload(co,dy,payload)
