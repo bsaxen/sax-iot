@@ -24,7 +24,7 @@ kwh = 0
 error = lib_readData(co,0)
 if error == 0:
     period = co.myresult
- else:
+else:
     print("Error reading period")
     exit()
 #===================================================
