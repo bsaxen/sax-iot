@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-04-05
+# Date: 2019-04-12
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -155,7 +155,7 @@ def control_algorithm(co,dy,hc):
 #=====================================================
 def getLatestValue(co,dy,hc,ix):
     hc.value_prev[ix] = hc.value[ix]
-    error = lib_readData(co,ds,ix)
+    error = lib_readData(co,ix)
     if error == 0:
         hc.value[ix] = co.myresult
         diff  = float(hc.value[ix]) - float(hc.value_prev[ix])
@@ -193,14 +193,14 @@ while True:
     roger = 0
     lib_increaseMyCounter(co,dy)
 
-    error = getLatestValue(co,ds,hc,hc.temperature_indoor_ix)
+    error = getLatestValue(co,dy,hc,hc.temperature_indoor_ix)
     if error == 0:
 	hc.temperature_indoor = hc.value[hc.temperature_indoor_ix]
         print "temperature_indoor  " + str(hc.temperature_indoor)
     else:
 	roger = 1
 
-    error = getLatestValue(co,ds,hc,hc.temperature_outdoor_ix)
+    error = getLatestValue(co,dy,hc,hc.temperature_outdoor_ix)
     if error == 0:
         hc.temperature_outdoor = hc.value[hc.temperature_outdoor_ix]
         print "temperature_outdoor " + str(hc.temperature_outdoor)
