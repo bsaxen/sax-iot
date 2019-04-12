@@ -116,23 +116,7 @@ co.mylibrary = version
 ds = Datastreams()
 dy = ModuleDynamic()
 
-#===================================================
-def lib_setup(co,confile,version):
-#===================================================
-    lib_readConfiguration(confile,co)
-    lib_publishMyStatic(co)
-    co.mysw = version
-#===================================================
-def lib_loop(co,dy):
-#===================================================
-    time.sleep(float(co.myperiod))
-    dy.mycounter += 1
-    if dy.mycounter > co.mywrap:
-        dy.mycounter = 1
-    msg = lib_PublishMyDynamic(co,dy)
-    # TBD publish static
-    time.sleep(float(co.myperiod))
-    return msg
+
 #===================================================
 def lib_publishMyStatic(co):
 #===================================================
@@ -684,6 +668,23 @@ def lib_generateRandomString():
 #=============================================
    char_set = string.ascii_uppercase + string.digits
    return ''.join(random.sample(char_set*6, 6))
+#===================================================
+def lib_setup(co,confile,version):
+#===================================================
+    lib_readConfiguration(confile,co)
+    lib_publishMyStatic(co)
+    co.mysw = version
+#===================================================
+def lib_loop(co,dy):
+#===================================================
+    time.sleep(float(co.myperiod))
+    dy.mycounter += 1
+    if dy.mycounter > co.mywrap:
+        dy.mycounter = 1
+    msg = lib_PublishMyDynamic(co,dy)
+    # TBD publish static
+    time.sleep(float(co.myperiod))
+    return msg
 #===================================================
 # End of file
 #===================================================
