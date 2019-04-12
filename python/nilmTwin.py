@@ -3,6 +3,9 @@
 # Author: Benny Saxen
 # Date: 2019-04-12
 # Description:
+# data 0 = nilm period
+# data 1 = nilm counter
+# data 2 = nilm pulses
 # =============================================
 from iotLib import *
 #===================================================
@@ -15,12 +18,11 @@ lib_setup(co,confile,version)
 missed = 0
 kwh = 0
 
-error = lib_readStaticParam(co,domain,device,'period')
+error = lib_readData(co,0)
 if error == 0:
-    period = int(co.myresult)
-    print "period="+str(period)
+    period = co.myresult
  else:
-    print "Not able to read period " + str(error)
+    print "Error reading period"
     exit()
 #===================================================
 # Loop
@@ -33,7 +35,7 @@ while True:
     msg = lib_publishMyDynamic(co,dy)
 
     prev_counter = counter
-    error = lib_readData(co,ds,0)
+    error = lib_readData(co,1)
     if error == 0:
         counter = co.myresult
     else:
@@ -41,7 +43,7 @@ while True:
     
     diff = counter  - prev_counter
     if diff == 1:
-       error = lib_readData(co,ds,1)
+       error = lib_readData(co,2)
        if error == 0:
           pulses = co.myresult
 	  kwh += pulses
