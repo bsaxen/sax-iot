@@ -33,6 +33,9 @@ wh2     = 0
 counter2 = 0
 pulses2  = 0
 
+hour = str(datetime.datetime.now().strftime("%H"))
+prev_hour = hour
+
 error = lib_readData(co,0)
 if error == 0:
    period1 = int(co.myresult)
@@ -51,7 +54,13 @@ else:
 #===================================================
 while True:
     roger = 0
-	
+
+    prev_hour = hour
+    hour = str(datetime.datetime.now().strftime("%H"))
+    if prev_hour == 23 and hour == 0:
+       wh1 = 0
+       wh2 = 0
+    
     lib_increaseMyCounter(co,dy)
 
     msg = lib_publishMyDynamic(co,dy)
@@ -108,11 +117,11 @@ while True:
     payload += '"pulses1": "'  + str(pulses1)  + '",\n'
     payload += '"counter1": "' + str(counter1) + '",\n'
     payload += '"missed1": "'  + str(missed1)  + '",\n'
-    payload += '"wh1": "'      + str(wh1)      + '",\n'
+    payload += '"wh1": "'      + str(wh1)     + '",\n'
     payload += '"pulses2": "'  + str(pulses2)  + '",\n'
     payload += '"counter2": "' + str(counter2) + '",\n'
     payload += '"missed2": "'  + str(missed2)  + '",\n'
-    payload += '"wh2": "'      + str(wh2)      + '"\n'
+    payload += '"wh2": "'      + str(wh2)     + '"\n'
     payload += '}\n'
 
     msg = lib_publishMyPayload(co,dy,payload)
