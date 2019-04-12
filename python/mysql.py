@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-04-08
+# Date.......: 2019-04-12
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -89,9 +89,7 @@ now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
 time.sleep(3)
 total_duration = 0
 while True:
-    lib_increaseMyCounter(co,dy)
-    if int(dy.mycounter)%int(co.myperiod) == 0:
-        msg = lib_publishMyDynamic(co,dy)
+    lib_loop(co,dy)
         
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
