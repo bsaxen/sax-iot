@@ -150,7 +150,7 @@ def lib_publishMyStatic(co):
         #print 'Message to ' + co.myid + ': ' + the_page
         #evaluateAction(the_page)
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
 #===================================================
 def lib_publishMyDynamic(co,dy):
 #===================================================
@@ -178,9 +178,9 @@ def lib_publishMyDynamic(co,dy):
         msg = response.read()
         t2 = int(round(time.time() * 1000))
         dy.myuplink_time = t2 - t1
-        print 'Message to ' + co.myid + ': ' + msg
+        print ('Message to ' + co.myid + ': ' + msg)
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
 
     return msg
 #===================================================
@@ -206,7 +206,7 @@ def lib_publishMyPayload(co,dy,payload):
         msg = response.read()
         #print 'Message to ' + co.myid + ': ' + msg
     except urllib2.URLError as e:
-        print e.reason
+        print(e.reason)
 
     return msg
 #===================================================
@@ -233,7 +233,7 @@ def lib_publishMyLog(co, message ):
         #print 'Message to ' + co.myid + ': ' + msg
         #evaluateAction(the_page)
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
 
     return msg
 #===================================================
@@ -269,7 +269,7 @@ def lib_initFile(fname):
         f.write('\n')
         f.close()
     except:
-        print "ERROR init file " + fname
+        print ("ERROR init file " + fname)
     return
 #=====================================================
 def lib_writeFile(fname,message,ts):
@@ -281,7 +281,7 @@ def lib_writeFile(fname,message,ts):
         f.write('\n')
         f.close()
     except:
-        print "ERROR write to file " + fname
+        print ("ERROR write to file " + fname)
     return
 #=====================================================
 def lib_getDeviceStatus(ds,domain,device):
@@ -328,10 +328,10 @@ def lib_commonAction(co,feedback):
         m = len(q)
         if m == 1:
             if q[0] == 'test':
-                print 'test'
+                print ('test')
                 action = 'test'
             if q[0] == 'photo':
-                print 'photo'
+                print ('photo')
                 action = 'photo'
         if m == 2:
             if q[0] == 'period':
@@ -345,7 +345,7 @@ def lib_commonAction(co,feedback):
     return action
 #===================================================
 def lib_evaluateAction( action):
-    print action
+    print (action)
 #===================================================
 def lib_readConfiguration(confile,c1):
     #print confile
@@ -449,7 +449,7 @@ def lib_readConfiguration(confile,c1):
                 if word[0] == 'c_image_name':
                     c1.image_name      = word[1]
             else:
-                print line
+                print (line)
         fh.close()
     except Exception as e:
         print(e)
@@ -495,8 +495,8 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_image_prefix some\n')
         fh.write('c_image_name   any\n')
         fh.close()
-        print "Configuration file created: " + confile
-        print "Edit your configuration and restart the application"
+        print ("Configuration file created: " + confile)
+        print ("Edit your configuration and restart the application")
         exit()
     return
 #=============================================
@@ -507,14 +507,14 @@ def lib_getStaticDeviceJson(co,domain,device):
     try:
         r = urllib2.urlopen(co.myresult,timeout=5)
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
         error = 1
         co.myresult = 1234
 
     if error == 0:    
        co.myresult = json.load(r)
     else:
-        print error
+        print (error)
     return error
 #=============================================
 def lib_getDynamicDeviceJson(co,domain,device):
@@ -527,14 +527,14 @@ def lib_getDynamicDeviceJson(co,domain,device):
         t2 = int(round(time.time() * 1000))
         dy.mydownlink_time = t2 - t1
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
         error = 1
         co.myresult = 1234
 
     if error == 0:    
        co.myresult = json.load(r)
     else:
-        print error
+        print (error)
     return error
 #=============================================
 def lib_getPayloadDeviceJson(co,domain,device):
@@ -547,14 +547,14 @@ def lib_getPayloadDeviceJson(co,domain,device):
         t2 = int(round(time.time() * 1000))
         dy.mydownlink_time = t2 - t1
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
         error = 1
         co.myresult = 1234
 
     if error == 0:    
        co.myresult = json.load(r)
     else:
-        print error
+        print (error)
     return error
 
 #=============================================
@@ -566,7 +566,7 @@ def lib_checkDeviceOnline(domain,device):
     xts1 = time.mktime(datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").timetuple())
     xts2 = time.mktime(datetime.datetime.strptime(now, "%Y-%m-%d %H:%M:%S").timetuple())
     diff = xts2 - xts1
-    print str(period) + " " + str(diff)
+    print (str(period) + " " + str(diff))
     old = 0
     if diff > period:
         old = 1
@@ -598,7 +598,7 @@ def lib_readDynamicParam(co,domain,device,par):
     if error == 0:
         co.myresult = co.myresult['msg'][par]
     else:
-        print error
+        print (error)
     return error
 #=============================================
 def lib_readStaticParam(co,domain,device,par):
@@ -607,7 +607,7 @@ def lib_readStaticParam(co,domain,device,par):
     if error == 0:
         co.myresult = co.myresult['msg'][par]
     else:
-        print error
+        print (error)
     return error
 #=============================================
 def lib_readPayloadParam(co,domain,device,par):
@@ -616,7 +616,7 @@ def lib_readPayloadParam(co,domain,device,par):
     if error == 0:
         co.myresult = co.myresult['msg'][par]
     else:
-        print error
+        print (error)
     return error
 #=============================================
 def lib_searchLogKey(domain,device,par):
@@ -630,7 +630,7 @@ def lib_readData(co,index):
 #=============================================
     index_error = 0
     if index >= co.ndata:
-        print "index too large"
+        print ("index too large")
         index_error = 1
     if index_error == 0:
         domain    = co.data_domain[index]
@@ -641,12 +641,12 @@ def lib_readData(co,index):
         if stdypa == 'static':
           error = lib_readStaticParam(co,domain,device,parameter)
         if stdypa == 'dynamic':
-          error = lib_readDynaimcParam(co,domain,device,parameter)
+          error = lib_readDynamicParam(co,domain,device,parameter)
         if stdypa == 'payload':
           error = lib_readPayloadParam(co,domain,device,parameter)
     else:
         error = 1001 
-        print error       
+        print (error)       
     return error
 #===================================================
 def lib_placeOrder(domain, server, device, message):
@@ -658,11 +658,11 @@ def lib_placeOrder(domain, server, device, message):
     data['tag']       = lib_generateRandomString()
     values = urllib.urlencode(data)
     req = 'http://' + domain + '/' + server + '?' + values
-    print req
+    print (req)
     try:
         response = urllib2.urlopen(req)
     except urllib2.URLError as e:
-        print e.reason
+        print (e.reason)
 #=============================================
 def lib_generateRandomString():
 #=============================================
