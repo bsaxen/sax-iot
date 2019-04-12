@@ -677,7 +677,6 @@ def lib_setup(co,confile,version):
 #===================================================
 def lib_loop(co,dy):
 #===================================================
-    time.sleep(float(co.myperiod))
     dy.mycounter += 1
     if dy.mycounter > co.mywrap:
         dy.mycounter = 1
