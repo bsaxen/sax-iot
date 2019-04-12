@@ -685,5 +685,12 @@ def lib_loop(co,dy):
     time.sleep(float(co.myperiod))
     return msg
 #===================================================
+def lib_increaseMyCounter(co,dy):
+#===================================================
+    dy.mycounter += 1
+    if dy.mycounter > co.mywrap:
+        dy.mycounter = 1
+    return
+#===================================================
 # End of file
 #===================================================
