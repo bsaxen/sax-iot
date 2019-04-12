@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-05
+# Date: 2019-04-12
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -38,11 +38,12 @@ class HeaterTwin:
    temperature_target_ix      = 3
    need_ix                    = 4
 
-   temperature_water_out    = 999
-   temperature_water_in     = 999
-   temperature_smoke        = 999
-   temperature_target       = 999
-   need                     = 999
+   temperature_water_out      = 999
+   temperature_water_in       = 999
+   temperature_smoke          = 999
+   temperature_target         = 999
+   need                       = 999
+   temperature_water_out_prev = 999
 
    value         = []
    value_prev    = []
@@ -50,6 +51,7 @@ class HeaterTwin:
    inertia  = 0
    warmcool = 0
    steps    = 0
+   expected = 0
 #=====================================================
 def show_action_bit_info(a):
     message = ''
@@ -61,7 +63,7 @@ def show_action_bit_info(a):
         message +=  "|heater_is_off "
     c = a & 4
     if c == 4:
-        message +=  "|no_warming_above_20"
+        message +=  "|no_need"
     c = a & 8
     if c == 8:
         message +=  "|no_cooling_possible"
@@ -70,13 +72,13 @@ def show_action_bit_info(a):
         message +=  "|below_min_steps"
     c = a & 32
     if c == 32:
-        message +=  "|steps_is_0"
+        message +=  "|zero_level"
     c = a & 64
     if c == 64:
         message +=  "|energy_limit_reached"
     c = a & 128
     if c == 128:
-        message +=  "|128_not_used"
+        message +=  "|max_level"
     print message
     return message
 #=====================================================
@@ -178,6 +180,12 @@ def simulate(co,dy,ht):
             if abs(ht.steps) < int(co.minsteps):
                 action += 16
 
+            way = float(ht.temperature_water_out) - float(ht.temperature_water_out_prev)
+            if way > 0 and ht.expected == CLOCKWISE:
+                action += 32
+            if way < 0 and ht.expected == COUNTERCLOCKWISE:
+                action += 128
+
             energy = float(ht.temperature_water_out) - float(ht.temperature_water_in)
             if energy > float(co.maxenergy) and int(ht.steps) > 0:
                 action += 64
@@ -186,9 +194,6 @@ def simulate(co,dy,ht):
                 direction = COUNTERCLOCKWISE
             if ht.steps < 0:
                 direction = CLOCKWISE
-
-            if ht.steps == 0:
-                action += 32
 		
             if int(ht.need) == 0 and ht.steps > 0:
                 action += 4
@@ -201,6 +206,8 @@ def simulate(co,dy,ht):
             if action == 0 and dy.mystop == 0:
                 ht.inertia = co.inertia
                 steps = abs(ht.steps)
+                ht.temperature_water_out_prev = ht.temperature_water_out
+                ht.expected = direction
                 message = "Stepper_"+str(steps)+"_"+str(direction)
                 lib_publishMyLog(co, message )
                 #send message to stepper devices
@@ -221,6 +228,8 @@ def simulate(co,dy,ht):
     payload += '"why"      : "' + str(why) + '",\n'
     payload += '"energy"   : "' + str(energy) + '",\n'
     payload += '"need"     : "' + str(ht.need) + '",\n'
+    payload += '"expected" : "' + str(ht.expected) + '",\n'
+    payload += '"prev_water_out" : "' + str(ht.temperature_water_out_prev) + '",\n'
     payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
     payload += '"temperature_water_in"  : "' + str(ht.temperature_water_in) + '",\n'
     payload += '"temperature_smoke"     : "' + str(ht.temperature_smoke) + '",\n'
@@ -252,9 +261,9 @@ def simulate(co,dy,ht):
 
     return
 #=====================================================
-def getLatestValue(co,dy,ds,ht,ix):
+def getLatestValue(co,dy,ht,ix):
     ht.value_prev[ix] = ht.value[ix]
-    error = lib_readData(co,ds,ix)
+    error = lib_readData(co,ix)
     if error == 0:
         ht.value[ix] = co.myresult
         diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
@@ -298,35 +307,35 @@ while True:
     roger = 0
     lib_increaseMyCounter(co,dy)
 
-    error = getLatestValue(co,dy,ds,ht,ht.temperature_water_out_ix)
+    error = getLatestValue(co,dy,ht,ht.temperature_water_out_ix)
     if error == 0:
 	ht.temperature_water_out = ht.value[ht.temperature_water_out_ix]
 	print "water_out " + str(ht.temperature_water_out)
     else:
 	roger = 1
 
-    error = getLatestValue(co,dy,ds,ht,ht.temperature_water_in_ix)
+    error = getLatestValue(co,dy,ht,ht.temperature_water_in_ix)
     if error == 0:
         ht.temperature_water_in = ht.value[ht.temperature_water_in_ix]
         print "water_in  " + str(ht.temperature_water_in)
     else:
 	roger = 1
 
-    error = getLatestValue(co,dy,ds,ht,ht.temperature_smoke_ix)
+    error = getLatestValue(co,dy,ht,ht.temperature_smoke_ix)
     if error == 0:
         ht.temperature_smoke = ht.value[ht.temperature_smoke_ix]
         print "smoke     " + str(ht.temperature_smoke)
     else:
 	roger = 1
 
-    error = getLatestValue(co,dy,ds,ht,ht.temperature_target_ix)
+    error = getLatestValue(co,dy,ht,ht.temperature_target_ix)
     if error == 0:
         ht.temperature_target = ht.value[ht.temperature_target_ix]
         print "target    " + str(ht.temperature_target)
     else:
 	roger = 1
 
-    error = getLatestValue(co,dy,ds,ht,ht.need_ix)
+    error = getLatestValue(co,dy,ht,ht.need_ix)
     if error == 0:
         ht.need = ht.value[ht.need_ix]
         print "need    " + str(ht.need)
