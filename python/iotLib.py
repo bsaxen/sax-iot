@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-04-10
+# Date: 2019-04-12
 # Description: IoT python library
 version = 2
 # =============================================
@@ -681,7 +681,7 @@ def lib_loop(co,dy):
     dy.mycounter += 1
     if dy.mycounter > co.mywrap:
         dy.mycounter = 1
-    msg = lib_PublishMyDynamic(co,dy)
+    msg = lib_publishMyDynamic(co,dy)
     # TBD publish static
     time.sleep(float(co.myperiod))
     return msg
