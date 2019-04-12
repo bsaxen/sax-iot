@@ -15,18 +15,18 @@ confile = "nilmtwin.conf"
 version = 1
 lib_setup(co,confile,version)
 if co.ndata != 3:
-    print("Configuration missmatch  c_data")
-    exit()
+   print("Configuration missmatch  c_data")
+   exit()
 
 missed = 0
 kwh = 0
 
 error = lib_readData(co,0)
 if error == 0:
-    period = co.myresult
+   period = co.myresult
 else:
-    print("Error reading period")
-    exit()
+   print("Error reading period")
+   exit()
 #===================================================
 # Loop
 #===================================================
@@ -40,9 +40,9 @@ while True:
     prev_counter = counter
     error = lib_readData(co,1)
     if error == 0:
-        counter = co.myresult
+       counter = co.myresult
     else:
-	print("Error reading counter")
+       print("Error reading counter")
     
     diff = counter  - prev_counter
     if diff == 1:
@@ -54,10 +54,10 @@ while True:
        else:
 	   print("Error reading pulses")
     else diff > 1:
-	print ("Missed information: " + str(diff))
-	missed += 1
+       print ("Missed information: " + str(diff))
+       missed += 1
     else:
-	print("Information sync problem: " + str(diff))
+       print("Information sync problem: " + str(diff))
     
 	
     payload  = '{\n'
