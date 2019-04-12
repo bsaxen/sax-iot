@@ -89,7 +89,9 @@ now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
 time.sleep(3)
 total_duration = 0
 while True:
-    lib_loop(co,dy)
+    dy.mycounter += 1
+    if dy.mycounter > co.mywrap:
+        dy.mycounter = 1
         
     then = now
     now = datetime.datetime.now()#.strftime("%Y-%m-%d %H:%M:%S")
