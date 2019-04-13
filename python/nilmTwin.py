@@ -1,7 +1,7 @@
 # =============================================
 # File: nilmTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-12
+# Date: 2019-04-13
 # Description:
 # Nilm Station 1
 # data 0 = nilm period
@@ -57,7 +57,7 @@ while True:
 
     prev_hour = hour
     hour = str(datetime.datetime.now().strftime("%H"))
-    if prev_hour == 23 and hour == 0:
+    if prev_hour == '23' and hour == '00':
        wh1 = 0
        wh2 = 0
     
