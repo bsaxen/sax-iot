@@ -204,7 +204,8 @@ def simulate(co,dy,ht):
             why = show_action_bit_info(action)
 
             if action == 0 and dy.mystop == 0:
-                ht.inertia = co.inertia
+		dyn_inertia = int(60.0/ht.temperature_water_out)
+                ht.inertia = int(co.inertia/dyn_inertia)
                 steps = abs(ht.steps)
                 ht.temperature_water_out_prev = ht.temperature_water_out
                 ht.expected = direction
