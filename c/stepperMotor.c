@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-04-10
+// Date.......: 2019-04-13
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -23,17 +23,18 @@ int QUARTER_STEP = 3;
 int CLOCKWISE = 1;
 int COUNTER_CLOCKWISE = 2;
 
-int DIR   = 4;   // D2
-int STEP  = 5;   // D1
-int SLEEP = 12;  // D6
-int MS1   = 13;  // D7
-int MS2   = 14;  // D5
-int SW    = 15;  // D8
+int DIR    = 4;   // D2
+int STEP   = 5;   // D1
+int SLEEP  = 12;  // D6
+int MS1    = 13;  // D7
+int MS2    = 14;  // D5
+int LIMIT  = 15;  // D8
 
 int dir = 0;
 int step_size = FULL_STEP;
 int number_of_steps = 0;
 int delay_between_steps = 5;
+int limit = 0;
 
 //================================================
 int stepCW(int steps,int dd)
@@ -49,7 +50,12 @@ int stepCW(int steps,int dd)
       delay(dd);
       digitalWrite(STEP, LOW);
       delay(dd);
-      if (digitalRead(SW) == HIGH) return 2;
+      if (digitalRead(LIMIT) == HIGH) 
+      {
+        digitalWrite(DIR, LOW);
+        digitalWrite(SLEEP, LOW);
+        return 2;
+      }
     }
   digitalWrite(DIR, LOW);
   digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.Serial.println
@@ -71,39 +77,16 @@ int stepCCW(int steps,int dd)
       delay(dd);
       digitalWrite(STEP, LOW);
       delay(dd);
-      if (digitalRead(SW) == HIGH) return 2;
-
+      if (digitalRead(LIMIT) == HIGH)
+      {
+        digitalWrite(DIR, LOW);
+        digitalWrite(SLEEP, LOW);
+        return 3;
+      }
     }
   digitalWrite(DIR, LOW);
   digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.
   return 1;
-}
-//================================================
-void go_to_pos(int cur, int pos)
-//================================================
-{
-  int delta = pos -cur;
-    Serial.print( "delta = ");
-      Serial.println(delta);
-  if (delta > 0)
-  {
-    move_stepper(1, 1, delta, 100);
-  }
-  else
-  {
-    move_stepper(2, 1, abs(delta), 100);
-  }
-  current_pos += delta;
-}
-//================================================
-void reset_pos()
-//================================================
-{
-   Serial.println( "Reset position...");
-   move_stepper(2,1,300,100);
-   move_stepper(1,1,10, 100);
-   current_pos = 10;
-   Serial.println( "Reset finished!");
 }
 
 //================================================
@@ -164,8 +147,15 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
 
         if(sw == 2)
         {
-          current_pos = 0;
-          Serial.println("RESET");
+          stepCCW(20, delay_between_steps);
+          current_pos = 20;
+          Serial.println("MIN_LIMIT");
+        }
+        if(sw == 3)
+        {
+          stepCW(20, delay_between_steps);
+          current_pos = current_pos - 20;
+          Serial.println("MAX_LIMIT");
         }
 
        Serial.print( "current position: ");
@@ -205,7 +195,7 @@ void setup(void){
     pinMode(SLEEP,OUTPUT);
     pinMode(MS1,OUTPUT);
     pinMode(MS2,OUTPUT);
-    pinMode(SW, INPUT);
+    pinMode(LIMIT, INPUT);
 
     digitalWrite(MS1,LOW);
     digitalWrite(MS2,LOW);
@@ -256,6 +246,11 @@ void loop(void){
     g_payload += da.counter;
     g_payload += "\",";
 
+    g_payload += "\"limit";
+    g_payload += "\":\"";
+    g_payload += limit;
+    g_payload += "\",";
+    
     g_payload += "\"position";
     g_payload += "\":\"";
     g_payload += current_pos;
@@ -280,6 +275,8 @@ void loop(void){
     g_message += dir;
     g_message += "_";
     g_message += number_of_steps;
+    g_message += "_";
+    g_message += limit;
     lib_publishLog(&co,&da,g_message);
   }
   
