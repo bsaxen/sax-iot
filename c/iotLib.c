@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-04-10
+// Date.......: 2019-04-14
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -69,7 +69,7 @@ String lib_loop(struct Configuration *co,struct Data *da)
   da->rssi = WiFi.RSSI();
   if (da->counter > co->conf_wrap) da->counter = 1;
   
-  msg = lib_publishDynamic(&co,&da);
+  msg = lib_publishDynamic(co,da);
   //Serial.println(msg); 
   
   if (da->counter%50 == 0)
