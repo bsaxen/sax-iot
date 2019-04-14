@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-12
+# Date: 2019-04-15
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -204,7 +204,7 @@ def simulate(co,dy,ht):
             why = show_action_bit_info(action)
 
             if action == 0 and dy.mystop == 0:
-		dyn_inertia = int(60.0/ht.temperature_water_out)
+		dyn_inertia = int(60.0/float(ht.temperature_water_out))
                 ht.inertia = int(co.inertia/dyn_inertia)
                 steps = abs(ht.steps)
                 ht.temperature_water_out_prev = ht.temperature_water_out
