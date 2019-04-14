@@ -205,7 +205,7 @@ def simulate(co,dy,ht):
 
             if action == 0 and dy.mystop == 0:
 		dyn_inertia = int(60.0/float(ht.temperature_water_out))
-                ht.inertia = int(co.inertia/dyn_inertia)
+                ht.inertia = int(int(co.inertia)/dyn_inertia)
                 steps = abs(ht.steps)
                 ht.temperature_water_out_prev = ht.temperature_water_out
                 ht.expected = direction
