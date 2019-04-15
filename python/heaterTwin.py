@@ -228,7 +228,6 @@ def simulate(co,dy,ht):
     payload += '"energy"   : "' + str(energy) + '",\n'
     payload += '"need"     : "' + str(ht.need) + '",\n'
     payload += '"stepper_pos" : "' + str(ht.stepper_pos) + '",\n'
-    payload += '"prev_water_out" : "' + str(ht.temperature_water_out_prev) + '",\n'
     payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
     payload += '"temperature_water_in"  : "' + str(ht.temperature_water_in) + '",\n'
     payload += '"temperature_smoke"     : "' + str(ht.temperature_smoke) + '",\n'
