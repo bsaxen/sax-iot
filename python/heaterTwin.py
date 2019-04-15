@@ -187,7 +187,7 @@ def simulate(co,dy,ht):
             if energy > float(co.maxenergy) and int(ht.steps) > 0:
                 action += 64
 
-            if ht.steps < 0:
+            if ht.steps <= 0:
                 direction = COUNTERCLOCKWISE
             if ht.steps > 0:
                 direction = CLOCKWISE
