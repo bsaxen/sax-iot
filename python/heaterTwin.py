@@ -205,8 +205,7 @@ def simulate(co,dy,ht):
                 ht.steps = int(co.maxsteps)
 
             if action == 0 and dy.mystop == 0:
-                dyn_inertia = int(60.0/float(ht.temperature_water_out))
-                ht.inertia = int(int(co.inertia)/dyn_inertia)
+                ht.inertia = int(co.inertia)
                 steps = abs(ht.steps)
                 message = "Stepper_"+str(steps)+"_"+str(direction)
                 lib_publishMyLog(co, message )
