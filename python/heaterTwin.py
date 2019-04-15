@@ -37,12 +37,14 @@ class HeaterTwin:
    temperature_smoke_ix       = 2
    temperature_target_ix      = 3
    need_ix                    = 4
+   stepper_pos_ix             = 5
 
    temperature_water_out      = 999
    temperature_water_in       = 999
    temperature_smoke          = 999
    temperature_target         = 999
    need                       = 999
+   stepper_pos                = 999
 
    value         = []
    value_prev    = []
@@ -50,7 +52,6 @@ class HeaterTwin:
    inertia     = 0
    warmcool    = 0
    steps       = 0
-   stepper_pos = 1
 #=====================================================
 def show_action_bit_info(a):
     message = ''
@@ -102,6 +103,10 @@ def simulate(co,dy,ht):
         ndi = ndi + 1
     if ht.need == 999:
         message = "No data - need"
+        lib_publishMyLog(co, message )
+        ndi = ndi + 1
+    if ht.stepper_pos == 999:
+        message = "No data - stepper_pos"
         lib_publishMyLog(co, message )
         ndi = ndi + 1
 	
@@ -279,7 +284,7 @@ def getLatestValue(co,dy,ht,ix):
 ht = HeaterTwin()
 lib_setup(co,confile,version)
 
-if co.ndata != 5:
+if co.ndata != 6:
     print "Configuration missing c_data"
     exit()
 if co.nsend != 1:
@@ -337,6 +342,13 @@ while True:
     if error == 0:
         ht.need = ht.value[ht.need_ix]
         print "need    " + str(ht.need)
+    else:
+	roger = 1
+	
+    error = getLatestValue(co,dy,ht,ht.stepper_pos_ix)
+    if error == 0:
+        ht.stepper_pos = ht.value[ht.stepper_pos_ix]
+        print "stepper_pos    " + str(ht.stepper_pos)
     else:
 	roger = 1
 	
