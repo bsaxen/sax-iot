@@ -22,8 +22,8 @@ MODE_ONLINE   = 2
 CLOCKWISE        = 1
 COUNTERCLOCKWISE = 2
 
-DECREASE = 1
-INCREASE = 2
+DECREASE = 2
+INCREASE = 1
 
 class Datastreams:
     no        = []
