@@ -188,14 +188,14 @@ def simulate(co,dy,ht):
                 action += 64
 
             if ht.steps <= 0:
-                direction = COUNTERCLOCKWISE
+                direction = DECREASE
             if ht.steps > 0:
-                direction = CLOCKWISE
+                direction = INCREASE
 		
-            if direction == CLOCKWISE and ht.stepper_pos == 288:
+            if direction == INCREASE and ht.stepper_pos == 288:
                 action += 32	
 		
-            if direction == COUNTERCLOCKWISE and ht.stepper_pos == 0:
+            if direction == DECREASE and ht.stepper_pos == 0:
                 action += 128	
 		
             if int(ht.need) == 0 and ht.steps > 0:
