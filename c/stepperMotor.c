@@ -240,16 +240,16 @@ void setup(void){
   co.conf_wrap       = 999999;
   co.conf_feedback   = 1;
 
-  co.conf_title      = "kvv32_stepper";
-  co.conf_tags       = "kvv32_stepper";
-  co.conf_desc       = "kvv32_stepper";
+  co.conf_title      = "test_stepper";
+  co.conf_tags       = "test_stepper";
+  co.conf_desc       = "test_stepper";
   co.conf_platform   = "esp8266";
 
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
   
   co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "123";
+  co.conf_password_1 = "6301166614";
   
   co.conf_ssid_2     = "NABTON";
   co.conf_password_2 = "a1b2c3d4e5f6g7";
@@ -349,7 +349,7 @@ void loop(void){
 
     g_payload += "\"calibrated";
     g_payload += "\":\"";
-    g_payload += limit;
+    g_payload += g_calibrated;
     g_payload += "\",";
 
     g_payload += "\"limit";
