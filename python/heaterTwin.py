@@ -6,20 +6,16 @@
 # 90 degrees <=> 1152/4 steps = 288
 #
 # Configuration:
-# 1 water_out
-# 2 water_in
-# 3 smoke
-# 4 target
+# --- read data ---
+# 0 water_out
+# 1 water_in
+# 2 smoke
+# 3 target
+# 4 need to heat
+# 5 stepper position
 #
-#c_send       iot.simuino.com A0_20_A6_13_0D_76
-#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp1
-#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp2
-#c_data       iot.simuino.com 5C_CF_7F_23_A3_2A payload temp3
-#c_data       iot.simuino.com 1002 payload target
-#c_data       iot.simuino.com 1002 payload need
-#
-# Stepper device
-# c_send       iot.simuino.com 103
+# --- create actions ---
+# stepper
 # =============================================
 import math
 import urllib
@@ -84,6 +80,8 @@ def show_action_bit_info(a):
 #=====================================================
 def simulate(co,dy,ht):
 
+    print ("In Mode: " + str(dy.mymode) + " State: " + str(dy.mystate))
+
     ndi = 0
     if ht.temperature_water_out == 999:
         message = "No data - temperature_water_out"
@@ -121,9 +119,11 @@ def simulate(co,dy,ht):
 
     print ndi
 
+    energy = float(ht.temperature_water_out) - float(ht.temperature_water_in)
+
     if dy.mymode == MODE_OFFLINE:
-	if all_data_is_available == 1:
-	    dy.mymode = MODE_ONLINE
+        if all_data_is_available == 1:
+            dy.mymode = MODE_ONLINE
             message = 'MODE_ONLINE'
             lib_publishMyLog(co, message )
 
@@ -184,19 +184,18 @@ def simulate(co,dy,ht):
             if abs(ht.steps) < int(co.minsteps):
                 action += 16
 
-            energy = float(ht.temperature_water_out) - float(ht.temperature_water_in)
             if energy > float(co.maxenergy) and int(ht.steps) > 0:
                 action += 64
 
-            if ht.steps > 0:
-                direction = COUNTERCLOCKWISE
             if ht.steps < 0:
+                direction = COUNTERCLOCKWISE
+            if ht.steps > 0:
                 direction = CLOCKWISE
 		
-            if direction == CLOCKWISE and ht.stepper_pos == 0:
+            if direction == CLOCKWISE and ht.stepper_pos == 288:
                 action += 32	
 		
-            if direction == COUNTERCLOCKWISE and ht.stepper_pos == 300:
+            if direction == COUNTERCLOCKWISE and ht.stepper_pos == 0:
                 action += 128	
 		
             if int(ht.need) == 0 and ht.steps > 0:
@@ -205,10 +204,8 @@ def simulate(co,dy,ht):
             if abs(ht.steps) > int(co.maxsteps):
                 ht.steps = int(co.maxsteps)
 
-            why = show_action_bit_info(action)
-
             if action == 0 and dy.mystop == 0:
-		dyn_inertia = int(60.0/float(ht.temperature_water_out))
+                dyn_inertia = int(60.0/float(ht.temperature_water_out))
                 ht.inertia = int(int(co.inertia)/dyn_inertia)
                 steps = abs(ht.steps)
                 message = "Stepper_"+str(steps)+"_"+str(direction)
@@ -220,6 +217,7 @@ def simulate(co,dy,ht):
                 code = steps + direction*100
                 lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
 #========================================================================
+    why = show_action_bit_info(action)
     payload  = '{\n'
     payload += '"mode"     : "' + str(dy.mymode) + '",\n'
     payload += '"state"    : "' + str(dy.mystate) + '",\n'
@@ -261,7 +259,7 @@ def simulate(co,dy,ht):
 				co.myperiod = float(q[1])
 				message = 'New Period: ' + str(co.myperiod)
 				lib_publishMyLog(co, message )
-
+    print ("Out Mode: " + str(dy.mymode) + " State: " + str(dy.mystate))
     return
 #=====================================================
 def getLatestValue(co,dy,ht,ix):
@@ -312,42 +310,42 @@ while True:
 
     error = getLatestValue(co,dy,ht,ht.temperature_water_out_ix)
     if error == 0:
-	ht.temperature_water_out = ht.value[ht.temperature_water_out_ix]
+	ht.temperature_water_out = float(ht.value[ht.temperature_water_out_ix])
 	print "water_out " + str(ht.temperature_water_out)
     else:
 	roger = 1
 
     error = getLatestValue(co,dy,ht,ht.temperature_water_in_ix)
     if error == 0:
-        ht.temperature_water_in = ht.value[ht.temperature_water_in_ix]
+        ht.temperature_water_in = float(ht.value[ht.temperature_water_in_ix])
         print "water_in  " + str(ht.temperature_water_in)
     else:
 	roger = 1
 
     error = getLatestValue(co,dy,ht,ht.temperature_smoke_ix)
     if error == 0:
-        ht.temperature_smoke = ht.value[ht.temperature_smoke_ix]
+        ht.temperature_smoke = float(ht.value[ht.temperature_smoke_ix])
         print "smoke     " + str(ht.temperature_smoke)
     else:
 	roger = 1
 
     error = getLatestValue(co,dy,ht,ht.temperature_target_ix)
     if error == 0:
-        ht.temperature_target = ht.value[ht.temperature_target_ix]
+        ht.temperature_target = float(ht.value[ht.temperature_target_ix])
         print "target    " + str(ht.temperature_target)
     else:
 	roger = 1
 
     error = getLatestValue(co,dy,ht,ht.need_ix)
     if error == 0:
-        ht.need = ht.value[ht.need_ix]
+        ht.need = int(ht.value[ht.need_ix])
         print "need    " + str(ht.need)
     else:
 	roger = 1
 	
     error = getLatestValue(co,dy,ht,ht.stepper_pos_ix)
     if error == 0:
-        ht.stepper_pos = ht.value[ht.stepper_pos_ix]
+        ht.stepper_pos = int(ht.value[ht.stepper_pos_ix])
         print "stepper_pos    " + str(ht.stepper_pos)
     else:
 	roger = 1
