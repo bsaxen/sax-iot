@@ -43,15 +43,14 @@ class HeaterTwin:
    temperature_smoke          = 999
    temperature_target         = 999
    need                       = 999
-   temperature_water_out_prev = 999
 
    value         = []
    value_prev    = []
 
-   inertia  = 0
-   warmcool = 0
-   steps    = 0
-   expected = 0
+   inertia     = 0
+   warmcool    = 0
+   steps       = 0
+   stepper_pos = 0
 #=====================================================
 def show_action_bit_info(a):
     message = ''
@@ -72,13 +71,13 @@ def show_action_bit_info(a):
         message +=  "|below_min_steps"
     c = a & 32
     if c == 32:
-        message +=  "|zero_level"
+        message +=  "|stepper_zero"
     c = a & 64
     if c == 64:
         message +=  "|energy_limit_reached"
     c = a & 128
     if c == 128:
-        message +=  "|max_level"
+        message +=  "|stepper_max"
     print message
     return message
 #=====================================================
@@ -180,12 +179,6 @@ def simulate(co,dy,ht):
             if abs(ht.steps) < int(co.minsteps):
                 action += 16
 
-            way = float(ht.temperature_water_out) - float(ht.temperature_water_out_prev)
-            if way > 0 and ht.expected == CLOCKWISE:
-                action += 32
-            if way < 0 and ht.expected == COUNTERCLOCKWISE:
-                action += 128
-
             energy = float(ht.temperature_water_out) - float(ht.temperature_water_in)
             if energy > float(co.maxenergy) and int(ht.steps) > 0:
                 action += 64
@@ -194,6 +187,12 @@ def simulate(co,dy,ht):
                 direction = COUNTERCLOCKWISE
             if ht.steps < 0:
                 direction = CLOCKWISE
+		
+            if direction == CLOCKWISE and ht.stepper_pos == 0:
+                action += 32	
+		
+            if direction == COUNTERCLOCKWISE and ht.stepper_pos == 300:
+                action += 128	
 		
             if int(ht.need) == 0 and ht.steps > 0:
                 action += 4
@@ -207,13 +206,12 @@ def simulate(co,dy,ht):
 		dyn_inertia = int(60.0/float(ht.temperature_water_out))
                 ht.inertia = int(int(co.inertia)/dyn_inertia)
                 steps = abs(ht.steps)
-                ht.temperature_water_out_prev = ht.temperature_water_out
-                ht.expected = direction
                 message = "Stepper_"+str(steps)+"_"+str(direction)
                 lib_publishMyLog(co, message )
                 #send message to stepper devices
                 print "========= Stepper Move ====== " + str(direction) + ' steps=' + str(steps)
                 message = "STEPPER"+','+str(direction)+','+str(steps)
+		
                 code = steps + direction*100
                 lib_placeOrder(co.send_domain[0], co.myserver, co.send_device[0], code )
 #========================================================================
