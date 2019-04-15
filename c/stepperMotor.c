@@ -17,12 +17,12 @@ int sw_version = 1;
 //================================================
 // Globals
 //================================================
-int current_pos = 0;
-int FULL_STEP = 1;
-int HALF_STEP = 2;
-int QUARTER_STEP = 3;
-int CLOCKWISE = 1;
-int COUNTER_CLOCKWISE = 2;
+int current_pos       = 0;
+int FULL_STEP         = 1;
+int HALF_STEP         = 2;
+int QUARTER_STEP      = 3;
+int CLOCKWISE         = 1; // Increase
+int COUNTER_CLOCKWISE = 2; // Decrease
 
 int DIR    = 4;   // D2
 int STEP   = 5;   // D1
@@ -184,6 +184,10 @@ int calibrate(){
         int touch1 = 0;
         int touch2 = 0;
         int ok = 0;
+  
+        Serial.println( "FULL STEP");
+        digitalWrite(MS1,LOW);
+        digitalWrite(MS2,LOW);
 
         Serial.println( "Calibrate max level...");
         touch1 = stepCW(400, delay_between_steps,0);
@@ -312,6 +316,21 @@ void loop(void){
     dir = COUNTER_CLOCKWISE;
     number_of_steps = res - 200;
     move = 1;
+  }
+  else if (res == 6614)
+  {
+    int ok = calibrate();
+    if (ok != 2)
+    {
+      Serial.println("Calibration failed");
+      g_calibrated = 0;
+    }
+    else
+    {
+      Serial.println("Calibration success!");
+      g_calibrated = 1;
+    }
+    move = 0;
   }
   else
   {
