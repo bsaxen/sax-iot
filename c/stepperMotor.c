@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-04-13
+// Date.......: 2019-04-15
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -29,15 +29,16 @@ int SLEEP  = 12;  // D6
 int MS1    = 13;  // D7
 int MS2    = 14;  // D5
 int LIMIT  = 15;  // D8
+int MINMAX = 10;  // S3
 
 int dir = 0;
 int step_size = FULL_STEP;
 int number_of_steps = 0;
-int delay_between_steps = 5;
+int delay_between_steps = 10;
 int limit = 0;
 
 //================================================
-int stepCW(int steps,int dd)
+int stepCW(int steps,int dd, int force)
 //================================================
 {
   int i;
@@ -50,11 +51,19 @@ int stepCW(int steps,int dd)
       delay(dd);
       digitalWrite(STEP, LOW);
       delay(dd);
-      if (digitalRead(LIMIT) == HIGH) 
+      if (digitalRead(LIMIT) == HIGH && force == 0) 
       {
+        digitalWrite(MINMAX, HIGH);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
         return 2;
+      }
+      if (digitalRead(LIMIT) == LOW && force == 1)
+      {
+        digitalWrite(MINMAX, LOW);
+        digitalWrite(DIR, LOW);
+        digitalWrite(SLEEP, LOW);
+        return 12;
       }
     }
   digitalWrite(DIR, LOW);
@@ -63,7 +72,7 @@ int stepCW(int steps,int dd)
 }
 
 //================================================
-int stepCCW(int steps,int dd)
+int stepCCW(int steps,int dd, int force)
 //================================================
 
 {
@@ -77,11 +86,19 @@ int stepCCW(int steps,int dd)
       delay(dd);
       digitalWrite(STEP, LOW);
       delay(dd);
-      if (digitalRead(LIMIT) == HIGH)
+      if (digitalRead(LIMIT) == HIGH && force == 0)
       {
+        digitalWrite(MINMAX, HIGH);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
         return 3;
+      }
+      if (digitalRead(LIMIT) == LOW && force == 1)
+      {
+        digitalWrite(MINMAX, LOW);
+        digitalWrite(DIR, LOW);
+        digitalWrite(SLEEP, LOW);
+        return 13;
       }
     }
   digitalWrite(DIR, LOW);
@@ -90,7 +107,7 @@ int stepCCW(int steps,int dd)
 }
 
 //================================================
-void move_stepper(int dir, int step_size, int number_of_step, int delay_between_steps){
+int move_stepper(int dir, int step_size, int number_of_step, int delay_between_steps){
 //================================================
         int sw = 0;
 
@@ -126,40 +143,39 @@ void move_stepper(int dir, int step_size, int number_of_step, int delay_between_
 
         if(dir == CLOCKWISE)
         {
-            current_pos +=  number_of_step;
-
             Serial.println( "Stepper motor CW -->");
-            sw = stepCW(number_of_steps, delay_between_steps);
+            sw = stepCW(number_of_steps, delay_between_steps,0);
+            if (sw == 1) current_pos -=  number_of_steps;
         }
         else if(dir == COUNTER_CLOCKWISE)
         {
-            current_pos -=  number_of_steps;
-
             Serial.println( "Stepper motor CCW  <--");
-            sw = stepCCW(number_of_steps, delay_between_steps);
+            sw = stepCCW(number_of_steps, delay_between_steps,0);
+            if (sw == 1) current_pos +=  number_of_steps;
         }
         else
             Serial.println( "ERROR: Unknown direction for stepper motor");
 
-        digitalWrite(MS1,LOW);
-        digitalWrite(MS2,LOW);
-        Serial.println( "Stepper sleeping");
-
         if(sw == 2)
         {
-          stepCCW(20, delay_between_steps);
-          current_pos = 20;
+          sw = stepCCW(99, delay_between_steps,1);
+          current_pos = 0;
           Serial.println("MIN_LIMIT");
         }
         if(sw == 3)
         {
-          stepCW(20, delay_between_steps);
-          current_pos = current_pos - 20;
+          sw = stepCW(99, delay_between_steps,1);
+          current_pos = 300;
           Serial.println("MAX_LIMIT");
         }
 
-       Serial.print( "current position: ");
-       Serial.println(current_pos);
+        digitalWrite(MS1,LOW);
+        digitalWrite(MS2,LOW);
+        Serial.println( "Stepper sleeping");
+        
+        Serial.print( "current position: ");
+        Serial.println(current_pos);
+        return sw;
 }
 //================================================
 void setup(void){
@@ -170,9 +186,9 @@ void setup(void){
   co.conf_wrap       = 999999;
   co.conf_feedback   = 1;
 
-  co.conf_title      = "test1";
-  co.conf_tags       = "test1";
-  co.conf_desc       = "stepper";
+  co.conf_title      = "kvv32_stepper";
+  co.conf_tags       = "kvv32_stepper";
+  co.conf_desc       = "kvv32_stepper";
   co.conf_platform   = "esp8266";
 
   co.conf_domain     = "iot.simuino.com";
@@ -196,12 +212,14 @@ void setup(void){
     pinMode(MS1,OUTPUT);
     pinMode(MS2,OUTPUT);
     pinMode(LIMIT, INPUT);
-
+    pinMode(MINMAX,OUTPUT);
+    
     digitalWrite(MS1,LOW);
     digitalWrite(MS2,LOW);
     digitalWrite(SLEEP,LOW);
     digitalWrite(DIR,LOW);
     digitalWrite(STEP,LOW);
+    digitalWrite(MINMAX,LOW);
   
     //Possible settings are (MS1/MS2) : full step (0,0), half step (1,0), 1/4 step (0,1), and 1/8 step (1,1)
 }
@@ -237,7 +255,7 @@ void loop(void){
   }
   if (move == 1)
   {
-    move_stepper(dir, step_size, number_of_steps, delay_between_steps);
+    limit = move_stepper(dir, step_size, number_of_steps, delay_between_steps);
 
     g_payload = "{";
 
