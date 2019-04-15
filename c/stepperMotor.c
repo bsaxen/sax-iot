@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-04-13
+// Date.......: 2019-04-15
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -146,13 +146,13 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         {
             Serial.println( "Stepper motor CW -->");
             sw = stepCW(number_of_steps, delay_between_steps,0);
-            if (sw == 1) current_pos -=  number_of_steps;
+            if (sw == 1) current_pos +=  number_of_steps;
         }
         else if(dir == COUNTER_CLOCKWISE)
         {
             Serial.println( "Stepper motor CCW  <--");
             sw = stepCCW(number_of_steps, delay_between_steps,0);
-            if (sw == 1) current_pos +=  number_of_steps;
+            if (sw == 1) current_pos -=  number_of_steps;
         }
         else
             Serial.println( "ERROR: Unknown direction for stepper motor");
