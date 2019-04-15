@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-04-15
+// Date.......: 2019-04-13
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -9,6 +9,7 @@ int sw_version = 1;
 // reset                      reset position to zero
 // reboot
 // period,x                   set period to x seconds
+// 90 degrees <=> 1152/4 steps = 288
 //=============================================
 // Configuration
 //=============================================
@@ -36,7 +37,7 @@ int step_size = FULL_STEP;
 int number_of_steps = 0;
 int delay_between_steps = 10;
 int limit = 0;
-
+int g_calibrated = 0;
 //================================================
 int stepCW(int steps,int dd, int force)
 //================================================
@@ -165,7 +166,7 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         if(sw == 3)
         {
           sw = stepCW(99, delay_between_steps,1);
-          current_pos = 300;
+          current_pos = 288;
           Serial.println("MAX_LIMIT");
         }
 
@@ -176,6 +177,55 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         Serial.print( "current position: ");
         Serial.println(current_pos);
         return sw;
+}
+//================================================
+int calibrate(){
+//================================================
+        int touch1 = 0;
+        int touch2 = 0;
+        int ok = 0;
+
+        Serial.println( "Calibrate max level...");
+        touch1 = stepCW(400, delay_between_steps,0);
+        if (touch1 == 2) 
+        {
+          Serial.println( "Release max level...");
+          touch2 = stepCCW(99, delay_between_steps,1);
+          if (touch2 == 13)
+          {
+             current_pos = 288;
+             Serial.println("MAX_LIMIT reached");
+             ok += 1;
+          }
+        }
+        else
+        {
+          Serial.println("ERROR: Calibrate max failed");
+        }
+
+        delay(10);
+        
+        Serial.println( "Calibrate zero level...");
+        touch1 = stepCCW(400, delay_between_steps,0);
+        if (touch1 == 3)
+        {
+          Serial.println( "Release min level...");
+          touch2 = stepCW(99, delay_between_steps,1);
+          if (touch2 == 12)
+          {
+             current_pos = 0;
+             Serial.println("MIN_LIMIT reached");
+             ok += 1;
+          }
+        }
+        else
+        {
+          Serial.println("ERROR: Calibrate min failed");
+        }
+
+        Serial.print( "Calibrate result");
+        Serial.println(ok);
+        return ok;    
 }
 //================================================
 void setup(void){
@@ -222,6 +272,20 @@ void setup(void){
     digitalWrite(MINMAX,LOW);
   
     //Possible settings are (MS1/MS2) : full step (0,0), half step (1,0), 1/4 step (0,1), and 1/8 step (1,1)
+
+    delay(10);
+    int ok = calibrate();
+    if (ok != 2)
+    {
+      Serial.println("Calibration failed");
+      g_calibrated = 0;
+      //exit(0);
+    }
+    else
+    {
+      Serial.println("Calibration success!");
+      g_calibrated = 1;
+    }
 }
 //================================================
 void loop(void){
@@ -262,6 +326,11 @@ void loop(void){
     g_payload += "\"counter";
     g_payload += "\":\"";
     g_payload += da.counter;
+    g_payload += "\",";
+
+    g_payload += "\"calibrated";
+    g_payload += "\":\"";
+    g_payload += limit;
     g_payload += "\",";
 
     g_payload += "\"limit";
