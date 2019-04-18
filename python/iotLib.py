@@ -514,8 +514,11 @@ def lib_getStaticDeviceJson(co,domain,device):
         error = 1
         co.myresult = '{"error":"1234"}'
 
-    if error == 0:    
-       co.myresult = json.load(r)
+    if error == 0:
+        try:
+            co.myresult = json.load(r)
+        except ValueError, e:
+            error = 1
     else:
         print (error)
     return error
@@ -534,8 +537,11 @@ def lib_getDynamicDeviceJson(co,domain,device):
         error = 1
         co.myresult = '{"error":"1234"}'
 
-    if error == 0:    
-       co.myresult = json.load(r)
+    if error == 0:
+        try:
+            co.myresult = json.load(r)
+        except ValueError, e:
+            error = 1
     else:
         print (error)
     return error
@@ -554,8 +560,11 @@ def lib_getPayloadDeviceJson(co,domain,device):
         error = 1
         co.myresult = '{"error":"1234"}'
 
-    if error == 0:    
-       co.myresult = json.load(r)
+    if error == 0:
+        try:
+            co.myresult = json.load(r)
+        except ValueError, e:
+            error = 1
     else:
         print (error)
     return error
