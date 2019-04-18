@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-04-15
+# Date: 2019-04-18
 # Description: IoT python library
 version = 2
 # =============================================
@@ -512,7 +512,7 @@ def lib_getStaticDeviceJson(co,domain,device):
     except urllib2.URLError as e:
         print (e.reason)
         error = 1
-        co.myresult = 1234
+        co.myresult = '{"error":"1234"}'
 
     if error == 0:    
        co.myresult = json.load(r)
@@ -532,7 +532,7 @@ def lib_getDynamicDeviceJson(co,domain,device):
     except urllib2.URLError as e:
         print (e.reason)
         error = 1
-        co.myresult = 1234
+        co.myresult = '{"error":"1234"}'
 
     if error == 0:    
        co.myresult = json.load(r)
@@ -552,7 +552,7 @@ def lib_getPayloadDeviceJson(co,domain,device):
     except urllib2.URLError as e:
         print (e.reason)
         error = 1
-        co.myresult = 1234
+        co.myresult = '{"error":"1234"}'
 
     if error == 0:    
        co.myresult = json.load(r)
