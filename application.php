@@ -11,7 +11,7 @@ $sel_domain = $_SESSION["domain"];
 $sel_domain = readDomainUrl($sel_domain);
 
 $sel_application = $_SESSION["application"];
-$doc = 'http://'.$sel_domain.'/devices/'.$sel_application;
+$doc = 'http://'.$sel_domain.'/application/'.$sel_application;
 $sel_desc = getDesc($doc);
 
 $flag_show_static  = $_SESSION["flag_show_static"];
@@ -184,9 +184,7 @@ function addDomain ($domain)
 function restApi($api,$domain,$application)
 //=============================================
 {
-  //echo("RestApi [$api] domain=$domain device=$device<br>");
-  $call = 'http://'.$domain.'/gateway.php?do='.$api.'&id='.$application;
-  //echo $call;
+  $call = 'http://'.$domain.'/server.php?do='.$api.'&id='.$application;
   $res = file_get_contents($call);
 }
 
@@ -292,9 +290,9 @@ if (isset($_GET['do'])) {
     }
     if (isset($_GET['device']))
     {
-      $sel_application = $_GET['appliation'];
-      $_SESSION["device"]   = $sel_application;
-      $doc = 'http://'.$sel_domain.'/devices/'.$sel_application;
+      $sel_application = $_GET['application'];
+      $_SESSION["application"]   = $sel_application;
+      $doc = 'http://'.$sel_domain.'/applications/'.$sel_application;
       $sel_desc = getDesc($doc);
     }
   }
@@ -569,7 +567,7 @@ $data = array();
             echo "</div></div>";
 
             echo "<div class=\"dropdown\">
-                  <button class=\"dropbtn\">Select Device
+                  <button class=\"dropbtn\">Select Application
                     <i class=\"fa fa-caret-down\"></i>
                   </button>
                   <div class=\"dropdown-content\">
@@ -614,7 +612,7 @@ $data = array();
             ";
               
       echo "<a href=application.php?do=delete&what=domain>$sel_domain</a>";
-      echo "<a href=application.php?do=delete&what=device>$sel_desc</a>";
+      echo "<a href=application.php?do=delete&what=application>$sel_desc</a>";
       echo "<a href=application.php?do=delete&what=log>clear log $sel_desc</a>";
       echo "</div></div>";
 
@@ -700,7 +698,7 @@ if ($flag_show_static == 0)
 {
   echo "<div id=\"static\">";
   echo "Static";
-  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/static.json';
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/static.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -715,7 +713,7 @@ if ($flag_show_dynamic == 0)
 {
   echo "<div id=\"dynamic\">";
   echo "Dynamic";
-  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/dynamic.json';
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/dynamic.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -730,7 +728,7 @@ if ($flag_show_payload == 0)
 {
   echo "<div id=\"payload\">";
   echo "Payload";
-  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/payload.json';
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/payload.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -745,7 +743,7 @@ if ($flag_show_log == 0)
 {
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
-  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/log.txt?ignore='.$rnd;
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/log.txt?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
     echo "</div>";
 }
