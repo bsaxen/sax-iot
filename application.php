@@ -1,18 +1,17 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-04-22
+// Date.......: 2019-04-23
 // Author.....: Benny Saxen
 // Description: IoT Application Manager
-$version = '2019-03-26';
 //=============================================
 session_start();
 
 $sel_domain = $_SESSION["domain"];
 $sel_domain = readDomainUrl($sel_domain);
 
-$sel_device = $_SESSION["device"];
-$doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
+$sel_application = $_SESSION["application"];
+$doc = 'http://'.$sel_domain.'/devices/'.$sel_application;
 $sel_desc = getDesc($doc);
 
 $flag_show_static  = $_SESSION["flag_show_static"];
@@ -182,11 +181,11 @@ function addDomain ($domain)
   fclose($fh);
 }
 //=============================================
-function restApi($api,$domain,$device)
+function restApi($api,$domain,$application)
 //=============================================
 {
   //echo("RestApi [$api] domain=$domain device=$device<br>");
-  $call = 'http://'.$domain.'/gateway.php?do='.$api.'&id='.$device;
+  $call = 'http://'.$domain.'/gateway.php?do='.$api.'&id='.$application;
   //echo $call;
   $res = file_get_contents($call);
 }
@@ -235,14 +234,6 @@ function getStatus($uri)
 }
 
 
-//=============================================
-function sendMessage($url,$device,$msg,$tag)
-//=============================================
-{
-  echo "Send message $msg tag=$tag to $url/$device<br>";
-  $call = 'http://'.$url.'/gateway.php?do=feedback&id='.$device.'&msg='.$msg.'&tag='.$tag;
-  $res = file_get_contents($call);
-}
 //=============================================
 // End of library
 //=============================================
@@ -301,9 +292,9 @@ if (isset($_GET['do'])) {
     }
     if (isset($_GET['device']))
     {
-      $sel_device = $_GET['device'];
-      $_SESSION["device"]   = $sel_device;
-      $doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
+      $sel_application = $_GET['appliation'];
+      $_SESSION["device"]   = $sel_application;
+      $doc = 'http://'.$sel_domain.'/devices/'.$sel_application;
       $sel_desc = getDesc($doc);
     }
   }
@@ -354,22 +345,22 @@ if (isset($_GET['do'])) {
       $fn = $sel_domain.'.domain';
       if (file_exists($fn)) unlink($fn);
     }
-    if ($what == 'device')
+    if ($what == 'application')
     {
-      restApi('delete',$sel_domain,$sel_device);
+      restApi('delete',$sel_domain,$sel_application);
     }
     if ($what == 'log')
     {
-      restApi('clearlog',$sel_domain,$sel_device);
+      restApi('clearlog',$sel_domain,$sel_application);
     }
   }
 
   if($do == 'rest')
   {
-    $api   = $_GET['api'];
-    $url   = $_GET['url'];
-    $topic = $_GET['topic'];
-    restApi($api,$url,$topic);
+    $api         = $_GET['api'];
+    $url         = $_GET['url'];
+    $application = $_GET['application'];
+    restApi($api,$url,$application);
   }
 
 }
@@ -381,18 +372,6 @@ if (isset($_POST['do'])) {
   {
     $dn = $_POST['domain'];
     if (strlen($dn) > 2)addDomain($dn);
-  }
-
-  if ($do == 'send_message')
-  {
-    $domain   = $_POST['domain'];
-    $device   = $_POST['device'];
-    $msg      = $_POST['message'];
-    $tag      = $_POST['tag'];
-    if (strlen($msg) > 2)
-      sendMessage($domain,$device,$msg,$tag);
-    else
-      echo "Message to short";
   }
 
 }
@@ -466,7 +445,7 @@ $data = array();
           background: -o-linear-gradient(right, #93B874, #C9DCB9);
           background: -moz-linear-gradient(right, #93B874, #C9DCB9);
           background: linear-gradient(to right, #93B874, #C9DCB9);
-          background-color: #93B874;
+          background-color: #33CEFF;
       }
       /* Navbar container */
    .navbar {
@@ -546,59 +525,12 @@ $data = array();
 // body
 //=========================================================================
 ?>
-<script type="text/javascript">
-
-
-
-window.onload = function(){
-
-    var tid = setInterval(getData, 3000);
-    function getData() {
-        console.log("Getting  data");
-        $.ajax({
-            url:		'ajaxManager.php',
-            /*dataType:	'json',*/
-            dataType:	'text',
-            success:	setData,
-            type:		'GET',
-            data:		{
-                domain: '<?php echo("$sel_domain")?>',
-                device: '<?php echo("$sel_device")?>'
-            }
-        });
-    }
-    function setData(result)
-    {
-        console.log("data!");
-        console.log(result);
-        var resArray = result.split("=");
-        var n = resArray.length;
-        console.log(n);
-
-        var i;
-        var input;
-        for (i = 1; i <= n;i++)
-        {
-          console.log(resArray[i]);
-          var id = 'no';
-          id = id.concat(i.toString());
-          input = document.getElementById(id);
-          input.value = resArray[i];
-          if (resArray[i] == 0)
-            input.style.background = "green";
-          if (resArray[i] > 0)
-            input.style.background = "red";
-        }
-    }
-}
-</script>
-
 
 <?php
-      echo("<h1>Device Manager $sel_domain $sel_desc $now</h1>");
+      echo("<h1>Application Manager $sel_domain $sel_desc $now</h1>");
       echo "<div class=\"navbar\">";
 
-      echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
+      echo "<a href=\"application.php?do=add_domain\">Add Domain</a>";
 
       echo "  <div class=\"dropdown\">
           <button class=\"dropbtn\">Select Information
@@ -606,10 +538,10 @@ window.onload = function(){
           </button>
           <div class=\"dropdown-content\">
            ";
-          echo "<a href=manager.php?do=info&what=static>static</a>";
-          echo "<a href=manager.php?do=info&what=dynamic>dynamic</a>";
-          echo "<a href=manager.php?do=info&what=payload>payload</a>";
-          echo "<a href=manager.php?do=info&what=log>log</a>";
+          echo "<a href=application.php?do=info&what=static>static</a>";
+          echo "<a href=application.php?do=info&what=dynamic>dynamic</a>";
+          echo "<a href=application.php?do=info&what=payload>payload</a>";
+          echo "<a href=application.php?do=info&what=log>log</a>";
           echo "</div></div>";
 
         echo "<div class=\"dropdown\">
@@ -630,7 +562,7 @@ window.onload = function(){
                 {
                     $line = trim($line);
                     $domain = str_replace(".domain", "", $line);
-                    echo "<a href=manager.php?do=select&domain=$domain>$domain</a>";
+                    echo "<a href=application.php?do=select&domain=$domain>$domain</a>";
                 }
               }
             }
@@ -643,7 +575,7 @@ window.onload = function(){
                   <div class=\"dropdown-content\">
                   ";
 
-                  $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
+                  $request = 'http://'.$sel_domain."/server.php?do=list";
                   //echo $request;
                   $ctx = stream_context_create(array('http'=>
                    array(
@@ -656,25 +588,23 @@ window.onload = function(){
 
                   for ($ii = 0; $ii < $num; $ii++)
                   {
-                    $device = str_replace(".reg", "", $data[$ii]);
-                    if (strlen($device) > 2)
+                    $application = str_replace(".arc", "", $data[$ii]);
+                    if (strlen($application) > 2)
                     {
-                      $doc = 'http://'.$sel_domain.'/devices/'.$device;
+                      $doc = 'http://'.$sel_domain.'/applications/'.$application;
                       $status = getStatus($doc);
                       $desc = getDesc($doc);
-                      $temp = $device;
+                      $temp = $application;
                       if ($status == 0)
                       {
-                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$desc</a>";
+                        echo "<a style=\"background: green;\" href=server.php?do=select&application=$application>$desc</a>";
                       }
                       else {
-                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $desc</a>";
+                        echo "<a style=\"background: red;\" href=server.php?do=select&application=$application>$temp $desc</a>";
                       }
                      }
                    }
           echo "</div></div>";
-
-      echo "<a href=\"manager.php?do=send_action\">Send Action</a>";
 
       echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Delete
@@ -683,15 +613,15 @@ window.onload = function(){
             <div class=\"dropdown-content\">
             ";
               
-      echo "<a href=manager.php?do=delete&what=domain>$sel_domain</a>";
-      echo "<a href=manager.php?do=delete&what=device>$sel_desc</a>";
-      echo "<a href=manager.php?do=delete&what=log>clear log $sel_desc</a>";
+      echo "<a href=application.php?do=delete&what=domain>$sel_domain</a>";
+      echo "<a href=application.php?do=delete&what=device>$sel_desc</a>";
+      echo "<a href=application.php?do=delete&what=log>clear log $sel_desc</a>";
       echo "</div></div>";
 
       echo "</div>";
 
       // Ajax fields
-      $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
+      $request = 'http://'.$sel_domain."/server.php?do=list";
       //echo $request;
       $ctx = stream_context_create(array('http'=>
        array(
@@ -718,11 +648,11 @@ window.onload = function(){
           //$feedback = restApi('list_feedback',$sel_domain,$device);
           //echo "<td>$feedback</td>";
           
-          $doc = 'http://'.$sel_domain.'/devices/'.$device;
+          $doc = 'http://'.$sel_domain.'/application/'.$application;
           $status = getStatus($doc);
           $desc = getDesc($doc);
             
-          echo "<td><a href=manager.php?do=select&device=$id>$desc</a></td>";
+          echo "<td><a href=application.php?do=select&application=$id>$desc</a></td>";
           $temp = $device;
           if ($status == 0)
           {
@@ -747,7 +677,7 @@ if ($form_send_action == 1)
   <form action=\"#\" method=\"post\">
     <input type=\"hidden\" name=\"do\" value=\"send_message\">
     <tr><td>Domain</td><td> <input type=\"text\" name=\"domain\" value=$sel_domain></td>
-    <tr><td>Device</td><td> <input type=\"text\" name=\"device\" value=$sel_device></td>
+    <tr><td>Application</td><td> <input type=\"text\" name=\"application\" value=$sel_application></td>
     <tr><td>Tag</td><td> <input type=\"text\" name=\"tag\" ></td>
     <tr><td>Message</td><td> <input type=\"text\" name=\"message\"></td>
     <td><input type= \"submit\" value=\"Send\"></td></tr>
@@ -770,7 +700,7 @@ if ($flag_show_static == 0)
 {
   echo "<div id=\"static\">";
   echo "Static";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/static.json';
+  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/static.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -785,7 +715,7 @@ if ($flag_show_dynamic == 0)
 {
   echo "<div id=\"dynamic\">";
   echo "Dynamic";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/dynamic.json';
+  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/dynamic.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -800,7 +730,7 @@ if ($flag_show_payload == 0)
 {
   echo "<div id=\"payload\">";
   echo "Payload";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/payload.json';
+  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/payload.json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -815,7 +745,7 @@ if ($flag_show_log == 0)
 {
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.txt?ignore='.$rnd;
+  $doc = 'http://'.$sel_domain.'/application/'.$sel_application.'/log.txt?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
     echo "</div>";
 }
