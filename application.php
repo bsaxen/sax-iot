@@ -288,7 +288,7 @@ if (isset($_GET['do'])) {
       $_SESSION["domain"] = $sel_domain;
       $sel_domain = readDomainUrl($sel_domain);
     }
-    if (isset($_GET['device']))
+    if (isset($_GET['application']))
     {
       $sel_application = $_GET['application'];
       $_SESSION["application"]   = $sel_application;
@@ -641,17 +641,14 @@ $data = array();
         {
           $nn += 1;
           echo "<td>$nn</td>";
-          $device = $id;
-          
-          //$feedback = restApi('list_feedback',$sel_domain,$device);
-          //echo "<td>$feedback</td>";
+          $application = $id;
           
           $doc = 'http://'.$sel_domain.'/application/'.$application;
           $status = getStatus($doc);
           $desc = getDesc($doc);
             
           echo "<td><a href=application.php?do=select&application=$id>$desc</a></td>";
-          $temp = $device;
+          $temp = $application;
           if ($status == 0)
           {
             echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
@@ -668,7 +665,6 @@ $data = array();
 
 if ($form_send_action == 1)
 {
-  //$doc = 'http://'.$sel_domain.'/device/'.$sel_device;
   echo "<br><br>
   <table border=0>";
   echo "
