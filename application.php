@@ -386,7 +386,7 @@ $data = array();
       <style>
 
       #container {
-      color: #336600;
+      color: #5E9EC7;
       background-color: cornsilk;
       float: left;
       width: 1000px;
@@ -443,7 +443,7 @@ $data = array();
           background: -o-linear-gradient(right, #93B874, #C9DCB9);
           background: -moz-linear-gradient(right, #93B874, #C9DCB9);
           background: linear-gradient(to right, #93B874, #C9DCB9);
-          background-color: #33CEFF;
+          background-color: #5E9EC7;
       }
       /* Navbar container */
    .navbar {
