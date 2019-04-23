@@ -21,27 +21,25 @@ $obj = new iotDoc();
 //=============================================
 $date         = date_create();
 $obj->sys_ts  = date_format($date, 'Y-m-d H:i:s');
-
-
 //=============================================
-function deleteDevice($id)
+function deleteApplication($id)
 //=============================================
 {
   // remove reg file
   //$filename = str_replace("/","_",$id);
-  $filename = 'register/'.$id.'.reg';
+  $filename = 'archive/'.$id.'.arc';
   if (file_exists($filename)) unlink($filename);
   // remove directory content
-  $dirname = 'devices/'.$id;
+  $dirname = 'applications/'.$id;
   array_map('unlink', glob("$dirname/*.*"));
-  // remove directory
+    
   rmdir($dirname);
 }
 //=============================================
 function saveStaticMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/static.json';
+  $f_file = 'applications/'.$obj->id.'/static.json';
   //echo $f_file;
   $doc = fopen($f_file, "w");
   if ($doc)
@@ -59,7 +57,7 @@ function saveStaticMsg($obj)
 function saveDynamicMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/dynamic.json';
+  $f_file = 'applications/'.$obj->id.'/dynamic.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -69,20 +67,13 @@ function saveDynamicMsg($obj)
         fwrite($doc, "}\n ");
         fclose($doc);
   }
-    
-  //$json      = utf8_encode($obj->msg_dynamic);
-  //$dec       = json_decode($json, TRUE);
-  //$counter   = $dec['counter'];
-  //$obj->log  = $counter;
-  //saveLog($obj);
-    
   return;
 }
 //=============================================
 function savePayloadMsg($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/payload.json';
+  $f_file = 'applications/'.$obj->id.'/payload.json';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -98,7 +89,7 @@ function savePayloadMsg($obj)
 function initLog($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/log.txt';
+  $f_file = 'applications/'.$obj->id.'/log.txt';
   $doc = fopen($f_file, "w");
   if ($doc)
   {
@@ -111,7 +102,7 @@ function initLog($obj)
 function saveLog($obj)
 //=============================================
 {
-  $f_file = 'devices/'.$obj->id.'/log.txt';
+  $f_file = 'applications/'.$obj->id.'/log.txt';
   $doc = fopen($f_file, "a");
   if ($doc)
   {
@@ -121,85 +112,15 @@ function saveLog($obj)
   return;
 }
 
+
 //=============================================
-function readFeedbackFile($fb_file)
-//=============================================
-{
-  $file = fopen($fb_file, "r");
-  if ($file)
-  {
-      $result = ":";
-      while(! feof($file))
-      {
-        $line = fgets($file);
-        //sscanf($line,"%s",$work);
-        $result = $result.$line;
-      }
-      fclose($file);
-      $result = $result.":";
-      // Delete file
-      if (file_exists($fb_file)) unlink($fb_file);
-  }
-  else
-  {
-      $result = ":void:";
-  }
-  return $result;
-}
-//=============================================
-function readFeedbackFileList($id)
+function listAllApplications()
 //=============================================
 {
-  $result = ' ';
-  $do = "ls devices/".$id."/"."*.feedback > devices/".$id."/feedback.work";
+  $do = "ls archive"."/"."*.arc > archive/archive.work";
   //echo $do;
   system($do);
-  $list_file = 'devices/'.$id.'/feedback.work';
-  $no_of_lines = count(file($list_file));
-  $file = fopen($list_file, "r");
-  if ($file)
-  {
-      // Read first line only
-      $line = fgets($file);
-      //echo "line:".$line;
-      if (strlen($line) > 2)
-      {
-          $line = trim($line);
-          //$line = 'devices/'.$line;
-          $result = readFeedbackFile($line);
-      }
-  }
-  $result = "[$no_of_lines]".$result;
-  return $result;
-}
-//=============================================
-function writeFeedbackFile($device, $feedback, $tag)
-//=============================================
-{
-  if (is_null($device))  return;
-  if (is_null($feedback)) return;
-  if (is_null($tag)) $tag = 'notag';
-  $fb_file = $device.'/'.$tag.'.feedback';
-  $file = fopen($fb_file, "w");
-  if ($file)
-  {
-    fwrite($file,$feedback);
-    fclose($file);
-  }
-  else
-  {
-      $result = " ";
-  }
-  return $result;
-}
-//=============================================
-function listAllDevices()
-//=============================================
-{
-  $do = "ls register"."/"."*.reg > register/register.work";
-  //echo $do;
-  system($do);
-  $file = fopen('register/register.work', "r");
+  $file = fopen('archive/archive.work', "r");
   if ($file)
   {
     while(!feof($file))
@@ -221,17 +142,6 @@ function listAllDevices()
   }
 }
 //=============================================
-function listAllFeedback($id)
-//=============================================
-{
-  $do = "ls devices/".$id."/"."*.feedback > devices/".$id."/feedback.work";
-  //echo $do;
-  system($do);
-  $list_file = 'devices/'.$id.'/feedback.work';
-  $no_of_lines = count(file($list_file));
-  echo $no_of_lines;
-}
-//=============================================
 // End of library
 //=============================================
 
@@ -239,7 +149,7 @@ if (isset($_GET['do']))
 {
 
     $do = $_GET['do'];
-     if ($do == 'list_devices')
+     if ($do == 'list')
      {
        listAllDevices();
        exit;
@@ -257,57 +167,46 @@ if (isset($_GET['do']))
       $error = 0;
 
       $ok = 0;
-      $dir = 'devices/'.$obj->id;
+      $dir = 'applications/'.$obj->id;
       if (is_dir($dir)) $ok++;
-      $file = 'register/'.$obj->id.'.reg';
+      $file = 'archive/'.$obj->id.'.arc';
       if (file_exists($file)) $ok++;
 
-      if ($ok == 0) // New device - register!
+      if ($ok == 0) // New application - archive!
       {
          mkdir($dir, 0777, true);
         //===========================================
-        // Registration
+        // Archive
         //===========================================
-        // Create register directory if not exist
-        $dir = 'register';
+        // Create archive directory if not exist
+        $dir = 'archive';
         if (!is_dir($dir))
         {
            mkdir($dir, 0777, true);
         }
         //$filename = str_replace("/","_",$obj->id);
-        $filename = 'register/'.$obj->id.'.reg';
+        $filename = 'archive/'.$obj->id.'.reg';
         $doc = fopen($filename, "w");
         fwrite($doc, "$gs_ts $ts $obj->id");
         fclose($doc);
       }
-      if ($ok == 1) // un-complete register
+      if ($ok == 1) // un-complete
       {
         $error = 3;
-        echo "Error: register broken";
+        echo "Error: archive broken";
       }
     }
     else
     {
       $error = 2;
-      echo "Error: no id specified";
+      echo "Error: no app id specified";
     }
 
 
     // API when id is available
     if($error == 0)
     {
-      if ($do == 'list_feedback')
-      {
-        listAllFeedback($obj->id);
-        exit;
-      }
-        
-      if ($do == 'feedback')
-      {
-        $msg   = $_GET['msg'];
-        $tag   = $_GET['tag'];
-        writeFeedbackFile('devices/'.$obj->id, $msg, $tag);
-      }
+
       if ($do == 'clearlog')
       {
         initLog($obj);
@@ -319,7 +218,7 @@ if (isset($_GET['do']))
       }
       if ($do == 'delete')
       {
-        deleteDevice($obj->id);
+        deleteApplication($obj->id);
       }
 
 
@@ -330,7 +229,6 @@ if (isset($_GET['do']))
           $obj->msg_static = $_GET['json'];
         }
         saveStaticMsg($obj);
-        //echo readFeedbackFileList($obj->id);
       }
 
       if ($do == 'dynamic')
@@ -340,7 +238,6 @@ if (isset($_GET['do']))
           $obj->msg_dynamic = $_GET['json'];
         }
         saveDynamicMsg($obj);
-        echo readFeedbackFileList($obj->id);
       }
 
       if ($do == 'payload')
@@ -350,7 +247,6 @@ if (isset($_GET['do']))
           $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
-        //echo readFeedbackFileList($obj->id);
       }
 
  } // error
