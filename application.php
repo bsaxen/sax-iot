@@ -1,6 +1,6 @@
 <?php
 //=============================================
-// File.......: manager.php
+// File.......: application.php
 // Date.......: 2019-04-23
 // Author.....: Benny Saxen
 // Description: IoT Application Manager
@@ -439,10 +439,10 @@ $data = array();
       }
 
       body {
-          background: -webkit-linear-gradient(left, #93B874, #C9DCB9);
-          background: -o-linear-gradient(right, #93B874, #C9DCB9);
-          background: -moz-linear-gradient(right, #93B874, #C9DCB9);
-          background: linear-gradient(to right, #93B874, #C9DCB9);
+          background: -webkit-linear-gradient(left, #93B874, #B9CDDC);
+          background: -o-linear-gradient(right, #93B874, #B9CDDC);
+          background: -moz-linear-gradient(right, #93B874, #B9CDDC);
+          background: linear-gradient(to right, #93B874, #B9CDDC);
           background-color: #5E9EC7;
       }
       /* Navbar container */
@@ -515,7 +515,7 @@ $data = array();
      display: block;
    }
       </style>
-         <title>Manager</title>
+         <title>Application</title>
       </head>
       <body > ";
 
