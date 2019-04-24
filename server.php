@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: server.php
-// Date.......: 2019-04-22
+// Date.......: 2019-04-24
 // Author.....: Benny Saxen
 // Description: IoT Server
 //=============================================
@@ -11,9 +11,8 @@
 class iotDoc {
     public $sys_ts;
     public $id;
-    public $msg_static;
-    public $msg_dynamic;
-    public $msg_payload;
+    public $channel_id;
+    public $msg_channel;
 }
 
 $obj = new iotDoc();
@@ -36,10 +35,10 @@ function deleteApplication($id)
   rmdir($dirname);
 }
 //=============================================
-function saveStaticMsg($obj)
+function saveChannelMsg($obj)
 //=============================================
 {
-  $f_file = 'applications/'.$obj->id.'/static.json';
+  $f_file = 'applications/'.$obj->id.'/channel_'.$obj->channel_id.'.json';
   //echo $f_file;
   $doc = fopen($f_file, "w");
   if ($doc)
@@ -47,44 +46,14 @@ function saveStaticMsg($obj)
         fwrite($doc, "{\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
         fwrite($doc, "   \"id\":       \"$obj->id\",\n");
-        fwrite($doc, "   \"msg\": $obj->msg_static\n");
+        fwrite($doc, "   \"channel\":   \"$obj->channel_id\",\n");
+        fwrite($doc, "   \"msg\": $obj->msg_channel\n");
         fwrite($doc, "}\n ");
         fclose($doc);
   }
   return;
 }
-//=============================================
-function saveDynamicMsg($obj)
-//=============================================
-{
-  $f_file = 'applications/'.$obj->id.'/dynamic.json';
-  $doc = fopen($f_file, "w");
-  if ($doc)
-  {
-        fwrite($doc, "{\n");
-        fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
-        fwrite($doc, "   \"msg\":  $obj->msg_dynamic\n");
-        fwrite($doc, "}\n ");
-        fclose($doc);
-  }
-  return;
-}
-//=============================================
-function savePayloadMsg($obj)
-//=============================================
-{
-  $f_file = 'applications/'.$obj->id.'/payload.json';
-  $doc = fopen($f_file, "w");
-  if ($doc)
-  {
-        fwrite($doc, "{\n");
-        fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
-        fwrite($doc, "   \"msg\":  $obj->msg_payload\n");
-        fwrite($doc, "}\n ");
-        fclose($doc);
-  }
-  return;
-}
+
 //=============================================
 function initLog($obj)
 //=============================================
@@ -211,42 +180,26 @@ if (isset($_GET['do']))
       {
         initLog($obj);
       }
+        
       if ($do == 'log')
       {
         $obj->log   = $_GET['log'];
         saveLog($obj);
       }
+        
       if ($do == 'delete')
       {
         deleteApplication($obj->id);
       }
 
-
-      if ($do == 'static')
+      if ($do == 'channel')
       {
-          $obj->msg_static = "{\"no_data\":\"0\"}";
+        $obj->channel_id   = $_GET['cid'];
+        $obj->msg_channel = "{\"no_data\":\"0\"}";
         if (isset($_GET['json'])) {
-          $obj->msg_static = $_GET['json'];
+          $obj->msg_channel = $_GET['json'];
         }
-        saveStaticMsg($obj);
-      }
-
-      if ($do == 'dynamic')
-      {
-        $obj->msg_dynamic = "{\"no_data\":\"0\"}";
-        if (isset($_GET['json'])) {
-          $obj->msg_dynamic = $_GET['json'];
-        }
-        saveDynamicMsg($obj);
-      }
-
-      if ($do == 'payload')
-      {
-        $obj->msg_payload = "{\"no_data\":\"0\"}";
-        if (isset($_GET['json'])) {
-          $obj->msg_payload = $_GET['json'];
-        }
-        savePayloadMsg($obj);
+        saveChannelMsg($obj);
       }
 
  } // error
