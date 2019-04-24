@@ -187,14 +187,15 @@ def lib_publishMyDynamic(co,dy):
 
     return msg
 #===================================================
-def lib_publishMyChannel(co,dy,payload):
+def lib_publishMyChannel(co,dy,cid,payload):
 #===================================================
     msg = '-'
     domain = co.mydomain
     server = co.myserver
     data = {}
     # meta data
-    data['do']       = 'payload'
+    data['do']       = 'channel'
+    data['cid']      = cid
     data['id']       = co.myid
     data['json']     = payload
 
