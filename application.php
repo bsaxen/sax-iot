@@ -15,7 +15,7 @@ $sel_domain = readDomainUrl($sel_domain);
 $sel_application = $_SESSION["application"];
 $doc = 'http://'.$sel_domain.'/application/'.$sel_application;
 $chan = 1;
-$sel_desc = getPayload($doc,$chan,'desc');
+$sel_desc = getPayload($doc,$chan,'test');
 
 $flag_show_channel  = $_SESSION["flag_show_channel"];
 $flag_show_log      = $_SESSION["flag_show_log"];
@@ -193,7 +193,7 @@ function restApi($api,$domain,$application)
 function getPayload($uri,$chan,$par)
 //=============================================
 {
-  $url       = $uri.'/channel_'.$chan.'json';
+  $url       = $uri.'/channel_'.$chan.'.json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
   $dec       = json_decode($json, TRUE);
@@ -204,7 +204,7 @@ function getPayload($uri,$chan,$par)
 function getHeader($uri,$chan,$par)
 //=============================================
 {
-  $url       = $uri.'/channel_'.$chan.'json';
+  $url       = $uri.'/channel_'.$chan.'.json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
   $dec       = json_decode($json, TRUE);
@@ -221,7 +221,7 @@ function getStatus($uri,$chan)
   $diff = strtotime($now) - strtotime($timestamp);
   $res = 999;
   $bias = 1;
-  
+
   if ($diff > $period + $bias)
   {
     $res = $diff - $period - $bias;
@@ -264,8 +264,10 @@ if (isset($_GET['do'])) {
       $sel_application = $_GET['application'];
       $_SESSION["application"]   = $sel_application;
       $doc = 'http://'.$sel_domain.'/applications/'.$sel_application;
-      $chan = 1;
-      $sel_desc = getPayload($doc,$chan,'desc');
+      //$chan = 1;
+      //echo $doc;
+      //$sel_desc = getPayload($doc,$chan,'test');
+      //echo $sel_desc;
     }
     if (isset($_GET['channel']))
     {
@@ -354,10 +356,10 @@ $data = array();
       }
 
       body {
-          background: -webkit-linear-gradient(left, #93B874, #B9CDDC);
-          background: -o-linear-gradient(right, #93B874, #B9CDDC);
-          background: -moz-linear-gradient(right, #93B874, #B9CDDC);
-          background: linear-gradient(to right, #93B874, #B9CDDC);
+          background: -webkit-linear-gradient(left, #CA7320, #B9CDDC);
+          background: -o-linear-gradient(right, #CA7320, #B9CDDC);
+          background: -moz-linear-gradient(right, #CA7320, #B9CDDC);
+          background: linear-gradient(to right, #CA7320, #B9CDDC);
           background-color: #5E9EC7;
       }
       /* Navbar container */
@@ -440,38 +442,13 @@ $data = array();
 ?>
 
 <?php
-      echo("<h1>Application Manager $sel_domain $sel_desc $sel_channel $now</h1>");
+
+      echo("<h1>Application Manager $sel_domain $sel_application $sel_channel $now</h1>");
       echo "<div class=\"navbar\">";
 
       echo "<a href=\"application.php?do=add_domain\">Add Domain</a>";
 
-      echo "  <div class=\"dropdown\">
-          <button class=\"dropbtn\">Select Channel
-            <i class=\"fa fa-caret-down\"></i>
-          </button>
-          <div class=\"dropdown-content\">
-           ";
 
-          $request = 'http://'.$sel_domain.'/server.php?do=list_channels&id='.$sel_application;
-          $ctx = stream_context_create(array('http'=>
-          array(
-                     'timeout' => 2,  //2 Seconds
-                       )
-          ));
-          $res = file_get_contents($request,false,$ctx);
-          $data = explode(":",$res);
-          $no_of_channels = count($data);
-
-          for ($ii = 0; $ii < $no_of_channels; $ii++)
-          {
-            $channel = str_replace(".json", "", $data[$ii]);
-            $channels[$ii] = $channel;
-            if (strlen($channel) > 2)
-            {
-                 echo "<a href=application.php?do=select&channel=$channel>$channel</a>";
-            }
-          }
-          echo "</div></div>";
 
        echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Select Domain
@@ -504,7 +481,7 @@ $data = array();
                   <div class=\"dropdown-content\">
                   ";
 
-                  $request = 'http://'.$sel_domain."/server.php?do=list_applications";
+                  $request = 'http://'.$sel_domain.'/server.php?do=list_applications';
                   //echo $request;
                   $ctx = stream_context_create(array('http'=>
                    array(
@@ -522,19 +499,48 @@ $data = array();
                     {
                       $doc = 'http://'.$sel_domain.'/applications/'.$application;
                       $chan = 1;
-                      $status = getStatus($doc,$chan);
-                      $desc = getPayload($doc,$chan,'desc');
-                      $temp = $application;
-                      if ($status == 0)
-                      {
-                        echo "<a style=\"background: green;\" href=server.php?do=select&application=$application>$desc</a>";
-                      }
-                      else {
-                        echo "<a style=\"background: red;\" href=server.php?do=select&application=$application>$temp $desc</a>";
-                      }
+                      //$status = getStatus($doc,$chan);
+                      //$desc = getPayload($doc,$chan,'desc');
+                      //$temp = $application;
+                      //if ($status == 0)
+                      //{
+                        echo "<a style=\"background: green;\" href=application.php?do=select&application=$application>$application</a>";
+                      //}
+                      //else {
+                      //  echo "<a style=\"background: red;\" href=application.php?do=select&application=$application>$temp $desc</a>";
+                      //}
                      }
                    }
           echo "</div></div>";
+
+          echo "  <div class=\"dropdown\">
+              <button class=\"dropbtn\">Select Channel
+                <i class=\"fa fa-caret-down\"></i>
+              </button>
+              <div class=\"dropdown-content\">
+               ";
+
+              $request = 'http://'.$sel_domain.'/server.php?do=list_channels&id='.$sel_application;
+              //echo $request;
+              $ctx = stream_context_create(array('http'=>
+              array(
+                         'timeout' => 2,  //2 Seconds
+                           )
+              ));
+              $res = file_get_contents($request,false,$ctx);
+              $data = explode(":",$res);
+              $no_of_channels = count($data) - 1;
+
+              for ($ii = 0; $ii < $no_of_channels; $ii++)
+              {
+                $channel = str_replace(".json", "", $data[$ii]);
+                $channels[$ii] = $channel;
+                if (strlen($channel) > 2)
+                {
+                     echo "<a href=application.php?do=select&channel=$channel>$channel</a>";
+                }
+              }
+              echo "</div></div>";
 
       echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Delete
@@ -542,60 +548,16 @@ $data = array();
             </button>
             <div class=\"dropdown-content\">
             ";
-              
+
       echo "<a href=application.php?do=delete&what=domain>$sel_domain</a>";
-      echo "<a href=application.php?do=delete&what=application>$sel_desc</a>";
-      echo "<a href=application.php?do=delete&what=log>clear log $sel_desc</a>";
+      echo "<a href=application.php?do=delete&what=application>$sel_application</a>";
+      echo "<a href=application.php?do=delete&what=log>clear log $sel_application</a>";
       echo "</div></div>";
 
       echo "</div>";
 
-      // Ajax fields
-      $request = 'http://'.$sel_domain."/server.php?do=list";
-      //echo $request;
-      $ctx = stream_context_create(array('http'=>
-       array(
-         'timeout' => 2,  //2 Seconds
-           )
-         ));
-      $res = file_get_contents($request,false,$ctx);
-      $data = explode(":",$res);
-      $num = count($data);
-
-      $nn = 0;
-      echo "<div id=\"status\">";
-      echo "<table>";
-      for ($ii = 0; $ii < $num; $ii++)
-      {
-        echo "<tr>";
-        $id = str_replace(".reg", "", $data[$ii]);
-        if (strlen($id) > 2)
-        {
-          $nn += 1;
-          echo "<td>$nn</td>";
-          $application = $id;
-          
-          $doc = 'http://'.$sel_domain.'/application/'.$application;
-          $chan = 1;
-          $status = getStatus($doc,$chan);
-          $desc = getDesc($doc,$chan,'desc');
-            
-          echo "<td><a href=application.php?do=select&application=$id>$desc</a></td>";
-          $temp = $application;
-          if ($status == 0)
-          {
-            echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
-          }
-          else {
-            echo("<td><input style=\"background: red;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
-          }
-        }
-        echo ("</tr>");
-      }
-     echo "</table>";
-     echo "</div>";
    //=============================================
-             
+;
 if ($form_add_domain == 1)
 {
   echo "
@@ -608,13 +570,13 @@ if ($form_add_domain == 1)
 
 //  echo "<div id=\"container\">";
 
-for ($ii = 0;$ii < $no_of_channels;$ii++)
+for ($ii = 0; $ii < $no_of_channels; $ii++)
 {
-if ($flag_show_channel != 0)
-{
+
   echo "<div id=\"channel\">";
-  echo 'Channel: '.$ii.' '.$channels[$ii];
-  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/channel_'.$channels[$ii].'json';
+  echo $channels[$ii];
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/'.$channels[$ii].'.json';
+  //echo $doc;
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -624,16 +586,14 @@ if ($flag_show_channel != 0)
   //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
 }
-}
 
-if ($flag_show_log == 0)
-{
+
   $rnd = generateRandomString(3);
     echo "<div id=\"log\">";
   $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/log.txt?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
     echo "</div>";
-}
+
 //  echo "</div";
 
 
