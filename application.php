@@ -7,12 +7,15 @@
 //=============================================
 session_start();
 
+$sel_channel = $_SESSION["channel"];
+
 $sel_domain = $_SESSION["domain"];
 $sel_domain = readDomainUrl($sel_domain);
 
 $sel_application = $_SESSION["application"];
 $doc = 'http://'.$sel_domain.'/application/'.$sel_application;
-$sel_desc = getDesc($doc);
+$chan = 1;
+$sel_desc = getPayload($doc,$chan,'desc');
 
 $flag_show_channel  = $_SESSION["flag_show_channel"];
 $flag_show_log      = $_SESSION["flag_show_log"];
@@ -264,6 +267,11 @@ if (isset($_GET['do'])) {
       $chan = 1;
       $sel_desc = getPayload($doc,$chan,'desc');
     }
+    if (isset($_GET['channel']))
+    {
+      $sel_channel = $_GET['channel'];
+      $_SESSION["channel"] = $sel_channel;
+    }
   }
 
 
@@ -325,38 +333,13 @@ $data = array();
       height: 900px;
       }
 
-      #status {
+      #channel {
       color: #336600;
       //background-color: grey;
       float: left;
       width: 400px;
 
       }
-
-      #static {
-      color: #336600;
-      //background-color: grey;
-      float: left;
-      width: 400px;
-
-      }
-
-      #dynamic {
-      color: #336600;
-      //background-color: red;
-      float: left;
-      width: 400px;
-
-      }
-
-      #payload {
-      color: #336600;
-      //background-color: blue;
-      float: left;
-      width: 400px;
-
-      }
-
 
       #log {
       color: #336600;
@@ -457,7 +440,7 @@ $data = array();
 ?>
 
 <?php
-      echo("<h1>Application Manager $sel_domain $sel_desc $now</h1>");
+      echo("<h1>Application Manager $sel_domain $sel_desc $sel_channel $now</h1>");
       echo "<div class=\"navbar\">";
 
       echo "<a href=\"application.php?do=add_domain\">Add Domain</a>";
@@ -469,25 +452,26 @@ $data = array();
           <div class=\"dropdown-content\">
            ";
 
-      $request = 'http://'.$sel_domain.'/server.php?do=list_channels&id='.$sel_application;
-      $ctx = stream_context_create(array('http'=>
-      array(
+          $request = 'http://'.$sel_domain.'/server.php?do=list_channels&id='.$sel_application;
+          $ctx = stream_context_create(array('http'=>
+          array(
                      'timeout' => 2,  //2 Seconds
                        )
-      ));
-      $res = file_get_contents($request,false,$ctx);
-      $data = explode(":",$res);
-      $num = count($data);
+          ));
+          $res = file_get_contents($request,false,$ctx);
+          $data = explode(":",$res);
+          $no_of_channels = count($data);
 
-      for ($ii = 0; $ii < $num; $ii++)
-      {
-            $channel = str_replace(".ch", "", $data[$ii]);
+          for ($ii = 0; $ii < $no_of_channels; $ii++)
+          {
+            $channel = str_replace(".json", "", $data[$ii]);
+            $channels[$ii] = $channel;
             if (strlen($channel) > 2)
             {
-                 echo "$channel";
+                 echo "<a href=application.php?do=select&channel=$channel>$channel</a>";
             }
-       }
-       echo "</div></div>";
+          }
+          echo "</div></div>";
 
        echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Select Domain
@@ -624,11 +608,13 @@ if ($form_add_domain == 1)
 
 //  echo "<div id=\"container\">";
 
+for ($ii = 0;$ii < $no_of_channels;$ii++)
+{
 if ($flag_show_channel != 0)
 {
   echo "<div id=\"channel\">";
-  echo "Payload";
-  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/channel_'.$sel_channel.'json';
+  echo 'Channel: '.$ii.' '.$channels[$ii];
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/channel_'.$channels[$ii].'json';
   $json   = file_get_contents($doc);
   if ($json)
   {
@@ -637,6 +623,7 @@ if ($flag_show_channel != 0)
   }
   //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
     echo "</div>";
+}
 }
 
 if ($flag_show_log == 0)
