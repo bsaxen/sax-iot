@@ -25,10 +25,10 @@ while True:
     lib_increaseMyCounter(co,dy)
     
     payload = '{"channel":"1","test": "123"}'
-    msg = lib_publishMychannel(co,dy,1,payload)
+    msg = lib_publishMyChannel(co,dy,1,payload)
     
     payload = '{"channel":"2","test": "321"}'
-    msg = lib_publishMychannel(co,dy,2,payload)
+    msg = lib_publishMyChannel(co,dy,2,payload)
     
     
     
