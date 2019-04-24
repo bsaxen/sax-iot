@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: application.php
-// Date.......: 2019-04-23
+// Date.......: 2019-04-24
 // Author.....: Benny Saxen
 // Description: IoT Application Manager
 //=============================================
@@ -14,10 +14,8 @@ $sel_application = $_SESSION["application"];
 $doc = 'http://'.$sel_domain.'/application/'.$sel_application;
 $sel_desc = getDesc($doc);
 
-$flag_show_static  = $_SESSION["flag_show_static"];
-$flag_show_dynamic = $_SESSION["flag_show_dynamic"];
-$flag_show_payload = $_SESSION["flag_show_payload"];
-$flag_show_log     = $_SESSION["flag_show_log"];
+$flag_show_channel  = $_SESSION["flag_show_channel"];
+$flag_show_log      = $_SESSION["flag_show_log"];
 
 // Configuration
 //=============================================
@@ -189,38 +187,38 @@ function restApi($api,$domain,$application)
 }
 
 //=============================================
-function getDesc($uri)
+function getPayload($uri,$chan,$par)
 //=============================================
 {
-  $url       = $uri.'/static.json';
+  $url       = $uri.'/channel_'.$chan.'json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
   $dec       = json_decode($json, TRUE);
-  $desc      = $dec['msg']['desc'];
-  return $desc;
+  $res       = $dec['msg'][$par];
+  return $res;
 }
 //=============================================
-function getStatus($uri)
+function getHeader($uri,$chan,$par)
 //=============================================
 {
-  $url       = $uri.'/static.json';
+  $url       = $uri.'/channel_'.$chan.'json';
   $json      = file_get_contents($url);
   $json      = utf8_encode($json);
   $dec       = json_decode($json, TRUE);
-  $period    = $dec['msg']['period'];
-
-  $url       = $uri.'/dynamic.json';
-  $json      = file_get_contents($url);
-  $json      = utf8_encode($json);
-  $dec       = json_decode($json, TRUE);
-  $timestamp = $dec['sys_ts'];
-  
+  $res       = $dec[$par];
+  return $res;
+}
+//=============================================
+function getStatus($uri,$chan)
+//=============================================
+{
+  $period    = getPayload($uri,$chan,'period');
+  $timestamp = getHeader($uri,$chan,'sys_ts');
   $now       = date_create('now')->format('Y-m-d H:i:s');
-
   $diff = strtotime($now) - strtotime($timestamp);
-
   $res = 999;
   $bias = 1;
+  
   if ($diff > $period + $bias)
   {
     $res = $diff - $period - $bias;
@@ -241,31 +239,6 @@ function getStatus($uri)
 // Back-End
 //=============================================
 
-if (isset($_GET['flag'])) {
-  $flag = $_GET['flag'];
-  $status = $_GET['status'];
-  if ($flag == "static")
-  {
-    $flag_show_static = $status;
-    $_SESSION["flag_show_static"] = $status;
-  }
-  if ($flag == "dynamic")
-  {
-    $flag_show_dynamic = $status;
-    $_SESSION["flag_show_dynamic"] = $status;
-  }
-  if ($flag == "payload")
-  {
-    $flag_show_payload = $status;
-    $_SESSION["flag_show_payload"] = $status;
-  }
-  if ($flag == "log")
-  {
-    $flag_show_log = $status;
-    $_SESSION["flag_show_log"] = $status;
-  }
-}
-
 if (isset($_GET['do'])) {
 
   $do = $_GET['do'];
@@ -273,11 +246,6 @@ if (isset($_GET['do'])) {
   if($do == 'add_domain')
   {
     $form_add_domain = 1;
-  }
-
-  if($do == 'send_action')
-  {
-    $form_send_action = 1;
   }
 
   if($do == 'select')
@@ -293,47 +261,11 @@ if (isset($_GET['do'])) {
       $sel_application = $_GET['application'];
       $_SESSION["application"]   = $sel_application;
       $doc = 'http://'.$sel_domain.'/applications/'.$sel_application;
-      $sel_desc = getDesc($doc);
+      $chan = 1;
+      $sel_desc = getPayload($doc,$chan,'desc');
     }
   }
 
-  if($do == 'info')
-  {
-    if (isset($_GET['what']))
-    {
-      $temp = $_GET['what'];
-
-      if ($temp == 'static')
-      {
-        $flag_show_static += 1;
-        if ($flag_show_static > 1)$flag_show_static = 0;
-        $_SESSION["flag_show_static"] = $flag_show_static;
-      }
-
-      if ($temp == 'dynamic')
-      {
-        $flag_show_dynamic += 1;
-        if ($flag_show_dynamic > 1)$flag_show_dynamic = 0;
-        $_SESSION["flag_show_dynamic"] = $flag_show_dynamic;
-      }
-
-      if ($temp == 'payload')
-      {
-        $flag_show_payload += 1;
-        if ($flag_show_payload > 1)$flag_show_payload = 0;
-        $_SESSION["flag_show_payload"] = $flag_show_payload;
-      }
-
-      if ($temp == 'log')
-      {
-        $flag_show_log += 1;
-        if ($flag_show_log > 1)$flag_show_log = 0;
-        $_SESSION["flag_show_log"] = $flag_show_log;
-      }
-
-
-    }
-  }
 
   if($do == 'delete')
   {
@@ -531,18 +463,33 @@ $data = array();
       echo "<a href=\"application.php?do=add_domain\">Add Domain</a>";
 
       echo "  <div class=\"dropdown\">
-          <button class=\"dropbtn\">Select Information
+          <button class=\"dropbtn\">Select Channel
             <i class=\"fa fa-caret-down\"></i>
           </button>
           <div class=\"dropdown-content\">
            ";
-          echo "<a href=application.php?do=info&what=static>static</a>";
-          echo "<a href=application.php?do=info&what=dynamic>dynamic</a>";
-          echo "<a href=application.php?do=info&what=payload>payload</a>";
-          echo "<a href=application.php?do=info&what=log>log</a>";
-          echo "</div></div>";
 
-        echo "<div class=\"dropdown\">
+      $request = 'http://'.$sel_domain.'/server.php?do=list_channels&id='.$sel_application;
+      $ctx = stream_context_create(array('http'=>
+      array(
+                     'timeout' => 2,  //2 Seconds
+                       )
+      ));
+      $res = file_get_contents($request,false,$ctx);
+      $data = explode(":",$res);
+      $num = count($data);
+
+      for ($ii = 0; $ii < $num; $ii++)
+      {
+            $channel = str_replace(".ch", "", $data[$ii]);
+            if (strlen($channel) > 2)
+            {
+                 echo "$channel";
+            }
+       }
+       echo "</div></div>";
+
+       echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Select Domain
               <i class=\"fa fa-caret-down\"></i>
             </button>
@@ -573,7 +520,7 @@ $data = array();
                   <div class=\"dropdown-content\">
                   ";
 
-                  $request = 'http://'.$sel_domain."/server.php?do=list";
+                  $request = 'http://'.$sel_domain."/server.php?do=list_applications";
                   //echo $request;
                   $ctx = stream_context_create(array('http'=>
                    array(
@@ -590,8 +537,9 @@ $data = array();
                     if (strlen($application) > 2)
                     {
                       $doc = 'http://'.$sel_domain.'/applications/'.$application;
-                      $status = getStatus($doc);
-                      $desc = getDesc($doc);
+                      $chan = 1;
+                      $status = getStatus($doc,$chan);
+                      $desc = getPayload($doc,$chan,'desc');
                       $temp = $application;
                       if ($status == 0)
                       {
@@ -644,8 +592,9 @@ $data = array();
           $application = $id;
           
           $doc = 'http://'.$sel_domain.'/application/'.$application;
-          $status = getStatus($doc);
-          $desc = getDesc($doc);
+          $chan = 1;
+          $status = getStatus($doc,$chan);
+          $desc = getDesc($doc,$chan,'desc');
             
           echo "<td><a href=application.php?do=select&application=$id>$desc</a></td>";
           $temp = $application;
@@ -662,23 +611,7 @@ $data = array();
      echo "</table>";
      echo "</div>";
    //=============================================
-
-if ($form_send_action == 1)
-{
-  echo "<br><br>
-  <table border=0>";
-  echo "
-  <form action=\"#\" method=\"post\">
-    <input type=\"hidden\" name=\"do\" value=\"send_message\">
-    <tr><td>Domain</td><td> <input type=\"text\" name=\"domain\" value=$sel_domain></td>
-    <tr><td>Application</td><td> <input type=\"text\" name=\"application\" value=$sel_application></td>
-    <tr><td>Tag</td><td> <input type=\"text\" name=\"tag\" ></td>
-    <tr><td>Message</td><td> <input type=\"text\" name=\"message\"></td>
-    <td><input type= \"submit\" value=\"Send\"></td></tr>
-  </form>
-  </table>";
-}
-              
+             
 if ($form_add_domain == 1)
 {
   echo "
@@ -690,41 +623,12 @@ if ($form_add_domain == 1)
 }
 
 //  echo "<div id=\"container\">";
-if ($flag_show_static == 0)
-{
-  echo "<div id=\"static\">";
-  echo "Static";
-  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/static.json';
-  $json   = file_get_contents($doc);
-  if ($json)
-  {
-    $result = prettyTolk( $json);
-    $id = generateForm($json,"white");
-  }
-  //echo ("<br>static<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
-  echo "</div>";
-}
 
-if ($flag_show_dynamic == 0)
+if ($flag_show_channel != 0)
 {
-  echo "<div id=\"dynamic\">";
-  echo "Dynamic";
-  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/dynamic.json';
-  $json   = file_get_contents($doc);
-  if ($json)
-  {
-    $result = prettyTolk( $json);
-    $id = generateForm($json,"#FF5733");
-  }
-  //echo ("<br>dynamic<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
-    echo "</div>";
-}
-
-if ($flag_show_payload == 0)
-{
-  echo "<div id=\"payload\">";
+  echo "<div id=\"channel\">";
   echo "Payload";
-  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/payload.json';
+  $doc = 'http://'.$sel_domain.'/applications/'.$sel_application.'/channel_'.$sel_channel.'json';
   $json   = file_get_contents($doc);
   if ($json)
   {
