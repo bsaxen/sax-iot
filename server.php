@@ -120,7 +120,7 @@ if (isset($_GET['do']))
     $do = $_GET['do'];
      if ($do == 'list')
      {
-       listAllDevices();
+       listAllApplications();
        exit;
      }
 
