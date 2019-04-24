@@ -31,7 +31,7 @@ function deleteApplication($id)
   // remove directory content
   $dirname = 'applications/'.$id;
   array_map('unlink', glob("$dirname/*.*"));
-    
+
   rmdir($dirname);
 }
 //=============================================
@@ -46,7 +46,7 @@ function saveChannelMsg($obj)
         fwrite($doc, "{\n");
         fwrite($doc, "   \"sys_ts\":   \"$obj->sys_ts\",\n");
         fwrite($doc, "   \"id\":       \"$obj->id\",\n");
-        fwrite($doc, "   \"channel\":   \"$obj->channel_id\",\n");
+        fwrite($doc, "   \"channel\":  \"$obj->channel_id\",\n");
         fwrite($doc, "   \"msg\": $obj->msg_channel\n");
         fwrite($doc, "}\n ");
         fclose($doc);
@@ -111,6 +111,32 @@ function listAllApplications()
   }
 }
 //=============================================
+function listAllChannels($app)
+//=============================================
+{
+  $term1 = 'applications/'.$app.'/*.json';
+  $term2 = 'applications/'.$app.'/channels.work';
+  $do = 'ls '.$term1.' > '.$term2;
+  //echo $do;
+  system($do);
+  $file = fopen($term2, "r");
+  if ($file)
+  {
+    while(!feof($file))
+    {
+      $line = fgets($file);
+      //echo $line;
+      if (strlen($line) > 2)
+      {
+          $dd = 'applications/'.$app.'/';
+          $line = str_replace($dd," ",$line);
+          $line = trim($line);
+          echo $line.':';
+      }
+    }
+  }
+}
+//=============================================
 // End of library
 //=============================================
 
@@ -118,11 +144,13 @@ if (isset($_GET['do']))
 {
 
     $do = $_GET['do'];
-     if ($do == 'list')
+     if ($do == 'list_applications')
      {
        listAllApplications();
        exit;
      }
+
+
 
     // Check if id is given
     $error = 1;
@@ -132,7 +160,7 @@ if (isset($_GET['do']))
       // Create device register
       $obj->id = $_GET['id'];
       $obj->id  = str_replace(":","_",$obj->id);
-        
+
       $error = 0;
 
       $ok = 0;
@@ -154,7 +182,7 @@ if (isset($_GET['do']))
            mkdir($dir, 0777, true);
         }
         //$filename = str_replace("/","_",$obj->id);
-        $filename = 'archive/'.$obj->id.'.reg';
+        $filename = 'archive/'.$obj->id.'.arc';
         $doc = fopen($filename, "w");
         fwrite($doc, "$gs_ts $ts $obj->id");
         fclose($doc);
@@ -175,18 +203,24 @@ if (isset($_GET['do']))
     // API when id is available
     if($error == 0)
     {
+      $do = $_GET['do'];
+      if ($do == 'list_channels')
+      {
+        listAllChannels($obj->id);
+        exit;
+      }
 
       if ($do == 'clearlog')
       {
         initLog($obj);
       }
-        
+
       if ($do == 'log')
       {
         $obj->log   = $_GET['log'];
         saveLog($obj);
       }
-        
+
       if ($do == 'delete')
       {
         deleteApplication($obj->id);
