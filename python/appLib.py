@@ -463,7 +463,7 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_domain    iot.simuino.com\n')
         fh.write('c_tags      tag\n')
         fh.write('c_desc      some\n')
-        fh.write('c_server    gateway.php\n')
+        fh.write('c_server    server.php\n')
         fh.write('c_period    10\n')
         fh.write('c_platform  python\n')
         fh.write('c_wrap      999999\n')
