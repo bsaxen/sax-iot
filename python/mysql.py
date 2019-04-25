@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-04-12
+# Date.......: 2019-04-25
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -108,6 +108,7 @@ while True:
     time.sleep(1)
 
     for num in range(0,co.nds):
+        counter = 1234
         domain = co.ds_domain[num]
         device = co.ds_device[num]
         source = co.ds_source[num]
