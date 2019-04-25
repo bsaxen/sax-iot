@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-04-11
+// Date.......: 2019-04-25
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -121,6 +121,39 @@ function saveLog($obj)
   return;
 }
 
+//=============================================
+function writeNo($obj,$no)
+//=============================================
+{
+  $f_file = 'devices/'.$obj->id.'/no.txt';
+  $doc = fopen($f_file, "w");
+  if ($doc)
+  {
+        fwrite($doc, "$no");
+        fclose($doc);
+  }
+  return;
+}
+//=============================================
+function readNo($obj)
+//=============================================
+{
+  $file = 'devices/'.$obj->id.'/no.txt';
+  if ($file)
+  {
+      while(!feof($file))
+      {
+        $result = fgets($file);
+        $result = trim($result);
+      }
+      fclose($file);
+  }
+  else
+  {
+      $result = 0;
+  }
+  return $result;
+}
 //=============================================
 function readFeedbackFile($fb_file)
 //=============================================
