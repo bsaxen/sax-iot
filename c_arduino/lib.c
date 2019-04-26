@@ -1,9 +1,9 @@
 //=============================================
-// File.......: iotLib.c
-// Date.......: 2019-04-14
+// File.......: lib.c
+// Date.......: 2019-04-26
 // Author.....: Benny Saxen
 // Description:
-int lib_version = 3;
+int lib_version = 1;
 //=============================================
 #include <SPI.h>
 #include <Ethernet.h>
@@ -11,22 +11,13 @@ int lib_version = 3;
 struct Configuration
 {
   String conf_id         = "x";
-  int conf_period        = 10;
-  int conf_wrap          = 999999;
+  unsigned long conf_period        = 10;
+  unsigned long conf_wrap          = 999999;
   int conf_feedback      = 1;
   String conf_title      = "title";
   String conf_tags       = "tag1";
   String conf_desc       = "your_description";
-  String conf_platform   = "esp8266";
-  
-  String conf_ssid_1     = "bridge";
-  String conf_password_1 = "qweqwe";
-  
-  String conf_ssid_2     = "bridge";
-  String conf_password_2 = "qweqwe";
-  
-  String conf_ssid_3     = "bridge";
-  String conf_password_3 = "qweqwe";
+  String conf_platform   = "arduino";
   
   String conf_domain     = "iot.simuino.com";
   String conf_server     = "gateway.php";
@@ -40,16 +31,24 @@ struct Configuration
 
 struct Data
 {
-  int counter;
-  int rssi;
+  unsigned long counter;
   int fail;
   int latency;
   String fail_msg;
-  String ssid;
+  String ip;
 };
 
 struct Configuration co;
 struct Data da;
+
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+ 
+// Set the static IP address to use if the DHCP fails to assign
+IPAddress ip(192, 168, 1, 177);
+IPAddress myDns(192, 168, 1, 1);
+
+// initialize the library instance:
+EthernetClient client;
 //=============================================
 
 String g_payload = "{\"no_data\":\"0\"}";
@@ -60,62 +59,81 @@ String lib_loop(struct Configuration *co,struct Data *da)
 //=============================================
 {
   String msg;
-  delay(co->conf_period*1000);
-  
+ 
   ++da->counter;
-  da->rssi = WiFi.RSSI();
+ 
   if (da->counter > co->conf_wrap) da->counter = 1;
   
   msg = lib_publishDynamic(co,da);
-  //Serial.println(msg); 
+  Serial.println(msg); 
   
   if (da->counter%50 == 0)
   {
       lib_publishStatic(co,da);
   }
+
+  unsigned long x = co->conf_period*1000;
+  delay(x);
+  byte res = Ethernet.maintain();
+  if (res != 0)
+  {
+    Serial.print("Maintain result = ");
+    Serial.println(res);
+  }
   
   return msg;
+}
+//=============================================
+String IpAddress2String(const IPAddress& ipAddress)
+//=============================================
+{
+  return String(ipAddress[0]) + String(".") +\
+  String(ipAddress[1]) + String(".") +\
+  String(ipAddress[2]) + String(".") +\
+  String(ipAddress[3])  ; 
 }
 //=============================================
 void lib_setup(struct Configuration *co,struct Data *da)
 //=============================================
 {
+  
   Serial.begin(9600);
-
-  for (uint8_t t = 3; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
-    Serial.flush();
-    delay(1000);
-  } 
-
-  WiFi.mode(WIFI_STA);
 
   char ssid[100];
   char password[100];
   
-  Serial.print("Connecting to ");
-  Serial.println(co->conf_ssid_1);
-  Serial.println(co->conf_ssid_2);
-  Serial.println(co->conf_ssid_3);
+  Serial.println("Initialize Ethernet with DHCP...");
   
-  co->conf_ssid_1.toCharArray(ssid,100);
-  co->conf_password_1.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
-
-  co->conf_ssid_2.toCharArray(ssid,100);
-  co->conf_password_2.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
-
-  co->conf_ssid_3.toCharArray(ssid,100);
-  co->conf_password_3.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+    // Check for Ethernet hardware present
+    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+      Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+      while (true) {
+        delay(1); // do nothing, no point running without Ethernet hardware
+      }
+    }
+    if (Ethernet.linkStatus() == LinkOFF) {
+      Serial.println("Ethernet cable is not connected.");
+    }
+    // try to congifure using IP address instead of DHCP:
+    Ethernet.begin(mac, ip, myDns);
+    Serial.print("My IP address: ");
+    Serial.println(Ethernet.localIP());
+  } else {
+    Serial.print("  DHCP assigned IP ");
+    Serial.println(Ethernet.localIP());
+  }
+  // give the Ethernet shield a second to initialize:
+  delay(1000);
   
+
   da->counter = 0;
-  co->conf_mac = WiFi.macAddress();
-  da->ssid = WiFi.SSID();
-  co->conf_id = co->conf_mac;
+  co->conf_mac = "not_used";
+  da->ip = IpAddress2String(Ethernet.localIP());
+  //co->conf_id = co->conf_mac;
   String stat_url = lib_buildUrlStatic(co);
-  String dont_care = lib_wifiConnectandSend(co,da, stat_url);
+  String dont_care = lib_ethSend(co,da, stat_url);
 }
 //=============================================
 String lib_publishStatic(struct Configuration *c2,struct Data *d2)
@@ -123,7 +141,7 @@ String lib_publishStatic(struct Configuration *c2,struct Data *d2)
 {
   String url,msg;
   url = lib_buildUrlStatic(&co);
-  msg = lib_wifiConnectandSend(&co,&da, url);
+  msg = lib_ethSend(&co,&da, url);
   return msg;
 }
 //=============================================
@@ -132,7 +150,7 @@ String lib_publishDynamic(struct Configuration *c2,struct Data *d2)
 {
   String url,msg;
   url = lib_buildUrlDynamic(&co,&da);
-  msg = lib_wifiConnectandSend(&co,&da, url);
+  msg = lib_ethSend(&co,&da, url);
   return msg;
 }
 //=============================================
@@ -141,7 +159,7 @@ String lib_publishPayload(struct Configuration *c2,struct Data *d2,String payloa
 {
   String url,msg;
   url = lib_buildUrlPayload(&co,&da, payload);
-  msg = lib_wifiConnectandSend(&co,&da, url);
+  msg = lib_ethSend(&co,&da, url);
   return msg;
 }
 //=============================================
@@ -150,7 +168,7 @@ String lib_publishLog(struct Configuration *c2,struct Data *d2,String message)
 {
   String url,msg;
   url = lib_buildUrlLog(&co, message);
-  msg = lib_wifiConnectandSend(&co,&da, url);
+  msg = lib_ethSend(&co,&da, url);
   return msg;
 }
 //=============================================
@@ -296,15 +314,11 @@ String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
   url += d2->latency;
   url += "\",";
   
-  url += "\"ssid";
+  url += "\"ip";
   url += "\":\"";
-  url += d2->ssid;
-  url += "\",";
-  
-  url += "\"rssi";
-  url += "\":\"";
-  url += d2->rssi;
+  url += d2->ip;
   url += "\"";
+ 
   url += "}";
   
   return url;
@@ -329,9 +343,9 @@ String lib_buildUrlPayload(struct Configuration *c2,struct Data *d2, String payl
 String lib_buildUrlLog(struct Configuration *c2, String message)
 //=============================================
 {
-  //===================================
+ 
   String url = '/'+ c2->conf_server;
-  //===================================
+ 
   url += "?do=log";
 
   url += "&id=";
@@ -344,43 +358,40 @@ String lib_buildUrlLog(struct Configuration *c2, String message)
 }  
 
 //=============================================
-String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
+String lib_ethSend(struct Configuration *co,struct Data *da, String cur_url)
 //=============================================
 {
+  char server[80];
+  
+  co->conf_domain.toCharArray(server,80); 
+  //Serial.println(server);
   unsigned long t1,t2;
   
   String sub = "-";
-  Serial.print("Requesting URL: ");
   Serial.println(cur_url);
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  const int httpPort = 80;
-  if (!client.connect(co->conf_domain,httpPort)) {
-    Serial.println("connection failed");
-    da->fail += 1;
-    return sub;
-  }
-
-  // This will send the request to the server
   t1 = millis();
-  client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
+ if (client.connect(server, 80)) {
+    //Serial.println("connecting...");
+    // send the HTTP GET request:
+    String temp1 = "GET " + cur_url + " HTTP/1.1\r\n" +
              "Host: " + co->conf_domain + "\r\n" +
-             "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-     if (millis() - timeout > 5000) {
-        Serial.println(">>> Client Timeout !");
-        client.stop();
-        return sub;
-     }
-     delay(5);
+             "Connection: close\r\n\r\n";
+
+    //Serial.println(temp1);
+    client.println(temp1);
+  } 
+  else 
+  {
+    // if you couldn't make a connection:
+    Serial.println("connection failed");
   }
   t2 = millis();
   da->latency = t2 - t1;
   // Read all the lines of the reply from server and print them to Serial
+  delay(100);
   while (client.available()) {
     String action = client.readStringUntil('\r');
-    Serial.print(action);
+    //Serial.print(action);
     if (action.indexOf('[') == 1)
     {
       int b = action.indexOf(':')+1;
@@ -390,6 +401,10 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
     // Do something based upon the action string
   }
 
-  Serial.println("closing connection");
+  //Serial.println("closing connection");
+
+  // close any connection before send a new request.
+  // This will free the socket on the WiFi shield
+  client.stop();
   return sub;
 }
