@@ -3,13 +3,12 @@
 // Date.......: 2019-04-26
 // Author.....: Benny Saxen
 int sw_version = 1;
-// Description: Signal from D1 pin.
+// Description: Signal from D5 pin, Arduino
 // 4.7kOhm between signal and Vcc
-// Problem access port: sudo chmod 666 /dev/ttyUSB0
 //=============================================
 // Configuration
 //=============================================
-//#include "iotLib.c"
+//#include "lib.c"
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #define ONE_WIRE_BUS 5 // Pin for connecting one wire sensor
@@ -40,27 +39,18 @@ void setup()
 //=============================================
 {
   co.conf_sw         = sw_version;
-  co.conf_id         = "set_to_mac";
-  co.conf_period     = 60;
+  co.conf_id         = "arduino_mega";
+  co.conf_period     = 120;
   co.conf_wrap       = 999999;
   co.conf_feedback   = 1;
 
-  co.conf_title      = "test1";
-  co.conf_tags       = "test1";
-  co.conf_desc       = "test1";
+  co.conf_title      = "kvv32_indoor_outdoor";
+  co.conf_tags       = "kvv32_indoor_outdoor";
+  co.conf_desc       = "kvv32_indoor_outdoor";
   co.conf_platform   = "esp8266";
 
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
-  
-  co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "dfgdfg";
-  
-  co.conf_ssid_2     = "bridge";
-  co.conf_password_2 = "dfgdfg";
-  
-  co.conf_ssid_3     = "bridge";
-  co.conf_password_3 = "dfgdfg";
 
   lib_setup(&co, &da);
     
@@ -77,9 +67,6 @@ void loop()
   char order[10];
   char buf[100];
 
-  msg = lib_loop(&co,&da);
-  Serial.println(msg);
-
   //Retrieve one or more temperature values
   sensor.requestTemperatures();
   //Loop through results and publish
@@ -90,7 +77,7 @@ void loop()
       if (temperature > -100) // filter out bad values , i.e. -127
       {
         temps[i] = temperature;
-        Serial.println(temperature);
+        //Serial.println(temperature);
       }
   }
 
@@ -112,8 +99,10 @@ void loop()
     g_payload +=  "\"no_temperatures\":\"0\""; 
   }
   g_payload += "}";
-  
+
   lib_publishPayload(&co,&da,g_payload);
+   msg = lib_loop(&co,&da);
+  //Serial.println(msg);
 }
 //=============================================
 // End of File
