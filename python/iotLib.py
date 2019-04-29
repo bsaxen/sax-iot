@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-04-18
+# Date: 2019-04-29
 # Description: IoT python library
 version = 2
 # =============================================
@@ -264,6 +264,27 @@ def lib_buildLogUrl(domain,device):
 #===================================================
     url =  'http://' + domain + '/devices/' + device + '/' + 'log.txt'
     return url
+#=====================================================
+def lib_writeMemory(fname,value):
+    try:
+        f = open(fname,'w')
+        f.write(fname)
+        f.write(value)
+        f.close()
+    except:
+        print ("ERROR write memory " + fname)
+    return
+#=====================================================
+def lib_readMemory(fname):
+    res = 0
+    try:
+        fh = open(fname,'r')
+        for line in fh:
+            res = line
+        fh.close()
+    except:
+        print ("ERROR read memory " + fname)
+    return res
 #=====================================================
 def lib_initFile(fname):
     try:
