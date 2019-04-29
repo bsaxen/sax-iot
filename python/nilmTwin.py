@@ -78,12 +78,12 @@ while True:
        if error == 0:
           pulses1 = int(co.myresult)
           wh1 += int(pulses1)
-          writeMemory('wh1.txt',wh1);
+          lib_writeMemory('wh1.txt',wh1);
           roger = 1
        else:
           print("Error reading pulses1")
     elif diff > 1:
-       wh1 = readMemory('wh1.txt');
+       wh1 = lib_readMemory('wh1.txt');
        print ("Missed information1: " + str(diff))
        missed1 += 1
        message = 'Missed information1' + str(diff)
@@ -104,12 +104,12 @@ while True:
        if error == 0:
           pulses2 = int(co.myresult)
           wh2 += int(pulses2)
-          writeMemory('wh2.txt',wh2);
+          lib_writeMemory('wh2.txt',wh2);
           roger = 1
        else:
           print("Error reading pulses2")
     elif diff > 1:
-       wh2 = readMemory('wh2.txt');
+       wh2 = lib_readMemory('wh2.txt');
        print ("Missed information2: " + str(diff))
        missed2 += 1
        message = 'Missed information2' + str(diff)
