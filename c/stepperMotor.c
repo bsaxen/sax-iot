@@ -338,7 +338,7 @@ void loop(void){
   {
     move = 0;
   }
-  if (move == 1)
+  if (move == 1 || res == 6614)
   {
     limit = move_stepper(dir, step_size, number_of_steps, delay_between_steps);
 
