@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-04-15
+// Date.......: 2019-05-04
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -160,14 +160,14 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         if(sw == 2)
         {
           sw = stepCCW(99, delay_between_steps,1);
-          current_pos = 0;
-          Serial.println("MIN_LIMIT");
+          current_pos = 288;
+          Serial.println("MAX_LIMIT");
         }
         if(sw == 3)
         {
           sw = stepCW(99, delay_between_steps,1);
-          current_pos = 288;
-          Serial.println("MAX_LIMIT");
+          current_pos = 0;
+          Serial.println("MIN_LIMIT");
         }
 
         digitalWrite(MS1,LOW);
@@ -229,6 +229,8 @@ int calibrate(){
 
         Serial.print( "Calibrate result");
         Serial.println(ok);
+        Serial.print( "Stepper position: ");
+        Serial.println(current_pos);
         return ok;    
 }
 //================================================
