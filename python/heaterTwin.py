@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-15
+# Date: 2019-05-04
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -267,7 +267,7 @@ def getLatestValue(co,dy,ht,ix):
     if error == 0:
         ht.value[ix] = co.myresult
         diff  = float(ht.value[ix]) - float(ht.value_prev[ix])
-        if abs(diff) > 10 and ht.value_prev[ix] != 999:
+        if abs(diff) > 288 and ht.value_prev[ix] != 999:
             message = 'value error: cur=' + str(ht.value[ix]) + ' prev=' + str(ht.value_prev[ix] + ' ix=' + str(ix))
             lib_publishMyLog(co, message)
             ht.value[ix] = ht.value_prev[ix]
