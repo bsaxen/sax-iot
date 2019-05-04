@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-04-25
+// Date.......: 2019-05-04
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -226,6 +226,43 @@ function writeFeedbackFile($device, $feedback, $tag)
   return $result;
 }
 //=============================================
+function createTriplets($obj)
+//=============================================
+{
+    $f_file = 'devices/'.$obj->id.'/payload.json';
+    $string = file_get_contents($f_file);
+    
+    $jsonIterator = new RecursiveIteratorIterator(
+    new RecursiveArrayIterator(json_decode($json, TRUE)),
+    RecursiveIteratorIterator::SELF_FIRST);
+
+    foreach ($jsonIterator as $key => $val) 
+    {
+         if(is_array($val)) 
+         {
+             echo "$key:\n";
+         } 
+         else 
+         {
+             echo "$key => $val\n";
+         }
+    }
+    
+    
+  /*$fb_file = 'triplets/'.$device.'/'.$tag.'.feedback';
+  $file = fopen($fb_file, "w");
+  if ($file)
+  {
+    fwrite($file,$feedback);
+    fclose($file);
+  }
+  else
+  {
+      $result = " ";
+  }
+  return $result;*/
+}
+//=============================================
 function listAllDevices()
 //=============================================
 {
@@ -383,6 +420,7 @@ if (isset($_GET['do']))
           $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
+        //createTriplets($obj);
         //echo readFeedbackFileList($obj->id);
       }
 
