@@ -1,10 +1,10 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-03-26
+// Date.......: 2019-05-05
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
-$version = '2019-03-26';
+$version = '2019-05-05';
 //=============================================
 session_start();
 
@@ -19,6 +19,7 @@ $flag_show_static  = $_SESSION["flag_show_static"];
 $flag_show_dynamic = $_SESSION["flag_show_dynamic"];
 $flag_show_payload = $_SESSION["flag_show_payload"];
 $flag_show_log     = $_SESSION["flag_show_log"];
+$flag_show_mapping = $_SESSION["flag_show_mapping"];
 
 // Configuration
 //=============================================
@@ -171,7 +172,15 @@ function generateForm($inp,$color)
    return $id;
 }
 //=============================================
-function addDomain ($domain)
+function addMapping($domain,$device,$parameter,$semantic)
+//=============================================
+{
+  $call = 'http://'.$domain.'/gateway.php?do=add_mapping&dev='.$device.'&par='.$parameter.'&sem='.$semantic;
+  echo $call;
+  $res = file_get_contents($call);
+}
+//=============================================
+function addDomain($domain)
 //=============================================
 {
   echo("[$domain]");
@@ -275,6 +284,11 @@ if (isset($_GET['flag'])) {
     $flag_show_log = $status;
     $_SESSION["flag_show_log"] = $status;
   }
+  if ($flag == "mapping")
+  {
+    $flag_show_mapping = $status;
+    $_SESSION["flag_show_mapping"] = $status;
+  }
 }
 
 if (isset($_GET['do'])) {
@@ -284,6 +298,11 @@ if (isset($_GET['do'])) {
   if($do == 'add_domain')
   {
     $form_add_domain = 1;
+  }
+
+  if($do == 'add_mapping')
+  {
+    $form_add_mapping = 1;
   }
 
   if($do == 'send_action')
@@ -381,6 +400,14 @@ if (isset($_POST['do'])) {
   {
     $dn = $_POST['domain'];
     if (strlen($dn) > 2)addDomain($dn);
+  }
+
+  if ($do == 'add_mapping')
+  {
+    $device    = $_POST['device'];
+    $parameter = $_POST['parameter'];
+    $semantic  = $_POST['semantic'];
+    if (strlen($device) > 2)addMapping($sel_domain,$device,$parameter,$semantic);
   }
 
   if ($do == 'send_message')
@@ -595,7 +622,7 @@ window.onload = function(){
 
 
 <?php
-      echo("<h1>Device Manager $sel_domain $sel_desc $now</h1>");
+      echo("<b>Device Manager $sel_domain $sel_desc $now</b>");
       echo "<div class=\"navbar\">";
 
       echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
@@ -688,6 +715,17 @@ window.onload = function(){
       echo "<a href=manager.php?do=delete&what=log>clear log $sel_desc</a>";
       echo "</div></div>";
 
+      echo "<div class=\"dropdown\">
+      <button class=\"dropbtn\">Mapping
+        <i class=\"fa fa-caret-down\"></i>
+      </button>
+      <div class=\"dropdown-content\">
+      ";
+        
+      echo "<a href=manager.php?do=list_mapping>List</a>";
+      echo "<a href=manager.php?do=add_mapping>Add</a>";
+      echo "</div></div>";
+
       echo "</div>";
 
       // Ajax fields
@@ -765,6 +803,18 @@ if ($form_add_domain == 1)
     </form> ";
 }
 
+if ($form_add_mapping == 1)
+{
+  echo "
+  <form action=\"#\" method=\"post\">
+    <input type=\"hidden\" name=\"do\" value=\"add_mapping\">
+    <br>Device<input type=\"text\" name=\"device\">
+    <br>Parameter<input type=\"text\" name=\"parameter\">
+    <br>Semantic<input type=\"text\" name=\"semantic\">
+    <br><input type= \"submit\" value=\"Add Mapping\">
+    </form> ";
+}
+
 //  echo "<div id=\"container\">";
 if ($flag_show_static == 0)
 {
@@ -811,13 +861,21 @@ if ($flag_show_payload == 0)
     echo "</div>";
 }
 
-if ($flag_show_log == 0)
+if ($flag_show_log == 0)      
 {
   $rnd = generateRandomString(3);
-    echo "<div id=\"log\">";
+  echo "<div id=\"log\">";
   $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.txt?ignore='.$rnd;
   echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
-    echo "</div>";
+  echo "</div>";
+}
+
+if ($flag_show_mapping == 0)
+{
+  echo "<div id=\"mapping\">";
+  $doc = 'http://'.$sel_domain.'/mapping.txt';
+  echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
+  echo "</div>";
 }
 //  echo "</div";
 
