@@ -343,8 +343,7 @@ function addMapping($device,$parameter,$semantic)
 {
   $filename = '/mapping.txt';
   $fh = fopen($filename, 'a') or die("Can't add rule $rule");
-  fwrite($fh, "$rule\n");
-  //echo("[$rule]");
+  fwrite($fh, "$device,$parameter,$semantic\n");
   fclose($fh);
 }
 //=============================================
