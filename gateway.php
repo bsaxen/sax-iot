@@ -362,9 +362,9 @@ if (isset($_GET['do']))
     
      if ($do == 'add_mapping')
      {
-        $device      = $_GET['device'];
-        $parameter   = $_GET['parameter'];
-        $semantic    = $_GET['semantic'];
+        $device      = $_GET['dev'];
+        $parameter   = $_GET['par'];
+        $semantic    = $_GET['sem'];
         addMapping($device,$parameter,$semantic);
      }
 
