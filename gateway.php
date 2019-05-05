@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-05-04
+// Date.......: 2019-05-05
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -230,7 +230,7 @@ function createTriplets($obj)
 //=============================================
 {
     $f_file = 'devices/'.$obj->id.'/payload.json';
-    $string = file_get_contents($f_file);
+    $json = file_get_contents($f_file);
     
     $jsonIterator = new RecursiveIteratorIterator(
     new RecursiveArrayIterator(json_decode($json, TRUE)),
@@ -240,27 +240,63 @@ function createTriplets($obj)
     {
          if(is_array($val)) 
          {
-             echo "$key:\n";
+             //echo "$key:\n";
          } 
-         else 
+         else
          {
-             echo "$key => $val\n";
+             //echo "$key => $val\n";
+             $semantic = NULL;
+             $semantic = getSemantic($obj->id,$key);
+             if ($semantic != NULL)
+             {
+               writeTriplet($semantic,$val);
+             }
          }
     }
-    
-    
-  /*$fb_file = 'triplets/'.$device.'/'.$tag.'.feedback';
-  $file = fopen($fb_file, "w");
+}
+//=============================================
+function getSemantic($id, $par)
+//=============================================
+{  
+  $result = NULL;
+  $m_file = 'mapping.txt';
+  $file = fopen($m_file, "r");
   if ($file)
   {
-    fwrite($file,$feedback);
+      while(!feof($file))
+      {
+        $line = fgets($file);
+        sscanf($line,"%s %s %s",$key_id,$key_par,$semantic);
+        if ($key_id == $id && $key_par == $par)
+        {
+          $result = $semantic;
+        }
+      }
+      fclose($file);
+  }
+  else
+  {
+      $result = NULL;
+  }
+  return $result;
+}
+//=============================================
+function writeTriplet($semantic, $value)
+//=============================================
+{  
+  $result = 0;
+  $f_file = 'triplets/'.$semantic.'.tpl';
+  $file = fopen($f_file, "w");
+  if ($file)
+  {
+    fwrite($file,$value);
     fclose($file);
   }
   else
   {
-      $result = " ";
+    $result = 1;
   }
-  return $result;*/
+  return $result;
 }
 //=============================================
 function listAllDevices()
@@ -420,7 +456,7 @@ if (isset($_GET['do']))
           $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
-        //createTriplets($obj);
+        createTriplets($obj);
         //echo readFeedbackFileList($obj->id);
       }
 
