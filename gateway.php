@@ -338,6 +338,16 @@ function listAllFeedback($id)
   echo $no_of_lines;
 }
 //=============================================
+function addMapping($device,$parameter,$semantic)
+//=============================================
+{
+  $filename = '/mapping.txt';
+  $fh = fopen($filename, 'a') or die("Can't add rule $rule");
+  fwrite($fh, "$rule\n");
+  //echo("[$rule]");
+  fclose($fh);
+}
+//=============================================
 // End of library
 //=============================================
 
@@ -349,6 +359,14 @@ if (isset($_GET['do']))
      {
        listAllDevices();
        exit;
+     }
+    
+     if ($do == 'add_mapping')
+     {
+        $device      = $_GET['device'];
+        $parameter   = $_GET['parameter'];
+        $semantic    = $_GET['semantic'];
+        addMapping($device,$parameter,$semantic);
      }
 
     // Check if id is given
