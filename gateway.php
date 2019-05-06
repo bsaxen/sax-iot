@@ -362,7 +362,7 @@ function deleteMapping($row_number)
       $line = fgets($fh2);
       if ($lines != $row_number)
       {
-         fwrite($fh1, "$line\n");
+         fwrite($fh1, "$line");
       }
   }
   $ok = 1;
