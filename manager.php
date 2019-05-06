@@ -53,6 +53,34 @@ function readDomainUrl($file)
   return $url;
 }
 //=============================================
+function showLinesHtml($domain,$file)
+//=============================================
+{
+  echo "==== $file ====<br>";
+  $fh = fopen($file, "r");
+  if ($fh)
+  {
+      echo"<table border=1>";
+      $lines = 0;
+      while(! feof($fh))
+      {
+        $lines++;
+        $line = fgets($fh);
+        $data = explode(" ",$line);
+        $semantic = trim($data[2]);
+        $call = 'http://'.$domain.'/triplets/'.$semantic.'.tpl';
+        //echo $call;
+        $res = file_get_contents($call);
+        echo "<tr><td>$lines</td> <td>$data[0]</td> <td>$data[1]</td> <td>$data[2]</td> <td>$res</td><td>";
+        echo "<a href=\"manager.php?do=delete_mapping&sem=$lines\">X</a>";
+        echo "</td></tr>";
+      }
+      echo"</table>";
+      fclose($fh);
+  }
+  return $lines;
+}
+//=============================================
 function generateRandomString($length = 15)
 //=============================================
 {
@@ -180,6 +208,14 @@ function addMapping($domain,$device,$parameter,$semantic)
   $res = file_get_contents($call);
 }
 //=============================================
+function deleteMapping($domain,$semantic)
+//=============================================
+{
+  $call = 'http://'.$domain.'/gateway.php?do=del_mapping&sem='.$semantic;
+  echo $call;
+  $res = file_get_contents($call);
+}
+//=============================================
 function addDomain($domain)
 //=============================================
 {
@@ -303,6 +339,12 @@ if (isset($_GET['do'])) {
   if($do == 'add_mapping')
   {
     $form_add_mapping = 1;
+  }
+
+  if($do == 'delete_mapping')
+  {
+    $semantic = $_GET['sem'];
+    deleteMapping($sel_domain,$semantic);
   }
 
   if($do == 'send_action')
@@ -448,7 +490,6 @@ $data = array();
       //background-color: grey;
       float: left;
       width: 400px;
-
       }
 
       #static {
@@ -456,7 +497,6 @@ $data = array();
       //background-color: grey;
       float: left;
       width: 400px;
-
       }
 
       #dynamic {
@@ -464,7 +504,6 @@ $data = array();
       //background-color: red;
       float: left;
       width: 400px;
-
       }
 
       #payload {
@@ -472,7 +511,6 @@ $data = array();
       //background-color: blue;
       float: left;
       width: 400px;
-
       }
 
 
@@ -481,7 +519,13 @@ $data = array();
       //background-color: yellow;
       float: left;
       width: 600px;
+      }
 
+      #mapping {
+        color: #336600;
+        //background-color: yellow;
+        float: left;
+        width: 600px;
       }
 
       html {
@@ -874,7 +918,8 @@ if ($flag_show_mapping == 0)
 {
   echo "<div id=\"mapping\">";
   $doc = 'http://'.$sel_domain.'/mapping.txt';
-  echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
+  showLinesHtml($sel_domain,$doc);
+  //echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
   echo "</div>";
 }
 //  echo "</div";
@@ -882,3 +927,4 @@ if ($flag_show_mapping == 0)
 
 echo "</body></html>";
 // End of file
+?>
