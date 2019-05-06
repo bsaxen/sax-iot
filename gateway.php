@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-05-05
+// Date.......: 2019-05-06
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -347,6 +347,33 @@ function addMapping($device,$parameter,$semantic)
   fclose($fh);
 }
 //=============================================
+function deleteMapping($row_number)
+//=============================================
+{
+  $ok = 0;
+  $filename1 = 'temp.txt';
+  $filename2 = 'mapping.txt';
+  $fh1 = fopen($filename1, 'w') or die("Cannot write to file $filename1");
+  $fh2 = fopen($filename2, 'r') or die("Cannot read file $filename2");
+  $lines = 0;
+  while(!feof($fh2))
+  {
+      $lines++;
+      $line = fgets($fh2);
+      if ($lines != $row_number)
+      {
+         fwrite($fh1, "$line\n");
+      }
+  }
+  $ok = 1;
+  fclose($fh1);
+  fclose($fh2);
+  if ($ok == 1)
+  {
+      system("cp -f temp.txt mapping.txt");
+  }
+}
+//=============================================
 // End of library
 //=============================================
 
@@ -367,6 +394,13 @@ if (isset($_GET['do']))
         $semantic    = $_GET['sem'];
         addMapping($device,$parameter,$semantic);
      }
+    
+     if ($do == 'del_mapping')
+     {
+        $semantic    = $_GET['sem'];
+        deleteMapping($semantic);
+     }
+
 
     // Check if id is given
     $error = 1;
