@@ -1,7 +1,7 @@
 # =============================================
 # File: nilmTwin.py
 # Author: Benny Saxen
-# Date: 2019-04-29
+# Date: 2019-05-07
 # Description:
 # Nilm Station 1
 # data 0 = nilm period
@@ -35,6 +35,9 @@ pulses2  = 0
 
 hour = str(datetime.datetime.now().strftime("%H"))
 prev_hour = hour
+
+message = '==== setup ===='
+lib_publishMyLog(co, message)
 
 error = lib_readData(co,0)
 if error == 0:
