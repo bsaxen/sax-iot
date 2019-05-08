@@ -269,8 +269,6 @@ def lib_writeMemory(fname,value):
     try:
         f = open(fname,'w')
         f.write(value)
-        print 'write memory '
-        print value
         f.close()
     except:
         print ("ERROR write memory " + fname)
@@ -282,8 +280,6 @@ def lib_readMemory(fname):
         fh = open(fname,'r')
         for line in fh:
             res = line
-            print 'read memory '
-            print res
         fh.close()
     except:
         print ("ERROR read memory " + fname)
@@ -639,8 +635,6 @@ def lib_readDynamicParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
-    print 'dyn'
-    print co.myresult
     return error
 #=============================================
 def lib_readStaticParam(co,domain,device,par):
@@ -651,8 +645,6 @@ def lib_readStaticParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
-    print 'stat'
-    print co.myresult
     return error
 #=============================================
 def lib_readPayloadParam(co,domain,device,par):
@@ -663,8 +655,6 @@ def lib_readPayloadParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
-    print 'pay'
-    print co.myresult
     return error
 #=============================================
 def lib_searchLogKey(domain,device,par):
