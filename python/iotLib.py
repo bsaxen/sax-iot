@@ -639,6 +639,8 @@ def lib_readDynamicParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
+    print 'dyn'
+    print co.myresult
     return error
 #=============================================
 def lib_readStaticParam(co,domain,device,par):
@@ -649,6 +651,8 @@ def lib_readStaticParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
+    print 'stat'
+    print co.myresult
     return error
 #=============================================
 def lib_readPayloadParam(co,domain,device,par):
@@ -659,6 +663,8 @@ def lib_readPayloadParam(co,domain,device,par):
         co.myresult = co.myresult['msg'][par]
     else:
         print (error)
+    print 'pay'
+    print co.myresult
     return error
 #=============================================
 def lib_searchLogKey(domain,device,par):
