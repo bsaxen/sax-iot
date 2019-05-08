@@ -36,9 +36,6 @@ pulses2  = 0
 hour = str(datetime.datetime.now().strftime("%H"))
 prev_hour = hour
 
-message = '==== setup ===='
-lib_publishMyLog(co, message)
-
 error = lib_readData(co,0)
 if error == 0:
    period1 = int(co.myresult)
