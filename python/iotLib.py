@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-04-29
+# Date: 2019-05-08
 # Description: IoT python library
 version = 2
 # =============================================
@@ -707,6 +707,8 @@ def lib_setup(co,confile,version):
     lib_readConfiguration(confile,co)
     lib_publishMyStatic(co)
     co.mysw = version
+    message = '==== setup ===='
+    lib_publishMyLog(co, message)
 #===================================================
 def lib_loop(co,dy):
 #===================================================
