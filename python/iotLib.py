@@ -268,7 +268,6 @@ def lib_buildLogUrl(domain,device):
 def lib_writeMemory(fname,value):
     try:
         f = open(fname,'w')
-        f.write(fname)
         f.write(value)
         f.close()
     except:
@@ -526,6 +525,7 @@ def lib_readConfiguration(confile,c1):
 #=============================================
 def lib_getStaticDeviceJson(co,domain,device):
 #=============================================
+    co.myresult = 0
     lib_buildAnyUrl(co,domain,device,'static')
     error = 0
     try:
@@ -546,6 +546,7 @@ def lib_getStaticDeviceJson(co,domain,device):
 #=============================================
 def lib_getDynamicDeviceJson(co,domain,device):
 #=============================================
+    co.myresult = 0
     lib_buildAnyUrl(co,domain,device,'dynamic')
     error = 0
     try:
@@ -569,6 +570,7 @@ def lib_getDynamicDeviceJson(co,domain,device):
 #=============================================
 def lib_getPayloadDeviceJson(co,domain,device):
 #=============================================
+    co.myresult = 0
     lib_buildAnyUrl(co,domain,device,'payload')
     error = 0
     try:
@@ -627,6 +629,7 @@ def lib_checkSequenceNumber(co,ds,domain,device):
 #=============================================
 def lib_readDynamicParam(co,domain,device,par):
 #=============================================
+    co.myresult = 0
     error = lib_getDynamicDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
@@ -636,6 +639,7 @@ def lib_readDynamicParam(co,domain,device,par):
 #=============================================
 def lib_readStaticParam(co,domain,device,par):
 #=============================================
+    co.myresult = 0
     error = lib_getStaticDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
@@ -645,6 +649,7 @@ def lib_readStaticParam(co,domain,device,par):
 #=============================================
 def lib_readPayloadParam(co,domain,device,par):
 #=============================================
+    co.myresult = 0
     error = lib_getPayloadDeviceJson(co,domain,device)
     if error == 0:
         co.myresult = co.myresult['msg'][par]
@@ -662,6 +667,7 @@ def lib_searchLogKey(domain,device,par):
 def lib_readData(co,index):
 #=============================================
     index_error = 0
+    co.myresult = 0
     if index >= co.ndata:
         print ("index too large")
         index_error = 1
