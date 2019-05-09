@@ -1,35 +1,21 @@
 <?php
 //=============================================
 // File.......: status.php
-// Date.......: 2019-03-31
+// Date.......: 2019-05-09
 // Author.....: Benny Saxen
 // Description: IoT Status
-$version = '2019-03-26';
 //=============================================
 session_start();
 
 $sel_domain = $_SESSION["domain"];
 $sel_domain = readDomainUrl($sel_domain);
 
-$sel_device = $_SESSION["device"];
-$doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
-$sel_desc = getDesc($doc);
-
-$flag_show_static  = $_SESSION["flag_show_static"];
-$flag_show_dynamic = $_SESSION["flag_show_dynamic"];
-$flag_show_payload = $_SESSION["flag_show_payload"];
-$flag_show_log     = $_SESSION["flag_show_log"];
-
-// Configuration
-//=============================================
-// No configuration needed
-//=============================================
 $date         = date_create();
 $ts           = date_format($date, 'Y-m-d H:i:s');
 $now          = date_create('now')->format('Y-m-d H:i:s');
 $g_rssi       = 0;
 $g_action     = 0;
-//echo "<br>$ts $now<br>";
+
 //=============================================
 // library
 //=============================================
@@ -57,130 +43,7 @@ function generateRandomString($length = 15)
 {
     return substr(sha1(rand()), 0, $length);
 }
-//=============================================
-function prettyTolk( $json )
-//=============================================
-{
-    global $rank,$g_nn;
-    $result = '';
-    $level = 0;
-    $nn = 1;
-    $in_quotes = false;
-    $in_escape = false;
-    $ends_line_level = NULL;
-    $json_length = strlen( $json );
 
-    for( $i = 0; $i < $json_length; $i++ ) {
-        $char = $json[$i];
-        $new_line_level = NULL;
-        $post = "";
-        if( $ends_line_level !== NULL ) {
-            $new_line_level = $ends_line_level;
-            $ends_line_level = NULL;
-        }
-        if ( $in_escape ) {
-            $in_escape = false;
-        } else if( $char === '"' )
-        {
-            $in_quotes = !$in_quotes;
-        }
-        else if( ! $in_quotes )
-        {
-            if($word)
-            {
-              $tmp = $rank[$nn];
-              //echo ("$word nn=$nn level=$level<br>");
-              //if($tmp > 0 && $tmp != $level) echo "JSON Error: $word<br>";
-              $rank[$nn] = $level;
-            }
-
-            $word = '';
-            switch( $char )
-            {
-                case '}': case ']':
-                    $level--;
-                    $ends_line_level = NULL;
-                    $new_line_level = $level;
-                    break;
-
-                case '{': case '[':
-                    $level++;
-
-                case ',':
-                    $ends_line_level = $level;
-                    break;
-
-                case ':':
-                    $nn++;
-                    //echo "nn=$nn<br>";
-                    $post = " ";
-                    break;
-
-                case " ": case "\t": case "\n": case "\r":
-                    $char = "";
-                    $ends_line_level = $new_line_level;
-                    $new_line_level = NULL;
-                    break;
-            }
-        } else if ( $char === '\\' ) {
-            $in_escape = true;
-        }
-        else {
-          $word .= $char;
-        }
-        if( $new_line_level !== NULL ) {
-            $result .= "\n".str_repeat( "\t", $new_line_level );
-        }
-        $result .= $char.$post;
-        //echo "$level $char<br>";
-    }
-    $g_nn = $nn-1;
-    return $result;
-}
-
-//=============================================
-function generateForm($inp,$color)
-//=============================================
-{
-  global $rank,$g_nn;
-
-  $id = 'void';
-
-  $jsonIterator = new RecursiveIteratorIterator(new RecursiveArrayIterator(json_decode($inp, TRUE)),RecursiveIteratorIterator::SELF_FIRST);
-  echo("<table border=0>");
-  $nn = 0;
-  foreach ($jsonIterator as $key => $val) {
-    $nn++;
-    if ($key == 'id') $id = $val;
-    echo "<tr>";
-    for($ii=1;$ii<$rank[$nn];$ii++)echo "<td></td>";
-
-      if(is_array($val))
-      {
-        echo "<td color=\"#C5FD69\">$key</td>";
-      }
-      else
-      {
-          echo "<td>$key</td><td bgcolor=\"$color\">$val</td><tr>";
-      }
-      echo "</tr>";
-   }
-   echo "</table>";
-   //if ($id == 'void') $id = generateRandomString(12);
-   if ($g_nn != $nn)echo("ERROR: Key duplicate in JSON structure: $nn $g_nn<br>");
-   return $id;
-}
-//=============================================
-function addDomain ($domain)
-//=============================================
-{
-  echo("[$domain]");
-  $filename = str_replace("/","_",$domain);
-  $filename = $filename.'.domain';
-  $fh = fopen($filename, 'w') or die("Can't add domain $domain");
-  fwrite($fh, "$domain");
-  fclose($fh);
-}
 //=============================================
 function restApi($api,$domain,$device)
 //=============================================
@@ -234,15 +97,6 @@ function getStatus($uri)
   return ($res);
 }
 
-
-//=============================================
-function sendMessage($url,$device,$msg,$tag)
-//=============================================
-{
-  echo "Send message $msg tag=$tag to $url/$device<br>";
-  $call = 'http://'.$url.'/gateway.php?do=feedback&id='.$device.'&msg='.$msg.'&tag='.$tag;
-  $res = file_get_contents($call);
-}
 //=============================================
 // End of library
 //=============================================
@@ -252,30 +106,7 @@ function sendMessage($url,$device,$msg,$tag)
 // Back-End
 //=============================================
 
-if (isset($_GET['flag'])) {
-  $flag = $_GET['flag'];
-  $status = $_GET['status'];
-  if ($flag == "static")
-  {
-    $flag_show_static = $status;
-    $_SESSION["flag_show_static"] = $status;
-  }
-  if ($flag == "dynamic")
-  {
-    $flag_show_dynamic = $status;
-    $_SESSION["flag_show_dynamic"] = $status;
-  }
-  if ($flag == "payload")
-  {
-    $flag_show_payload = $status;
-    $_SESSION["flag_show_payload"] = $status;
-  }
-  if ($flag == "log")
-  {
-    $flag_show_log = $status;
-    $_SESSION["flag_show_log"] = $status;
-  }
-}
+
 
 if (isset($_GET['do'])) {
 
@@ -299,69 +130,6 @@ if (isset($_GET['do'])) {
       $_SESSION["domain"] = $sel_domain;
       $sel_domain = readDomainUrl($sel_domain);
     }
-    if (isset($_GET['device']))
-    {
-      $sel_device = $_GET['device'];
-      $_SESSION["device"]   = $sel_device;
-      $doc = 'http://'.$sel_domain.'/devices/'.$sel_device;
-      $sel_desc = getDesc($doc);
-    }
-  }
-
-  if($do == 'info')
-  {
-    if (isset($_GET['what']))
-    {
-      $temp = $_GET['what'];
-
-      if ($temp == 'static')
-      {
-        $flag_show_static += 1;
-        if ($flag_show_static > 1)$flag_show_static = 0;
-        $_SESSION["flag_show_static"] = $flag_show_static;
-      }
-
-      if ($temp == 'dynamic')
-      {
-        $flag_show_dynamic += 1;
-        if ($flag_show_dynamic > 1)$flag_show_dynamic = 0;
-        $_SESSION["flag_show_dynamic"] = $flag_show_dynamic;
-      }
-
-      if ($temp == 'payload')
-      {
-        $flag_show_payload += 1;
-        if ($flag_show_payload > 1)$flag_show_payload = 0;
-        $_SESSION["flag_show_payload"] = $flag_show_payload;
-      }
-
-      if ($temp == 'log')
-      {
-        $flag_show_log += 1;
-        if ($flag_show_log > 1)$flag_show_log = 0;
-        $_SESSION["flag_show_log"] = $flag_show_log;
-      }
-
-
-    }
-  }
-
-  if($do == 'delete')
-  {
-    $what   = $_GET['what'];
-    if ($what == 'domain')
-    {
-      $fn = $sel_domain.'.domain';
-      if (file_exists($fn)) unlink($fn);
-    }
-    if ($what == 'device')
-    {
-      restApi('delete',$sel_domain,$sel_device);
-    }
-    if ($what == 'log')
-    {
-      restApi('clearlog',$sel_domain,$sel_device);
-    }
   }
 
   if($do == 'rest')
@@ -370,29 +138,6 @@ if (isset($_GET['do'])) {
     $url   = $_GET['url'];
     $topic = $_GET['topic'];
     restApi($api,$url,$topic);
-  }
-
-}
-
-if (isset($_POST['do'])) {
-  $do = $_POST['do'];
-
-  if ($do == 'add_domain')
-  {
-    $dn = $_POST['domain'];
-    if (strlen($dn) > 2)addDomain($dn);
-  }
-
-  if ($do == 'send_message')
-  {
-    $domain   = $_POST['domain'];
-    $device   = $_POST['device'];
-    $msg      = $_POST['message'];
-    $tag      = $_POST['tag'];
-    if (strlen($msg) > 2)
-      sendMessage($domain,$device,$msg,$tag);
-    else
-      echo "Message to short";
   }
 
 }
@@ -538,7 +283,7 @@ $data = array();
      display: block;
    }
       </style>
-         <title>Manager</title>
+         <title>Status</title>
       </head>
       <body > ";
 
@@ -598,9 +343,6 @@ window.onload = function(){
       echo("<h1>Device Status $sel_domain $now</h1>");
       echo "<div class=\"navbar\">";
 
-      echo "<a href=\"manager.php?do=add_domain\">Add Domain</a>";
-
-
         echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Select Domain
               <i class=\"fa fa-caret-down\"></i>
@@ -619,24 +361,11 @@ window.onload = function(){
                 {
                     $line = trim($line);
                     $domain = str_replace(".domain", "", $line);
-                    echo "<a href=manager.php?do=select&domain=$domain>$domain</a>";
+                    echo "<a href=status.php?do=select&domain=$domain>$domain</a>";
                 }
               }
             }
             echo "</div></div>";
-
-
-
-
-      echo "<div class=\"dropdown\">
-            <button class=\"dropbtn\">Delete
-              <i class=\"fa fa-caret-down\"></i>
-            </button>
-            <div class=\"dropdown-content\">
-            ";
-              
-      echo "<a href=manager.php?do=delete&what=domain>$sel_domain</a>";
-      echo "</div></div>";
 
       echo "</div>";
 
@@ -687,75 +416,6 @@ window.onload = function(){
      echo "</table>";
      echo "</div>";
    //=============================================
-
-
-              
-if ($form_add_domain == 1)
-{
-  echo "
-  <form action=\"#\" method=\"post\">
-    <input type=\"hidden\" name=\"do\" value=\"add_domain\">
-    Add Domain<input type=\"text\" name=\"domain\">
-    <input type= \"submit\" value=\"Add Domain\">
-    </form> ";
-}
-
-//  echo "<div id=\"container\">";
-if ($flag_show_static == 0)
-{
-  echo "<div id=\"static\">";
-  echo "Static";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/static.json';
-  $json   = file_get_contents($doc);
-  if ($json)
-  {
-    $result = prettyTolk( $json);
-    $id = generateForm($json,"white");
-  }
-  //echo ("<br>static<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
-  echo "</div>";
-}
-
-if ($flag_show_dynamic == 0)
-{
-  echo "<div id=\"dynamic\">";
-  echo "Dynamic";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/dynamic.json';
-  $json   = file_get_contents($doc);
-  if ($json)
-  {
-    $result = prettyTolk( $json);
-    $id = generateForm($json,"#FF5733");
-  }
-  //echo ("<br>dynamic<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
-    echo "</div>";
-}
-
-if ($flag_show_payload == 0)
-{
-  echo "<div id=\"payload\">";
-  echo "Payload";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/payload.json';
-  $json   = file_get_contents($doc);
-  if ($json)
-  {
-    $result = prettyTolk( $json);
-    $id = generateForm($json,"#A2D5F8");
-  }
-  //echo ("<br>payload<br><iframe style=\"background: #FFFFFF;\" src=$doc width=\"400\" height=\"300\"></iframe>");
-    echo "</div>";
-}
-
-if ($flag_show_log == 0)
-{
-  $rnd = generateRandomString(3);
-    echo "<div id=\"log\">";
-  $doc = 'http://'.$sel_domain.'/devices/'.$sel_device.'/log.txt?ignore='.$rnd;
-  echo ("<br>log<br><iframe id= \"ilog\" style=\"background: #FFFFFF;\" src=$doc width=\"500\" height=\"600\"></iframe>");
-    echo "</div>";
-}
-//  echo "</div";
-
 
 echo "</body></html>";
 // End of file
