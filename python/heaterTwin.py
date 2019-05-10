@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-05-04
+# Date: 2019-05-10
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -12,7 +12,6 @@
 # 2 smoke
 # 3 target
 # 4 need to heat
-# 5 stepper position
 #
 # --- create actions ---
 # stepper
@@ -33,14 +32,14 @@ class HeaterTwin:
    temperature_smoke_ix       = 2
    temperature_target_ix      = 3
    need_ix                    = 4
-   stepper_pos_ix             = 5
+   limit_ix                   = 5 
 
    temperature_water_out      = 999
    temperature_water_in       = 999
    temperature_smoke          = 999
    temperature_target         = 999
    need                       = 999
-   stepper_pos                = 999
+   limit                      = 999
 
    value         = []
    value_prev    = []
@@ -68,13 +67,13 @@ def show_action_bit_info(a):
         message +=  "|below_min_steps"
     c = a & 32
     if c == 32:
-        message +=  "|stepper_zero"
+        message +=  "|min_stepper_limit"
     c = a & 64
     if c == 64:
         message +=  "|energy_limit_reached"
     c = a & 128
     if c == 128:
-        message +=  "|stepper_max"
+        message +=  "|max_stepper_limit"
     print message
     return message
 #=====================================================
@@ -101,10 +100,6 @@ def simulate(co,dy,ht):
         ndi = ndi + 1
     if ht.need == 999:
         message = "No data - need"
-        lib_publishMyLog(co, message )
-        ndi = ndi + 1
-    if ht.stepper_pos == 999:
-        message = "No data - stepper_pos"
         lib_publishMyLog(co, message )
         ndi = ndi + 1
 	
@@ -179,6 +174,12 @@ def simulate(co,dy,ht):
             tmp3 = tmp1 - tmp2
             ht.steps = round(tmp3)
 
+            if ht.limit == 804 and ht.steps < 0:
+                action += 32
+
+            if ht.limit == 802 and ht.steps > 0:
+                action += 128
+
             if ht.temperature_water_in > ht.temperature_water_out and ht.steps < 0:
                 action += 8
             if abs(ht.steps) < int(co.minsteps):
@@ -191,12 +192,6 @@ def simulate(co,dy,ht):
                 direction = DECREASE
             if ht.steps > 0:
                 direction = INCREASE
-		
-            if direction == INCREASE and ht.stepper_pos == 288:
-                action += 32	
-		
-            if direction == DECREASE and ht.stepper_pos == 0:
-                action += 128	
 		
             if int(ht.need) == 0 and ht.steps > 0:
                 action += 4
@@ -229,7 +224,6 @@ def simulate(co,dy,ht):
     payload += '"why"      : "' + str(why) + '",\n'
     payload += '"energy"   : "' + str(energy) + '",\n'
     payload += '"need"     : "' + str(ht.need) + '",\n'
-    payload += '"stepper_pos" : "' + str(ht.stepper_pos) + '",\n'
     payload += '"temperature_water_out" : "' + str(ht.temperature_water_out) + '",\n'
     payload += '"temperature_water_in"  : "' + str(ht.temperature_water_in) + '",\n'
     payload += '"temperature_smoke"     : "' + str(ht.temperature_smoke) + '",\n'
@@ -341,14 +335,14 @@ while True:
         print "need    " + str(ht.need)
     else:
 	roger = 1
-	
-    error = getLatestValue(co,dy,ht,ht.stepper_pos_ix)
+
+    error = getLatestValue(co,dy,ht,ht.limit_ix)
     if error == 0:
-        ht.stepper_pos = int(ht.value[ht.stepper_pos_ix])
-        print "stepper_pos    " + str(ht.stepper_pos)
+        ht.limit = int(ht.value[ht.limit_ix])
+        print "limit    " + str(ht.limit)
     else:
 	roger = 1
-	
+
     if roger == 0:
         simulate(co,dy,ht)
     else:
