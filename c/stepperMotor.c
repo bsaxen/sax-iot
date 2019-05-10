@@ -1,6 +1,6 @@
 //=============================================
 // File.......: stepperMotor.c
-// Date.......: 2019-05-04
+// Date.......: 2019-05-10
 int sw_version = 1;
 // Author.....: Benny Saxen
 // Description:
@@ -11,7 +11,15 @@ int sw_version = 1;
 // period,x                   set period to x seconds
 // 90 degrees <=> 1152/4 steps = 288
 //=============================================
-// Configuration
+// Debug Codes
+//
+// Normal 
+// 901 CW ok
+// 902 CCW ok
+// Error
+// 9001 More steps than expected
+// 9002 Failure during calibration, max limit not found
+// 9003 Failure during calibration, min limit not found
 //=============================================
 //#include "iotLib.c"
 //================================================
@@ -37,7 +45,7 @@ int step_size = FULL_STEP;
 int number_of_steps = 0;
 int delay_between_steps = 10;
 int limit = 0;
-int g_calibrated = 0;
+int g_calibrated = 288;
 //================================================
 int stepCW(int steps,int dd, int force)
 //================================================
@@ -57,19 +65,19 @@ int stepCW(int steps,int dd, int force)
         digitalWrite(MINMAX, HIGH);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
-        return 2;
+        return i;
       }
       if (digitalRead(LIMIT) == LOW && force == 1)
       {
         digitalWrite(MINMAX, LOW);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
-        return 12;
+        return i;
       }
     }
   digitalWrite(DIR, LOW);
   digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.Serial.println
-  return 1;
+  return i;
 }
 
 //================================================
@@ -92,19 +100,19 @@ int stepCCW(int steps,int dd, int force)
         digitalWrite(MINMAX, HIGH);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
-        return 3;
+        return i;
       }
       if (digitalRead(LIMIT) == LOW && force == 1)
       {
         digitalWrite(MINMAX, LOW);
         digitalWrite(DIR, LOW);
         digitalWrite(SLEEP, LOW);
-        return 13;
+        return i;
       }
     }
   digitalWrite(DIR, LOW);
   digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.
-  return 1;
+  return i;
 }
 
 //================================================
@@ -146,29 +154,41 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         {
             Serial.println( "Stepper motor CW -->");
             sw = stepCW(number_of_steps, delay_between_steps,0);
-            if (sw == 1) current_pos +=  number_of_steps;
+          // All steps executed
+            if (sw == number_of_steps)
+            {
+              current_pos +=  number_of_steps;
+              sw = 901;
+            }
+          // Max position reached, move back from max
+            if (sw < number_of_steps)
+            {
+               sw = stepCCW(99, delay_between_steps,1);
+               current_pos = g_calibrated-sw;
+               Serial.println("MAX_LIMIT");             
+            }
         }
         else if(dir == COUNTER_CLOCKWISE)
         {
             Serial.println( "Stepper motor CCW  <--");
             sw = stepCCW(number_of_steps, delay_between_steps,0);
-            if (sw == 1) current_pos -=  number_of_steps;
+          // All steps executed
+            if (sw == number_of_steps)
+            {
+              current_pos -=  number_of_steps;
+              sw = 902;
+            }
+          // Min position reached, move back from min
+            if (sw < number_of_steps)
+            {
+               sw = stepCW(99, delay_between_steps,1);
+               current_pos = sw;
+               Serial.println("MIN_LIMIT");             
+            }
+           if (sw > number_of_steps) sw = 9001;
         }
         else
             Serial.println( "ERROR: Unknown direction for stepper motor");
-
-        if(sw == 2)
-        {
-          sw = stepCCW(99, delay_between_steps,1);
-          current_pos = 288;
-          Serial.println("MAX_LIMIT");
-        }
-        if(sw == 3)
-        {
-          sw = stepCW(99, delay_between_steps,1);
-          current_pos = 0;
-          Serial.println("MIN_LIMIT");
-        }
 
         digitalWrite(MS1,LOW);
         digitalWrite(MS2,LOW);
@@ -179,8 +199,10 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
         return sw;
 }
 //================================================
-int calibrate(){
+int calibrate()
+// Returns number of steps in working interval
 //================================================
+{
         int touch1 = 0;
         int touch2 = 0;
         int ok = 0;
@@ -191,40 +213,41 @@ int calibrate(){
 
         Serial.println( "Calibrate max level...");
         touch1 = stepCW(400, delay_between_steps,0);
-        if (touch1 == 2) 
+        if (touch1 < 400) 
         {
-          Serial.println( "Release max level...");
+          Serial.println("MAX_LIMIT reached");
+          
           touch2 = stepCCW(99, delay_between_steps,1);
-          if (touch2 == 13)
+          if (touch2 < 99)
           {
-             current_pos = 288;
-             Serial.println("MAX_LIMIT reached");
-             ok += 1;
+             Serial.println( "Released max level");
           }
         }
         else
         {
           Serial.println("ERROR: Calibrate max failed");
+          ok = 9002;
         }
 
-        delay(10);
+        delay(100);
         
         Serial.println( "Calibrate zero level...");
         touch1 = stepCCW(400, delay_between_steps,0);
-        if (touch1 == 3)
+        if (touch1 < 400)
         {
-          Serial.println( "Release min level...");
+          Serial.println("MIN_LIMIT reached");
           touch2 = stepCW(99, delay_between_steps,1);
-          if (touch2 == 12)
+          if (touch2 < 99)
           {
              current_pos = 0;
-             Serial.println("MIN_LIMIT reached");
-             ok += 1;
+             Serial.println( "Released min level");
+             ok = touch1;
           }
         }
         else
         {
           Serial.println("ERROR: Calibrate min failed");
+          ok = 9003;
         }
 
         Serial.print( "Calibrate result");
@@ -281,16 +304,16 @@ void setup(void){
 
     delay(10);
     int ok = calibrate();
-    if (ok != 2)
+    if (ok > 9000)
     {
       Serial.println("Calibration failed");
-      g_calibrated = 0;
+      g_calibrated = ok;
       //exit(0);
     }
     else
     {
       Serial.println("Calibration success!");
-      g_calibrated = 1;
+      g_calibrated = ok;
     }
 }
 //================================================
@@ -322,15 +345,15 @@ void loop(void){
   else if (res == 6614)
   {
     int ok = calibrate();
-    if (ok != 2)
+    if (ok > 9000)
     {
       Serial.println("Calibration failed");
-      g_calibrated = 0;
+      g_calibrated = ok;
     }
     else
     {
       Serial.println("Calibration success!");
-      g_calibrated = 1;
+      g_calibrated = ok;
     }
     move = 0;
   }
