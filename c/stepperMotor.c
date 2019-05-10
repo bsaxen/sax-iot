@@ -274,7 +274,7 @@ void setup(void){
   co.conf_server     = "gateway.php";
   
   co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "6301166614";
+  co.conf_password_1 = "qwer";
   
   co.conf_ssid_2     = "NABTON";
   co.conf_password_2 = "a1b2c3d4e5f6g7";
