@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: status.php
-// Date.......: 2019-05-09
+// Date.......: 2019-05-10
 // Author.....: Benny Saxen
 // Description: IoT Status
 //=============================================
@@ -207,10 +207,10 @@ $data = array();
       }
 
       body {
-          background: -webkit-linear-gradient(left, #93B874, #C9DCB9);
-          background: -o-linear-gradient(right, #93B874, #C9DCB9);
-          background: -moz-linear-gradient(right, #93B874, #C9DCB9);
-          background: linear-gradient(to right, #93B874, #C9DCB9);
+          background: -webkit-linear-gradient(left, #93B874, #191970);
+          background: -o-linear-gradient(right, #93B874, #191970);
+          background: -moz-linear-gradient(right, #93B874, #191970);
+          background: linear-gradient(to right, #93B874, #191970);
           background-color: #93B874;
       }
       /* Navbar container */
@@ -340,7 +340,7 @@ window.onload = function(){
 
 
 <?php
-      echo("<h1>Device Status $sel_domain $now</h1>");
+      echo("<b>Device Status $sel_domain $now</b>");
       echo "<div class=\"navbar\">";
 
         echo "<div class=\"dropdown\">
@@ -401,7 +401,7 @@ window.onload = function(){
           $status = getStatus($doc);
           $desc = getDesc($doc);
             
-          echo "<td><a href=manager.php?do=select&device=$id>$desc</a></td>";
+          echo "<td><a href=\"manager.php?do=select&device=$id\" target=\"_blank\">$desc</a></td>";
           $temp = $device;
           if ($status == 0)
           {
