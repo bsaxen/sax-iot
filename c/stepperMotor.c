@@ -17,9 +17,10 @@ int sw_version = 1;
 // 901 CW ok
 // 902 CCW ok
 // Error
-// 9001 More steps than expected
-// 9002 Failure during calibration, max limit not found
-// 9003 Failure during calibration, min limit not found
+// 9001 CW More steps than expected
+// 9002 CCW More steps than expected
+// 9003 Failure during calibration, max limit not found
+// 9004 Failure during calibration, min limit not found
 //=============================================
 //#include "iotLib.c"
 //================================================
@@ -88,7 +89,7 @@ int stepCCW(int steps,int dd, int force)
   int i;
   digitalWrite(DIR, HIGH);
   digitalWrite(SLEEP, HIGH); // Set the Sleep mode to AWAKE.
-  for(i=0;i<=steps;i++)
+  for(i=0;i<steps;i++)
     {
       delayMicroseconds(200);
       digitalWrite(STEP, HIGH);
@@ -112,7 +113,7 @@ int stepCCW(int steps,int dd, int force)
     }
   digitalWrite(DIR, LOW);
   digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.
-  return i;
+  return steps;
 }
 
 //================================================
@@ -157,16 +158,15 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
           // All steps executed
             if (sw == number_of_steps)
             {
-              current_pos +=  number_of_steps;
               sw = 901;
             }
           // Max position reached, move back from max
             if (sw < number_of_steps)
             {
                sw = stepCCW(99, delay_between_steps,1);
-               current_pos = g_calibrated-sw;
                Serial.println("MAX_LIMIT");             
             }
+            if (sw > number_of_steps) sw = 9001;
         }
         else if(dir == COUNTER_CLOCKWISE)
         {
@@ -175,17 +175,15 @@ int move_stepper(int dir, int step_size, int number_of_step, int delay_between_s
           // All steps executed
             if (sw == number_of_steps)
             {
-              current_pos -=  number_of_steps;
               sw = 902;
             }
           // Min position reached, move back from min
             if (sw < number_of_steps)
             {
                sw = stepCW(99, delay_between_steps,1);
-               current_pos = sw;
                Serial.println("MIN_LIMIT");             
             }
-           if (sw > number_of_steps) sw = 9001;
+            if (sw > number_of_steps) sw = 9002;
         }
         else
             Serial.println( "ERROR: Unknown direction for stepper motor");
@@ -226,7 +224,7 @@ int calibrate()
         else
         {
           Serial.println("ERROR: Calibrate max failed");
-          ok = 9002;
+          ok = 9003;
         }
 
         delay(100);
@@ -239,7 +237,6 @@ int calibrate()
           touch2 = stepCW(99, delay_between_steps,1);
           if (touch2 < 99)
           {
-             current_pos = 0;
              Serial.println( "Released min level");
              ok = touch1;
           }
@@ -247,13 +244,12 @@ int calibrate()
         else
         {
           Serial.println("ERROR: Calibrate min failed");
-          ok = 9003;
+          ok = 9004;
         }
 
         Serial.print( "Calibrate result");
         Serial.println(ok);
-        Serial.print( "Stepper position: ");
-        Serial.println(current_pos);
+  
         return ok;    
 }
 //================================================
@@ -380,11 +376,6 @@ void loop(void){
     g_payload += "\"limit";
     g_payload += "\":\"";
     g_payload += limit;
-    g_payload += "\",";
-    
-    g_payload += "\"position";
-    g_payload += "\":\"";
-    g_payload += current_pos;
     g_payload += "\",";
     
     g_payload += "\"steps";
