@@ -1,10 +1,10 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-05-05
+// Date.......: 2019-05-10
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
-$version = '2019-05-05';
+$version = '2019-05-10';
 //=============================================
 session_start();
 
@@ -616,56 +616,6 @@ $data = array();
 //=========================================================================
 // body
 //=========================================================================
-?>
-<script type="text/javascript">
-
-
-
-window.onload = function(){
-
-    var tid = setInterval(getData, 3000);
-    function getData() {
-        console.log("Getting  data");
-        $.ajax({
-            url:		'ajaxManager.php',
-            /*dataType:	'json',*/
-            dataType:	'text',
-            success:	setData,
-            type:		'GET',
-            data:		{
-                domain: '<?php echo("$sel_domain")?>',
-                device: '<?php echo("$sel_device")?>'
-            }
-        });
-    }
-    function setData(result)
-    {
-        console.log("data!");
-        console.log(result);
-        var resArray = result.split("=");
-        var n = resArray.length;
-        console.log(n);
-
-        var i;
-        var input;
-        for (i = 1; i <= n;i++)
-        {
-          console.log(resArray[i]);
-          var id = 'no';
-          id = id.concat(i.toString());
-          input = document.getElementById(id);
-          input.value = resArray[i];
-          if (resArray[i] == 0)
-            input.style.background = "green";
-          if (resArray[i] > 0)
-            input.style.background = "red";
-        }
-    }
-}
-</script>
-
-
-<?php
       echo("<b>Device Manager $sel_domain $sel_desc $now</b>");
       echo "<div class=\"navbar\">";
 
@@ -731,16 +681,16 @@ window.onload = function(){
                     if (strlen($device) > 2)
                     {
                       $doc = 'http://'.$sel_domain.'/devices/'.$device;
-                      $status = getStatus($doc);
+                      //$status = getStatus($doc);
                       $desc = getDesc($doc);
-                      $temp = $device;
-                      if ($status == 0)
-                      {
-                        echo "<a style=\"background: green;\" href=manager.php?do=select&device=$device>$desc</a>";
-                      }
-                      else {
-                        echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $desc</a>";
-                      }
+                      //$temp = $device;
+                      //if ($status == 0)
+                      //{
+                        echo "<a style=\"background: cornsilk;\" href=manager.php?do=select&device=$device>$desc</a>";
+                      //}
+                      //else {
+                      //  echo "<a style=\"background: red;\" href=manager.php?do=select&device=$device>$temp $desc</a>";
+                      //}
                      }
                    }
           echo "</div></div>";
@@ -772,52 +722,6 @@ window.onload = function(){
 
       echo "</div>";
 
-      // Ajax fields
-      $request = 'http://'.$sel_domain."/gateway.php?do=list_devices";
-      //echo $request;
-      $ctx = stream_context_create(array('http'=>
-       array(
-         'timeout' => 2,  //2 Seconds
-           )
-         ));
-      $res = file_get_contents($request,false,$ctx);
-      $data = explode(":",$res);
-      $num = count($data);
-
-      $nn = 0;
-      echo "<div id=\"status\">";
-      echo "<table>";
-      for ($ii = 0; $ii < $num; $ii++)
-      {
-        echo "<tr>";
-        $id = str_replace(".reg", "", $data[$ii]);
-        if (strlen($id) > 2)
-        {
-          $nn += 1;
-          echo "<td>$nn</td>";
-          $device = $id;
-          
-          //$feedback = restApi('list_feedback',$sel_domain,$device);
-          //echo "<td>$feedback</td>";
-          
-          $doc = 'http://'.$sel_domain.'/devices/'.$device;
-          $status = getStatus($doc);
-          $desc = getDesc($doc);
-            
-          echo "<td><a href=manager.php?do=select&device=$id>$desc</a></td>";
-          $temp = $device;
-          if ($status == 0)
-          {
-            echo("<td><input style=\"background: green;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
-          }
-          else {
-            echo("<td><input style=\"background: red;\" id=\"no$nn\" type=\"text\" name=\"n_no\" size=8 value=$status /></td>");
-          }
-        }
-        echo ("</tr>");
-      }
-     echo "</table>";
-     echo "</div>";
    //=============================================
 
 if ($form_send_action == 1)
