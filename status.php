@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: status.php
-// Date.......: 2019-05-10
+// Date.......: 2019-05-11
 // Author.....: Benny Saxen
 // Description: IoT Status
 //=============================================
@@ -36,6 +36,17 @@ function readDomainUrl($file)
   }
   //echo $url;
   return $url;
+}
+//=============================================
+function addDomain($domain)
+//=============================================
+{
+  echo("[$domain]");
+  $filename = str_replace("/","_",$domain);
+  $filename = $filename.'.domain';
+  $fh = fopen($filename, 'w') or die("Can't add domain $domain");
+  fwrite($fh, "$domain");
+  fclose($fh);
 }
 //=============================================
 function generateRandomString($length = 15)
@@ -142,6 +153,16 @@ if (isset($_GET['do'])) {
 
 }
 
+
+if (isset($_POST['do'])) 
+{
+  $do = $_POST['do'];
+  if ($do == 'add_domain')
+  {
+    $dn = $_POST['domain'];
+    if (strlen($dn) > 2)addDomain($dn);
+  }
+}
 //=============================================
 // Front-End
 //=============================================
@@ -342,6 +363,8 @@ window.onload = function(){
 <?php
       echo("<b>Device Status $sel_domain $now</b>");
       echo "<div class=\"navbar\">";
+              
+        echo "<a href=\"status.php?do=add_domain\">Add Domain</a>";
 
         echo "<div class=\"dropdown\">
             <button class=\"dropbtn\">Select Domain
@@ -416,6 +439,14 @@ window.onload = function(){
      echo "</table>";
      echo "</div>";
    //=============================================
-
+if ($form_add_domain == 1)
+{
+  echo "
+  <form action=\"#\" method=\"post\">
+    <input type=\"hidden\" name=\"do\" value=\"add_domain\">
+    Add Domain<input type=\"text\" name=\"domain\">
+    <input type= \"submit\" value=\"Add Domain\">
+    </form> ";
+}
 echo "</body></html>";
 // End of file
