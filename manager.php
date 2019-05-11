@@ -720,6 +720,8 @@ $data = array();
       echo "<a href=manager.php?do=add_mapping>Add</a>";
       echo "</div></div>";
 
+      echo "<a href=\"status.php\" target=\"_blank\">Status</a>";
+
       echo "</div>";
 
    //=============================================
