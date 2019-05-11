@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-04-14
+// Date.......: 2019-05-11
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -254,6 +254,11 @@ String lib_buildUrlStatic(struct Configuration *c2)
   url += "\"sw";
   url += "\":\"";
   url += c2->conf_sw;
+  url += "\",";
+  
+  url += "\"platform";
+  url += "\":\"";
+  url += c2->conf_platform;
   url += "\",";
   
   url += "\"period";
