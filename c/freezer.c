@@ -84,18 +84,19 @@ void loop()
   char buf[100];
   int  current_temperature;
     
-  int res = lib_decode_freezer(msg);  
+    
+  msg = lib_loop(&co,&da);
+  Serial.println(msg);
+    
+  int res = lib_decode_FREEZER(msg);  
   if (res != 0) 
   {
       co.conf_target_temp = res;
       lib_publishStatic(&co,&da);
-      g_message = "New target temperaure";
+      g_message = "New target temperature";
       lib_publishLog(&co,&da,g_message);
   }
-
-  msg = lib_loop(&co,&da);
-  Serial.println(msg);
-
+    
   sensor.requestTemperatures();
  
   for(int i=0;i<nsensors;i++)
