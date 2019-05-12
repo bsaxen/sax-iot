@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-05-11
+// Date.......: 2019-05-12
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -39,6 +39,7 @@ struct Configuration
   String conf_mac        = "void";
   int conf_library       = lib_version;
   int conf_sw            = 0;
+  int conf_target_temp   = 0;
 };
 
 struct Data
@@ -230,6 +231,11 @@ String lib_buildUrlStatic(struct Configuration *c2)
     url += "\"sensors";
     url += "\":\"";
     url += c2->conf_sensors;
+    url += "\",";
+
+    url += "\"target_temp";
+    url += "\":\"";
+    url += c2->conf_target_temp;
     url += "\",";
   }
   
