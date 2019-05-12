@@ -193,6 +193,20 @@ int lib_decode_STEPPER(String msg)
   return result;
 }
 //=============================================
+int lib_decode_FREEZER(String msg)
+//=============================================
+{
+  char buf[100];
+  int result = 0;
+
+  //msg.toCharArray(buf,100);
+  Serial.print("Decode Freezer:");
+  Serial.println(msg);
+  result = msg.toInt();
+
+  return result;
+}
+//=============================================
 String lib_buildUrlStatic(struct Configuration *c2)
 //=============================================
 {
