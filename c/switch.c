@@ -1,6 +1,6 @@
 //=============================================
 // File.......: switch.c
-// Date.......: 2019-04-10
+// Date.......: 2019-05-12
 // Author.....: Benny Saxen
 // Description:
 int sw_version = 2;
@@ -73,11 +73,11 @@ void loop()
   
   if (event != 0)
   { 
-    payload = "{";
-    payload += "\"status\":\"";
-    payload += g_status;
-    payload += "\"";
-    payload += "}";
+    g_payload = "{";
+    g_payload += "\"status\":\"";
+    g_payload += g_status;
+    g_payload += "\"";
+    g_payload += "}";
     
     lib_publishPayload(&co,&da,g_payload);
    
