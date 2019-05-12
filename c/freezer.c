@@ -83,6 +83,15 @@ void loop()
   char order[10];
   char buf[100];
   int  current_temperature;
+    
+  int res = lib_decode_freezer(msg);  
+  if (res != 0) 
+  {
+      co.conf_target_temp = res;
+      lib_publishStatic(&co,&da);
+      g_message = "New target temperaure";
+      lib_publishLog(&co,&da,g_message);
+  }
 
   msg = lib_loop(&co,&da);
   Serial.println(msg);
