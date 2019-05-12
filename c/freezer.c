@@ -66,6 +66,7 @@ void setup()
   co.conf_password_3 = "dfgdfg";
 
   co.conf_target_temp = -15;
+  co.conf_deviation_temp = 5;
 
   lib_setup(&co, &da);
     
@@ -105,7 +106,7 @@ current_temperature = temps[0];
 switch (g_status)
 {
   case 0:
-    if (current_temperature > co.conf_target_temp)
+    if (current_temperature > co.conf_target_temp + co.conf_deviation_temp)
     {
       digitalWrite(SWITCH_PIN,HIGH);
       g_status = 1;
