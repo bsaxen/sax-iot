@@ -40,6 +40,7 @@ struct Configuration
   int conf_library       = lib_version;
   int conf_sw            = 0;
   int conf_target_temp   = 0;
+  int conf_deviation_temp   = 0;
 };
 
 struct Data
@@ -236,6 +237,11 @@ String lib_buildUrlStatic(struct Configuration *c2)
     url += "\"target_temp";
     url += "\":\"";
     url += c2->conf_target_temp;
+    url += "\",";
+    
+    url += "\"deviation_temp";
+    url += "\":\"";
+    url += c2->conf_deviation_temp;
     url += "\",";
   }
   
