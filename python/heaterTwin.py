@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterTwin.py
 # Author: Benny Saxen
-# Date: 2019-05-10
+# Date: 2019-05-13
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 #
@@ -25,7 +25,7 @@ from iotLib import *
 confile = "heatertwin.conf"
 version = 1
 #=====================================================
-class HeaterTwin:
+class model:
 
    temperature_water_out_ix   = 0
    temperature_water_in_ix    = 1
@@ -43,6 +43,7 @@ class HeaterTwin:
 
    value         = []
    value_prev    = []
+   par_desc      = []
 
    inertia     = 0
    warmcool    = 0
@@ -272,7 +273,7 @@ def getLatestValue(co,dy,ht,ix):
 #===================================================
 # Setup
 #===================================================
-ht = HeaterTwin()
+ht = model()
 lib_setup(co,confile,version)
 
 if co.ndata != 6:
