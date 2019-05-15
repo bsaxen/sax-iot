@@ -687,13 +687,13 @@ def lib_generateRandomString():
    char_set = string.ascii_uppercase + string.digits
    return ''.join(random.sample(char_set*6, 6))
 #===================================================
-def lib_setup(co,confile,version):
+def lib_setup(co,dy,confile,version):
 #===================================================
     lib_readConfiguration(confile,co)
-    lib_publishMyStatic(co)
+    lib_publishMyStatic(co,dy)
     co.mysw = version
     message = '==== setup ===='
-    lib_publishMyLog(co, message)
+    lib_publishMyLog(co,dy, message)
 #===================================================
 def lib_loop(co,dy):
 #===================================================
