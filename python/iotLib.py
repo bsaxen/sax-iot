@@ -121,23 +121,23 @@ dy = ModuleDynamic()
 
 
 #===================================================
-def lib_httpRequest(domain,server,values,dy):
+def lib_httpRequest(domain,server,values):
 #===================================================
     req = 'http://' + domain + '/' + server + '?' + values
     try:
-        t1 = int(round(time.time() * 1000))     
+        #t1 = int(round(time.time() * 1000))     
         response = urllib2.urlopen(req)
         msg = response.read()
-        t2 = int(round(time.time() * 1000))
-        dy.myuplink_time = t2 - t1
-        print ('Message to ' + co.myid + ': ' + msg)
+        #t2 = int(round(time.time() * 1000))
+        #dy.myuplink_time = t2 - t1
+        #print ('Message to ' + co.myid + ': ' + msg)
     except urllib2.URLError as e:
         print (e.reason)
         msg = '-'
         
     return msg
 #===================================================
-def lib_publishMyStatic(co,dy):
+def lib_publishMyStatic(co):
 #===================================================
 
     domain = co.mydomain
@@ -161,7 +161,7 @@ def lib_publishMyStatic(co,dy):
     data['json']  = payload
 
     values = urllib.urlencode(data)
-    msg = lib_httpRequest(domain,server,values,dy)
+    msg = lib_httpRequest(domain,server,values)
     
     return msg
 #===================================================
@@ -183,11 +183,11 @@ def lib_publishMyDynamic(co,dy):
     data['json']     = payload
 
     values = urllib.urlencode(data)
-    msg = lib_httpRequest(domain,server,values,dy)
+    msg = lib_httpRequest(domain,server,values)
     
     return msg
 #===================================================
-def lib_publishMyPayload(co,dy,payload):
+def lib_publishMyPayload(co,payload):
 #===================================================
     msg = '-'
     domain = co.mydomain
@@ -199,11 +199,11 @@ def lib_publishMyPayload(co,dy,payload):
     data['json']     = payload
 
     values = urllib.urlencode(data)
-    msg = lib_httpRequest(domain,server,values,dy)
+    msg = lib_httpRequest(domain,server,values)
     
     return msg
 #===================================================
-def lib_publishMyLog(co,dy,message ):
+def lib_publishMyLog(co,message):
 #===================================================
     msg = '-'
     domain = co.mydomain
@@ -215,7 +215,7 @@ def lib_publishMyLog(co,dy,message ):
     data['log']      = message
 
     values = urllib.urlencode(data)
-    msg = lib_httpRequest(domain,server,values,dy)
+    msg = lib_httpRequest(domain,server,values)
     
     return msg
 #===================================================
@@ -687,13 +687,13 @@ def lib_generateRandomString():
    char_set = string.ascii_uppercase + string.digits
    return ''.join(random.sample(char_set*6, 6))
 #===================================================
-def lib_setup(co,dy,confile,version):
+def lib_setup(co,confile,version):
 #===================================================
     lib_readConfiguration(confile,co)
-    lib_publishMyStatic(co,dy)
+    lib_publishMyStatic(co)
     co.mysw = version
     message = '==== setup ===='
-    lib_publishMyLog(co,dy, message)
+    lib_publishMyLog(co, message)
 #===================================================
 def lib_loop(co,dy):
 #===================================================
