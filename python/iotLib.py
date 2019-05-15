@@ -176,8 +176,8 @@ def lib_publishMyDynamic(co,dy):
     data['id']       = co.myid
     payload  = '{'
     payload += '"counter" : "'   + str(dy.mycounter)       + '",'
-    payload += '"uplink" : "'    + str(dy.myuplink_time)   + '",'
-    payload += '"downlink" : "'  + str(dy.mydownlink_time) + '",'
+    #payload += '"uplink" : "'    + str(dy.myuplink_time)   + '",'
+    #payload += '"downlink" : "'  + str(dy.mydownlink_time) + '",'
     payload += '"errors" : "'    + str(dy.myerrors)        + '"'
     payload += '}'
     data['json']     = payload
