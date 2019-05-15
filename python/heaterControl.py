@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-04-12
+# Date: 2019-05-15
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -26,6 +26,7 @@ class HeaterControl:
 
     bias  = 0.0
     need  = 1
+    pause = 0
 
     temperature_indoor    = 999
     temperature_outdoor   = 999
@@ -88,8 +89,9 @@ def control_algorithm(co,dy,hc):
                 lib_publishMyLog(co, message )
 		
 	    hc.need = 1
+	    hc.pause = 0
             if float(hc.temperature_indoor) > 20.0:
-                hc.need = 0
+                hc.pause = 1
             if float(hc.temperature_indoor) < float(hc.temperature_outdoor):
                 hc.need = 0
 
@@ -106,6 +108,8 @@ def control_algorithm(co,dy,hc):
                 y = coeff2*temp + mconst2
 
             y = y + hc.bias
+	    if ht.pause == 1:
+		y = co.minheat
 #========================================================================
     payload  = '{\n'
     payload += '"mintemp" : "' + str(co.mintemp) + '",\n'
