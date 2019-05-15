@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-05-08
+# Date: 2019-05-15
 # Description: IoT python library
 version = 2
 # =============================================
@@ -121,7 +121,23 @@ dy = ModuleDynamic()
 
 
 #===================================================
-def lib_publishMyStatic(co):
+def lib_httpRequest(domain,server,values,dy):
+#===================================================
+    req = 'http://' + domain + '/' + server + '?' + values
+    try:
+        t1 = int(round(time.time() * 1000))     
+        response = urllib2.urlopen(req)
+        msg = response.read()
+        t2 = int(round(time.time() * 1000))
+        dy.myuplink_time = t2 - t1
+        print ('Message to ' + co.myid + ': ' + msg)
+    except urllib2.URLError as e:
+        print (e.reason)
+        msg = '-'
+        
+    return msg
+#===================================================
+def lib_publishMyStatic(co,dy):
 #===================================================
 
     domain = co.mydomain
@@ -142,18 +158,12 @@ def lib_publishMyStatic(co):
     payload += '"library" : "'  + str(co.mylibrary) + '",'
     payload += '"platform" : "' + str(co.myplatform) + '"'
     payload += '}'
-    data['json']     = payload
+    data['json']  = payload
 
     values = urllib.urlencode(data)
-    req = 'http://' + domain + '/' + server + '?' + values
-    #print req
-    try:
-        response = urllib2.urlopen(req)
-        the_page = response.read()
-        #print 'Message to ' + co.myid + ': ' + the_page
-        #evaluateAction(the_page)
-    except urllib2.URLError as e:
-        print (e.reason)
+    msg = lib_httpRequest(domain,server,values,dy)
+    
+    return msg
 #===================================================
 def lib_publishMyDynamic(co,dy):
 #===================================================
@@ -173,18 +183,8 @@ def lib_publishMyDynamic(co,dy):
     data['json']     = payload
 
     values = urllib.urlencode(data)
-    req = 'http://' + domain + '/' + server + '?' + values
-    #print req
-    try:
-        t1 = int(round(time.time() * 1000))     
-        response = urllib2.urlopen(req)
-        msg = response.read()
-        t2 = int(round(time.time() * 1000))
-        dy.myuplink_time = t2 - t1
-        print ('Message to ' + co.myid + ': ' + msg)
-    except urllib2.URLError as e:
-        print (e.reason)
-
+    msg = lib_httpRequest(domain,server,values,dy)
+    
     return msg
 #===================================================
 def lib_publishMyPayload(co,dy,payload):
@@ -199,21 +199,11 @@ def lib_publishMyPayload(co,dy,payload):
     data['json']     = payload
 
     values = urllib.urlencode(data)
-    req = 'http://' + domain + '/' + server + '?' + values
-    #print req
-    try:
-        t1 = int(round(time.time() * 1000))     
-        response = urllib2.urlopen(req)
-        t2 = int(round(time.time() * 1000))
-        dy.myuplink_time = t2 - t1
-        msg = response.read()
-        #print 'Message to ' + co.myid + ': ' + msg
-    except urllib2.URLError as e:
-        print(e.reason)
-
+    msg = lib_httpRequest(domain,server,values,dy)
+    
     return msg
 #===================================================
-def lib_publishMyLog(co, message ):
+def lib_publishMyLog(co,dy,message ):
 #===================================================
     msg = '-'
     domain = co.mydomain
@@ -225,19 +215,8 @@ def lib_publishMyLog(co, message ):
     data['log']      = message
 
     values = urllib.urlencode(data)
-    req = 'http://' + domain + '/' + server + '?' + values
-    #print req
-    try:
-        t1 = int(round(time.time() * 1000))     
-        response = urllib2.urlopen(req)
-        msg = response.read()
-        t2 = int(round(time.time() * 1000))
-        dy.myuplink_time = t2 - t1
-        #print 'Message to ' + co.myid + ': ' + msg
-        #evaluateAction(the_page)
-    except urllib2.URLError as e:
-        print (e.reason)
-
+    msg = lib_httpRequest(domain,server,values,dy)
+    
     return msg
 #===================================================
 def lib_createMyUrl(co):
