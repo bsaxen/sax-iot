@@ -129,7 +129,7 @@ def control_algorithm(co,dy,hc):
     payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
     payload += '}\n'
 
-    lib_publishMyPayload(co,dy,payload)
+    lib_publishMyPayload(co,payload)
     msg = lib_publishMyDynamic(co,dy)
 
     if ":" in msg:
