@@ -1,7 +1,7 @@
 # =============================================
 # File: nilmTwin.py
 # Author: Benny Saxen
-# Date: 2019-05-08
+# Date: 2019-05-17
 # Description:
 # Nilm Station 1
 # data 0 = nilm period
@@ -128,7 +128,7 @@ while True:
     payload += '"wh2": "'      + str(wh2)     + '"\n'
     payload += '}\n'
 
-    msg = lib_publishMyPayload(co,dy,payload)
+    msg = lib_publishMyPayload(co,payload)
 
     lib_commonAction(co,msg)
 
