@@ -231,7 +231,7 @@ def simulate(co,dy,ht):
     payload += '"temperature_target"    : "' + str(ht.temperature_target) + '"\n'
     payload += '}\n'
 
-    lib_publishMyPayload(co,dy,payload)
+    lib_publishMyPayload(co,payload)
     msg = lib_publishMyDynamic(co,dy)
 
     if ":" in msg:
