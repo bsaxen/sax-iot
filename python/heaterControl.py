@@ -1,7 +1,7 @@
 # =============================================
 # File: heaterControl.py
 # Author: Benny Saxen
-# Date: 2019-05-15
+# Date: 2019-05-16
 # Description: heater control algorithm
 # 90 degrees <=> 1152/4 steps = 288
 # Configuration:
@@ -108,7 +108,7 @@ def control_algorithm(co,dy,hc):
                 y = coeff2*temp + mconst2
 
             y = y + hc.bias
-	    if ht.pause == 1:
+	    if hc.pause == 1:
 		y = co.minheat
 #========================================================================
     payload  = '{\n'
