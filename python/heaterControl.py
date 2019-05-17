@@ -125,6 +125,7 @@ def control_algorithm(co,dy,hc):
     payload += '"errors" : "' + str(dy.myerrors) + '",\n'
     payload += '"stop" : "' + str(dy.mystop) + '",\n'
     payload += '"bias" : "' + str(hc.bias) + '",\n'
+    payload += '"pause" : "' + str(hc.pause) + '",\n'
     payload += '"temperature_outdoor" : "' + str(hc.temperature_outdoor) + '",\n'
     payload += '"temperature_indoor" : "' + str(hc.temperature_indoor) + '"\n'
     payload += '}\n'
