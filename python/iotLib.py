@@ -88,7 +88,10 @@ class Configuration:
     maxenergy = 0
     inertia   = 480
     warmcool  = 720
-
+    
+    # Heater Control
+    target_temp = 20
+    
     # database access
     dbhost     = '192.168.1.85'
     dbname     = 'gow'
@@ -407,8 +410,12 @@ def lib_readConfiguration(confile,c1):
                 if word[0] == 'c_inertia':
                     c1.inertia         = word[1]
                 if word[0] == 'c_maxenergy':
-                    c1.maxenergy        = word[1]
-
+                    c1.maxenergy       = word[1]
+                    
+                # Heater Twin
+                if word[0] == 'c_target_temp':
+                    c1.target_temp     = word[1]
+                    
                 # Database access
                 if word[0] == 'c_dbhost':
                     c1.dbhost         = word[1]
@@ -480,6 +487,7 @@ def lib_readConfiguration(confile,c1):
         fh.write('c_warmcool     720\n')
         fh.write('c_inertia      480\n')
         fh.write('c_maxenergy    4.0\n')
+        fh.write('c_target_temp  20.0\n')
 
         fh.write('#c_send         domain device\n')
 
