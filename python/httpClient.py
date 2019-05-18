@@ -21,7 +21,7 @@ while True:
 
     payload = '{"test":"10043","test2": "453"}'
     print payload
-    msg = lib_publishMyPayload(co,dy,payload)
+    msg = lib_publishMyPayload(co,payload)
 
     lib_commonAction(co,msg)
 
