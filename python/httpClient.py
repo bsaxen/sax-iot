@@ -20,7 +20,6 @@ while True:
     print payload
     msg = lib_publishMyPayload(co,payload)
     lib_commonAction(co,msg)
-    time.sleep(float(co.myperiod))
 #===================================================
 # End of file
 #===================================================
