@@ -12,6 +12,7 @@ import datetime
 import random
 import string
 import json
+import socket
 
 STATE_OFF     = 1
 STATE_ON      = 2
