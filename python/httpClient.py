@@ -1,7 +1,7 @@
 # =============================================
 # File: httpClient.py
 # Author: Benny Saxen
-# Date: 2019-03-18
+# Date: 2019-05-18
 # Description:
 # =============================================
 from iotLib import *
@@ -15,9 +15,11 @@ lib_setup(co,confile,version)
 # Loop
 #===================================================
 while True:
-    lib_increaseMyCounter(co,dy)
 
-    msg = lib_publishMyDynamic(co,dy)
+    lib_loop(co,dy)   
+    #lib_increaseMyCounter(co,dy)
+
+    #msg = lib_publishMyDynamic(co,dy)
 
     payload = '{"test":"10043","test2": "453"}'
     print payload
