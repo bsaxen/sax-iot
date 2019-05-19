@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #=============================================
 # File.......: mysql.py
-# Date.......: 2019-04-25
+# Date.......: 2019-05-19
 # Author.....: Benny Saxen
 # Description:
 #=============================================
@@ -62,7 +62,7 @@ for num in range(0,co.nds):
 
     if source == 'dynamic':
         error = lib_readDynamicParam(co,domain,device,param)
-    else:
+    if source == 'payload':
         error = lib_readPayloadParam(co,domain,device,param)
         
     if error == 0:
