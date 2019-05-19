@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-05-18
+# Date: 2019-05-19
 # Description: IoT python library
 version = 2
 # =============================================
@@ -641,7 +641,11 @@ def lib_readPayloadParam(co,domain,device,par):
     co.myresult = 0
     error = lib_getPayloadDeviceJson(co,domain,device)
     if error == 0:
-        co.myresult = co.myresult['msg'][par]
+        try:
+            co.myresult = co.myresult['msg'][par]
+        except:
+            co.myresult = 0
+            error = 1
     else:
         print (error)
     return error
