@@ -1,6 +1,6 @@
 //=============================================
 // File.......: iotLib.c
-// Date.......: 2019-05-12
+// Date.......: 2019-06-09
 // Author.....: Benny Saxen
 // Description:
 int lib_version = 3;
@@ -8,6 +8,10 @@ int lib_version = 3;
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+
+#include <ESP8266HTTPClient.h>
+
+#include <WiFiClient.h>
 
 ESP8266WiFiMulti WiFiMulti;
 
@@ -90,7 +94,7 @@ void lib_setup(struct Configuration *co,struct Data *da)
   for (uint8_t t = 3; t > 0; t--) {
     Serial.printf("[SETUP] WAIT %d...\n", t);
     Serial.flush();
-    delay(1000);
+    delay(800);
   } 
 
   WiFi.mode(WIFI_STA);
@@ -105,8 +109,8 @@ void lib_setup(struct Configuration *co,struct Data *da)
   
   co->conf_ssid_1.toCharArray(ssid,100);
   co->conf_password_1.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
-
+  //WiFiMulti.addAP(ssid, password);
+  WiFiMulti.addAP("bridge", "2342345");
   co->conf_ssid_2.toCharArray(ssid,100);
   co->conf_password_2.toCharArray(password,100);
   WiFiMulti.addAP(ssid, password);
@@ -389,12 +393,16 @@ String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String c
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
   const int httpPort = 80;
+  
+  Serial.println(co->conf_domain);
+  
   if (!client.connect(co->conf_domain,httpPort)) {
     Serial.println("connection failed");
     da->fail += 1;
     return sub;
   }
-
+  Serial.println(cur_url);
+  
   // This will send the request to the server
   t1 = millis();
   client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
