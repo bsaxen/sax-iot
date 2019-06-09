@@ -58,13 +58,13 @@ void setup()
   co.conf_server     = "gateway.php";
   
   strcpy(co.conf_ssid_1,"bridge");
-  strcpy(co.conf_password_1,"6301166614");
+  strcpy(co.conf_password_1,"1234");
   
-  //co.conf_ssid_2     = "bridge";
-  //co.conf_password_2 = "6301166614";
-  
-  //co.conf_ssid_3     = "bridge";
-  //co.conf_password_3 = "6301166614";
+  strcpy(co.conf_ssid_2,"bridge");
+  strcpy(co.conf_password_2,"1234");
+    
+  strcpy(co.conf_ssid_3,"bridge");
+  strcpy(co.conf_password_3,"1234");
 
   co.conf_target_temp = -15;
   co.conf_deviation_temp = 5;
