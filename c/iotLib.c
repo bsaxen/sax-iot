@@ -26,14 +26,14 @@ struct Configuration
   String conf_desc       = "your_description";
   String conf_platform   = "esp8266";
   
-  String conf_ssid_1     = "bridge";
-  String conf_password_1 = "qweqwe";
+  char conf_ssid_1[16]     = "bridge";
+  char conf_password_1[16] = "qweqwe";
   
-  String conf_ssid_2     = "bridge";
-  String conf_password_2 = "qweqwe";
+  char conf_ssid_2[16]     = "bridge";
+  char conf_password_2[16] = "qweqwe";
   
-  String conf_ssid_3     = "bridge";
-  String conf_password_3 = "qweqwe";
+  char conf_ssid_3[16]     = "bridge";
+  char conf_password_3[16] = "qweqwe";
   
   String conf_domain     = "iot.simuino.com";
   String conf_server     = "gateway.php";
@@ -107,17 +107,15 @@ void lib_setup(struct Configuration *co,struct Data *da)
   Serial.println(co->conf_ssid_2);
   Serial.println(co->conf_ssid_3);
   
-  co->conf_ssid_1.toCharArray(ssid,100);
-  co->conf_password_1.toCharArray(password,100);
+  //co->conf_ssid_1.toCharArray(ssid,100);
+  //co->conf_password_1.toCharArray(password,100);
+  WiFiMulti.addAP(co->conf_ssid_1, co->conf_password_1);
+  WiFiMulti.addAP(co->conf_ssid_2, co->conf_password_2);
+  WiFiMulti.addAP(co->conf_ssid_3, co->conf_password_3);
+  //WiFiMulti.addAP("bridge", "6301166614");
+  //co->conf_ssid_2.toCharArray(ssid,100);
+  //co->conf_password_2.toCharArray(password,100);
   //WiFiMulti.addAP(ssid, password);
-  WiFiMulti.addAP("bridge", "2342345");
-  co->conf_ssid_2.toCharArray(ssid,100);
-  co->conf_password_2.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
-
-  co->conf_ssid_3.toCharArray(ssid,100);
-  co->conf_password_3.toCharArray(password,100);
-  WiFiMulti.addAP(ssid, password);
   
   da->counter = 0;
   co->conf_mac = WiFi.macAddress();
