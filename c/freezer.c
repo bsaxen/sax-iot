@@ -7,6 +7,7 @@ int sw_version = 1;
 // Switch control pin D2 pin (GPIO 04)
 // 4.7kOhm between signal and Vcc
 // Problem access port: sudo chmod 666 /dev/ttyUSB0
+// Set target temperature with temp + 100, or temp - 100
 //=============================================
 // Configuration
 //=============================================
@@ -56,14 +57,14 @@ void setup()
   co.conf_domain     = "iot.simuino.com";
   co.conf_server     = "gateway.php";
   
-  co.conf_ssid_1     = "bridge";
-  co.conf_password_1 = "6301166614";
+  strcpy(co.conf_ssid_1,"bridge");
+  strcpy(co.conf_password_1,"6301166614");
   
-  co.conf_ssid_2     = "bridge";
-  co.conf_password_2 = "6301166614";
+  //co.conf_ssid_2     = "bridge";
+  //co.conf_password_2 = "6301166614";
   
-  co.conf_ssid_3     = "bridge";
-  co.conf_password_3 = "6301166614";
+  //co.conf_ssid_3     = "bridge";
+  //co.conf_password_3 = "6301166614";
 
   co.conf_target_temp = -15;
   co.conf_deviation_temp = 5;
@@ -97,7 +98,7 @@ void loop()
     int res = lib_decode_FREEZER(msg);
     if(res < 0 )res = res + 100;  
     if(res > 0 )res = res - 100;  
-    Serial.print("target temp=");Serial.println(res);
+    Serial.print("target temp");Serial.println(res);
     if (res != 0) 
     {
       co.conf_target_temp = res;
@@ -169,6 +170,10 @@ switch (g_status)
         g_payload += "\",";
     }
   }
+  g_payload += "\"target\":\"";
+  g_payload += co.conf_target_temp;
+  g_payload += "\",";
+
   g_payload += "\"status\":\"";
   g_payload += g_status;
   g_payload += "\"";
