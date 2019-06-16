@@ -1,6 +1,6 @@
 //=============================================
 // File.......: freezer.c
-// Date.......: 2019-05-12
+// Date.......: 2019-06-16
 // Author.....: Benny Saxen
 int sw_version = 1;
 // Temperature Signal from D1 pin (GPIO 05).
@@ -66,8 +66,8 @@ void setup()
   strcpy(co.conf_ssid_3,"bridge");
   strcpy(co.conf_password_3,"1234");
 
-  co.conf_target_temp = -15;
-  co.conf_deviation_temp = 5;
+  co.conf_target_temp = -18;
+  co.conf_deviation_temp = 2;
 
   lib_setup(&co, &da);
     
@@ -138,7 +138,7 @@ switch (g_status)
 
   case 1:
     Serial.println("Compressor is ON");
-    if (current_temperature <= co.conf_target_temp)
+    if (current_temperature <= co.conf_target_temp - co.conf_deviation_temp)
     {
       Serial.println("Freezer temperature ok  - turn off compressor");
       digitalWrite(SWITCH_PIN,HIGH);
