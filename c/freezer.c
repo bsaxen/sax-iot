@@ -173,6 +173,10 @@ switch (g_status)
   g_payload += "\"target\":\"";
   g_payload += co.conf_target_temp;
   g_payload += "\",";
+    
+  g_payload += "\"deviation\":\"";
+  g_payload += co.conf_deviation_temp;
+  g_payload += "\",";
 
   g_payload += "\"status\":\"";
   g_payload += g_status;
