@@ -1,0 +1,120 @@
+//=============================================
+// File.......: freezer_arduino_no_com.c
+// Date.......: 2019-10-13
+// Author.....: Benny Saxen
+int sw_version = 1;
+// Description: Signal from D5 pin, Arduino
+// 4.7kOhm between signal and Vcc
+//=============================================
+// Configuration
+//=============================================
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 5 // Pin for connecting one wire sensor
+#define TEMPERATURE_PRECISION 12
+#define SWITCH_PIN 4 // Control relay switch
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensor(&oneWire);
+DeviceAddress device[10];
+int nsensors = 0;
+int g_status = 0; // Compressor OFF
+float target_temp = -18.0;
+float deviation_temp = 2.0; 
+float temps[10];
+//=============================================
+void SetUpTemperatureSensors()
+//=============================================
+{
+    pinMode(ONE_WIRE_BUS, INPUT);
+    sensor.begin();
+    nsensors = sensor.getDeviceCount();
+    if(nsensors > 0)
+    {
+        for(int i=0;i<nsensors;i++)
+        {
+            sensor.getAddress(device[i], i);
+            sensor.setResolution(device[i], TEMPERATURE_PRECISION);
+        }
+    }
+}
+//=============================================
+void setup()
+//=============================================
+{
+  Serial.begin(9600);
+    
+  SetUpTemperatureSensors();
+  Serial.println(nsensors);
+  temps[0] = -15.0;
+}
+//=============================================
+void loop()
+//=============================================
+{
+  String msg;
+  
+  int i;
+  char order[10];
+  char buf[100];
+
+  //Retrieve one or more temperature values
+  sensor.requestTemperatures();
+  //Loop through results and publish
+  for(int i=0;i<nsensors;i++)
+  {
+     //float temperature = sensor.getTempCByIndex(i);
+      float temperature = sensor.getTempC(device[i]);
+      if (temperature > -100) // filter out bad values , i.e. -127
+      {
+        temps[i] = temperature;
+        Serial.println(temperature);
+      }
+  }
+nsensors = 1;
+
+if (nsensors > 0)
+{
+  float current_temperature = temps[0];
+
+  switch (g_status)
+  {
+    case 0:
+      Serial.print("Compressor is OFF");Serial.println(current_temperature);
+      temps[0] = temps[0] + 0.1;
+      if (current_temperature > target_temp + deviation_temp)
+      {
+        Serial.println("Freezer to warm  - turn on compressor");
+        digitalWrite(SWITCH_PIN,LOW);
+        g_status = 1;
+      }
+      break;
+
+    case 1:
+      Serial.print("Compressor is ON");Serial.println(current_temperature);
+      temps[0] = temps[0] - 0.1;
+      if (current_temperature <= target_temp - deviation_temp)
+      {
+        Serial.println("Freezer temperature ok  - turn off compressor");
+        digitalWrite(SWITCH_PIN,HIGH);
+        g_status = 0;
+      }  
+      break; 
+
+    default:
+      Serial.println("Compressor is UNKNOWN");
+      Serial.println("Default Switch - shall not happen!");
+      digitalWrite(SWITCH_PIN,HIGH);
+      g_status = 0;
+      break;   
+  }
+}
+else
+{
+  Serial.println("no temperature sensors");
+}
+  delay(1000);
+}
+//=============================================
+// End of File
+//=============================================
