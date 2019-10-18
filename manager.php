@@ -1,10 +1,10 @@
 <?php
 //=============================================
 // File.......: manager.php
-// Date.......: 2019-05-10
+// Date.......: 2019-10-18
 // Author.....: Benny Saxen
 // Description: IoT Device Manager
-$version = '2019-05-10';
+$version = '2019-10-18';
 //=============================================
 session_start();
 
@@ -286,6 +286,7 @@ function sendMessage($url,$device,$msg,$tag)
 {
   echo "Send message $msg tag=$tag to $url/$device<br>";
   $call = 'http://'.$url.'/gateway.php?do=feedback&id='.$device.'&msg='.$msg.'&tag='.$tag;
+  echo "$call<br>"
   $res = file_get_contents($call);
 }
 //=============================================
