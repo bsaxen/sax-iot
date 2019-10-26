@@ -1,6 +1,6 @@
 //=============================================
-// File.......: freezer_arduino_no_com.c
-// Date.......: 2019-10-13
+// File.......: freezer_arduino.c
+// Date.......: 2019-10-26
 // Author.....: Benny Saxen
 int sw_version = 1;
 // Description: Signal from D5 pin, Arduino
@@ -8,11 +8,16 @@ int sw_version = 1;
 //=============================================
 // Configuration
 //=============================================
+//#include "lib.c"
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #define ONE_WIRE_BUS 5 // Pin for connecting one wire sensor
 #define TEMPERATURE_PRECISION 12
 #define SWITCH_PIN 4 // Control relay switch
+#define COMPRESSOR_PIN 12 // LED
+#define ERROR_PIN 11 // LED
+#define LIVE_PIN 10 // LED
+
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensor(&oneWire);
@@ -26,6 +31,7 @@ float temps[10];
 void SetUpTemperatureSensors()
 //=============================================
 {
+
     pinMode(ONE_WIRE_BUS, INPUT);
     sensor.begin();
     nsensors = sensor.getDeviceCount();
@@ -42,11 +48,19 @@ void SetUpTemperatureSensors()
 void setup()
 //=============================================
 {
+  pinMode(COMPRESSOR_PIN, OUTPUT);
+  pinMode(ERROR_PIN, OUTPUT);
+  pinMode(LIVE_PIN, OUTPUT);
+  pinMode(SWITCH_PIN, OUTPUT);
+
   Serial.begin(9600);
-    
+  digitalWrite(SWITCH_PIN,LOW);
+  digitalWrite(COMPRESSOR_PIN,LOW);
+  digitalWrite(ERROR_PIN,LOW);
+  digitalWrite(LIVE_PIN,LOW);
+  
   SetUpTemperatureSensors();
   Serial.println(nsensors);
-  temps[0] = -15.0;
 }
 //=============================================
 void loop()
@@ -58,6 +72,11 @@ void loop()
   char order[10];
   char buf[100];
 
+  digitalWrite(LIVE_PIN, HIGH);
+  delay(300);
+  digitalWrite(LIVE_PIN, LOW);
+  delay(300);
+
   //Retrieve one or more temperature values
   sensor.requestTemperatures();
   //Loop through results and publish
@@ -65,14 +84,20 @@ void loop()
   {
      //float temperature = sensor.getTempCByIndex(i);
       float temperature = sensor.getTempC(device[i]);
+      //temperature = temps[0];
+      Serial.println(temperature);
       if (temperature > -100) // filter out bad values , i.e. -127
       {
+        digitalWrite(ERROR_PIN, LOW);
         temps[i] = temperature;
-        Serial.println(temperature);
+        //Serial.println(temperature);
+      }
+      else
+      {
+          digitalWrite(ERROR_PIN, HIGH);
       }
   }
-nsensors = 1;
-
+ 
 if (nsensors > 0)
 {
   float current_temperature = temps[0];
@@ -80,24 +105,26 @@ if (nsensors > 0)
   switch (g_status)
   {
     case 0:
-      Serial.print("Compressor is OFF");Serial.println(current_temperature);
-      temps[0] = temps[0] + 0.1;
+      Serial.print("Compressor is OFF ");
+
       if (current_temperature > target_temp + deviation_temp)
       {
-        Serial.println("Freezer to warm  - turn on compressor");
+        Serial.println(" Freezer to warm  - turn on compressor");
         digitalWrite(SWITCH_PIN,LOW);
         g_status = 1;
+        digitalWrite(COMPRESSOR_PIN, HIGH);
       }
       break;
 
     case 1:
-      Serial.print("Compressor is ON");Serial.println(current_temperature);
-      temps[0] = temps[0] - 0.1;
+      Serial.print("Compressor is ON ");
+  
       if (current_temperature <= target_temp - deviation_temp)
       {
-        Serial.println("Freezer temperature ok  - turn off compressor");
+        Serial.println(" Freezer temperature ok  - turn off compressor");
         digitalWrite(SWITCH_PIN,HIGH);
         g_status = 0;
+        digitalWrite(COMPRESSOR_PIN, LOW);
       }  
       break; 
 
@@ -105,6 +132,9 @@ if (nsensors > 0)
       Serial.println("Compressor is UNKNOWN");
       Serial.println("Default Switch - shall not happen!");
       digitalWrite(SWITCH_PIN,HIGH);
+      digitalWrite(ERROR_PIN, HIGH);
+      delay(300);
+      digitalWrite(ERROR_PIN, LOW);
       g_status = 0;
       break;   
   }
@@ -112,6 +142,9 @@ if (nsensors > 0)
 else
 {
   Serial.println("no temperature sensors");
+  digitalWrite(ERROR_PIN, HIGH);
+  delay(2000);
+  digitalWrite(ERROR_PIN, LOW);
 }
   delay(1000);
 }
