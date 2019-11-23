@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-05-06
+// Date.......: 2019-11-23
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -507,7 +507,7 @@ if (isset($_GET['do']))
           $obj->msg_payload = $_GET['json'];
         }
         savePayloadMsg($obj);
-        createTriplets($obj);
+        //createTriplets($obj);
         //echo readFeedbackFileList($obj->id);
       }
 
