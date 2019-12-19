@@ -1,7 +1,7 @@
 # =============================================
 # File: iotLib.py
 # Author: Benny Saxen
-# Date: 2019-05-19
+# Date: 2019-12-19
 # Description: IoT python library
 version = 2
 # =============================================
@@ -23,8 +23,8 @@ MODE_ONLINE   = 2
 CLOCKWISE        = 1
 COUNTERCLOCKWISE = 2
 
-DECREASE = 2
-INCREASE = 1
+DECREASE = 1
+INCREASE = 2
 
 class Datastreams:
     no        = []
