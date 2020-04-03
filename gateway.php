@@ -417,7 +417,7 @@ if (isset($_GET['do']))
       $dir = 'devices/'.$obj->id;
       if (is_dir($dir)) $ok = 1;
       $file = 'register/'.$obj->id.'.reg';
-      if (file_exists($file)) $0k += 10;
+      if (file_exists($file)) $ok += 10;
 
       if ($ok != 11) // !
       {
