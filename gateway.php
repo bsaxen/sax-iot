@@ -1,7 +1,7 @@
 <?php
 //=============================================
 // File.......: gateway.php
-// Date.......: 2019-11-23
+// Date.......: 2020-04-03
 // Author.....: Benny Saxen
 // Description: IoT Gateway
 //=============================================
@@ -415,11 +415,11 @@ if (isset($_GET['do']))
 
       $ok = 0;
       $dir = 'devices/'.$obj->id;
-      if (is_dir($dir)) $ok++;
+      if (is_dir($dir)) $ok = 1;
       $file = 'register/'.$obj->id.'.reg';
-      if (file_exists($file)) $ok++;
+      if (file_exists($file)) $0k += 10;
 
-      if ($ok == 0) // New device - register!
+      if ($ok != 11) // !
       {
          mkdir($dir, 0777, true);
         //===========================================
@@ -437,7 +437,7 @@ if (isset($_GET['do']))
         fwrite($doc, "$gs_ts $ts $obj->id");
         fclose($doc);
       }
-      if ($ok == 1) // un-complete register
+      if ($ok == 99) // un-complete register
       {
         $error = 3;
         echo "Error: register broken";
