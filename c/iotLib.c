@@ -1,475 +1,435 @@
 //=============================================
-// File.......: stepperMotor.c
-// Date.......: 2019-12-14
-int sw_version = 1;
+// File.......: iotLib.c
+// Date.......: 2019-06-09
 // Author.....: Benny Saxen
-//=============================================
 // Description:
-// Note: CW, CCW orientation is from stepper motor facing axis side
-// Message Api:
-// move,dir,step-size,steps,delay  example: 1,1,40,5
-// reset                      reset position to zero
-// reboot
-// period,x                   set period to x seconds
-// 90 degrees <=> 1152/4 steps = 288
+int lib_version = 3;
 //=============================================
-// Debug Codes
-//
-// Normal 
-// 801 Max/Min limit reached
-// 802 Max/Min limit released
-// 803 Min/Max limit reached
-// 804 Min/Max limit released
-// 805 Unknow limit detected
-// 901 CW ok
-// 902 CCW ok
-// Error
-// 9003 Failure during calibration, max limit not found
-// 9004 Failure during calibration, min limit not found
-// 9005 Failure during calibration, min and max limit not found
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
+#include <ESP8266HTTPClient.h>
+
+#include <WiFiClient.h>
+
+ESP8266WiFiMulti WiFiMulti;
+
+struct Configuration
+{
+  String conf_id         = "x";
+  int conf_period        = 10;
+  int conf_wrap          = 999999;
+  int conf_feedback      = 1;
+  String conf_title      = "title";
+  String conf_tags       = "tag1";
+  String conf_desc       = "your_description";
+  String conf_platform   = "esp8266";
+  
+  char conf_ssid_1[16]     = "bridge";
+  char conf_password_1[16] = "qweqwe";
+  
+  char conf_ssid_2[16]     = "bridge";
+  char conf_password_2[16] = "qweqwe";
+  
+  char conf_ssid_3[16]     = "bridge";
+  char conf_password_3[16] = "qweqwe";
+  
+  String conf_domain     = "iot.simuino.com";
+  String conf_server     = "gateway.php";
+ 
+  int conf_kwh_pulses    = 0;
+  int conf_sensors       = 0;
+  String conf_mac        = "void";
+  int conf_library       = lib_version;
+  int conf_sw            = 0;
+  int conf_target_temp   = 0;
+  int conf_deviation_temp   = 0;
+};
+
+struct Data
+{
+  int counter;
+  int rssi;
+  int fail;
+  int latency;
+  String fail_msg;
+  String ssid;
+};
+
+struct Configuration co;
+struct Data da;
 //=============================================
-//#include "iotLib.c"
-//================================================
-// Globals
-//================================================
-int current_pos       = 0;
-int FULL_STEP         = 1;
-int HALF_STEP         = 2;
-int QUARTER_STEP      = 3;
-int CLOCKWISE         = 1; // Increase
-int COUNTER_CLOCKWISE = 2; // Decrease
 
-int DIR    = 4;   // D2
-int STEP   = 5;   // D1
-int SLEEP  = 12;  // D6
-int MS1    = 13;  // D7
-int MS2    = 14;  // D5
-int LIMIT  = 15;  // D8
-int MINMAX = 10;  // S3
+String g_payload = "{\"no_data\":\"0\"}";
+String g_message = "nothing";
 
-int dir = 0;
-int step_size = FULL_STEP;
-int number_of_steps = 0;
-int delay_between_steps = 10;
-int limit = 901;
-int g_calibrated = 0;
-//================================================
-int stepCW(int steps,int dd, int force)
-//================================================
+//=============================================
+String lib_loop(struct Configuration *co,struct Data *da)
+//=============================================
 {
-  int i;
-  digitalWrite(DIR, LOW);
-  digitalWrite(SLEEP, HIGH); // Set the Sleep mode to AWAKE.
-  for(i=0;i<=steps;i++)
-    {
-      delayMicroseconds(200);
-      digitalWrite(STEP, HIGH);
-      delay(dd);
-      digitalWrite(STEP, LOW);
-      delay(dd);
-      if (digitalRead(LIMIT) == HIGH && force == 0) 
-      {
-        digitalWrite(MINMAX, HIGH);
-        digitalWrite(DIR, LOW);
-        digitalWrite(SLEEP, LOW);
-        return 801;
-      }
-      if (digitalRead(LIMIT) == LOW && force == 1)
-      {
-        digitalWrite(MINMAX, LOW);
-        digitalWrite(DIR, LOW);
-        digitalWrite(SLEEP, LOW);
-        return 804;
-      }
-    }
-  digitalWrite(DIR, LOW);
-  digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.Serial.println
-  return steps;
-}
-
-//================================================
-int stepCCW(int steps,int dd, int force)
-//================================================
-
-{
-  int i;
-  digitalWrite(DIR, HIGH);
-  digitalWrite(SLEEP, HIGH); // Set the Sleep mode to AWAKE.
-  for(i=0;i<steps;i++)
-    {
-      delayMicroseconds(200);
-      digitalWrite(STEP, HIGH);
-      delay(dd);
-      digitalWrite(STEP, LOW);
-      delay(dd);
-      if (digitalRead(LIMIT) == HIGH && force == 0)
-      {
-        digitalWrite(MINMAX, HIGH);
-        digitalWrite(DIR, LOW);
-        digitalWrite(SLEEP, LOW);
-        return 803;
-      }
-      if (digitalRead(LIMIT) == LOW && force == 1)
-      {
-        digitalWrite(MINMAX, LOW);
-        digitalWrite(DIR, LOW);
-        digitalWrite(SLEEP, LOW);
-        return 802;
-      }
-    }
-  digitalWrite(DIR, LOW);
-  digitalWrite(SLEEP, LOW); // Set the Sleep mode to SLEEP.
-  return steps;
-}
-
-//================================================
-int move_stepper(int dir, int step_size, int number_of_step, int delay_between_steps){
-//================================================
-        int sw = 0;
-
-        Serial.print( " dir=");Serial.println( dir);
-        Serial.print( " step_size=");Serial.println( step_size);
-        Serial.print( " steps=");Serial.println( number_of_steps);
-        Serial.print( " delay=");Serial.println( delay_between_steps);
-
-        if(step_size == FULL_STEP)
-        {
-            Serial.println( "FULL STEP");
-            digitalWrite(MS1,LOW);
-            digitalWrite(MS2,LOW);
-        }
-        else if (step_size == HALF_STEP)
-        {
-            Serial.println( "HALF STEP");
-            digitalWrite(MS1,HIGH);
-            digitalWrite(MS2,LOW);
-        }
-        else if (step_size == QUARTER_STEP)
-        {
-            Serial.println( "QUARTER STEP");
-            digitalWrite(MS1,LOW);
-            digitalWrite(MS2,HIGH);
-        }
-        else // default fullstep
-        {
-            Serial.println( "DEFAULT FULL STEP");
-            digitalWrite(MS1,LOW);
-            digitalWrite(MS2,LOW);
-        }
-
-        if(dir == CLOCKWISE)
-        {
-            Serial.println( "Stepper motor CW -->");
-            sw = stepCW(number_of_steps, delay_between_steps,0);
-          // All steps executed
-            if (sw == number_of_steps)
-            {
-              sw = 901;
-            }
-          // Max position reached, move back from max
-            if (sw == 801)
-            {
-               sw = stepCCW(99, delay_between_steps,1);
-               Serial.println("MAX_LIMIT");             
-            }
-        }
-        else if(dir == COUNTER_CLOCKWISE)
-        {
-            Serial.println( "Stepper motor CCW  <--");
-            sw = stepCCW(number_of_steps, delay_between_steps,0);
-          // All steps executed
-            if (sw == number_of_steps)
-            {
-              sw = 902;
-            }
-          // Min position reached, move back from min
-            if (sw == 803)
-            {
-               sw = stepCW(99, delay_between_steps,1);
-               Serial.println("MIN_LIMIT");             
-            }
-        }
-        else
-            Serial.println( "ERROR: Unknown direction for stepper motor");
-
-        digitalWrite(MS1,LOW);
-        digitalWrite(MS2,LOW);
-        Serial.println( "Stepper sleeping");
-        
-        Serial.print( "current position: ");
-        Serial.println(current_pos);
-        return sw;
-}
-//================================================
-int calibrate()
-// Returns number of steps in working interval
-//================================================
-{
-        int touch1 = 0;
-        int touch2 = 0;
-        int ok = 0;
-        int both = 0;
-  
-        Serial.println( "FULL STEP");
-        digitalWrite(MS1,LOW);
-        digitalWrite(MS2,LOW);
-
-        Serial.println( "Calibrate max level...");
-        touch1 = stepCW(400, delay_between_steps,0);
-        if (touch1 == 801) 
-        {
-          Serial.println("MAX_LIMIT reached");
-          
-          touch2 = stepCCW(99, delay_between_steps,1);
-          if (touch2 == 802)
-          {
-             Serial.println( "Released max level");
-          }
-        }
-        else
-        {
-          Serial.println("ERROR: Calibrate max failed");
-          ok = 9003;
-          both = 1;
-        }
-
-        delay(100);
-        
-        Serial.println( "Calibrate zero level...");
-        touch1 = stepCCW(400, delay_between_steps,0);
-        if (touch1 == 803)
-        {
-          Serial.println("MIN_LIMIT reached");
-          touch2 = stepCW(99, delay_between_steps,1);
-          if (touch2 == 804)
-          {
-             Serial.println( "Released min level");
-             ok = touch2;
-          }
-        }
-        else
-        {
-          Serial.println("ERROR: Calibrate min failed");
-          ok = 9004;
-          both += 1;
-        }
-
-        if (both == 2) ok = 9005;
-        Serial.print( "Calibrate result");
-        Serial.println(ok);
-
-        // Return to default operation position = mid interval
-        Serial.println( "Calibrate max level...");
-        touch1 = stepCW(200, delay_between_steps,0);
-        if (touch1 == 801) 
-        {
-          Serial.println("MAX_LIMIT reached");
-          
-          touch2 = stepCCW(99, delay_between_steps,1);
-          if (touch2 == 802)
-          {
-             Serial.println( "Released max level");
-          }
-        }
-  
-        return ok;    
-}
-//================================================
-void setup(void){
-//================================================
-  co.conf_sw         = sw_version;
-  co.conf_id         = "set_to_mac";
-  co.conf_period     = 20;
-  co.conf_wrap       = 999999;
-  co.conf_feedback   = 1;
-
-  co.conf_title      = "kvv32_stepper";
-  co.conf_tags       = "kvv32_stepper";
-  co.conf_desc       = "kvv32_stepper";
-  co.conf_platform   = "esp8266";
-
-  co.conf_domain     = "iot.simuino.com";
-  co.conf_server     = "gateway.php";
-  
-  strcpy(co.conf_ssid_1,"bridge");
-  strcpy(co.conf_password_1,"qwer");
-
-  strcpy(co.conf_ssid_2,"NABTON");
-  strcpy(co.conf_password_2,"a1b2c3d4e5f6g7");
-  
-  strcpy(co.conf_ssid_3,"ASUS");
-  strcpy(co.conf_password_3,"123");
-
-  lib_setup(&co, &da);
-  
-    //Initialize
-    pinMode(DIR,OUTPUT);
-    pinMode(STEP,OUTPUT);
-    pinMode(SLEEP,OUTPUT);
-    pinMode(MS1,OUTPUT);
-    pinMode(MS2,OUTPUT);
-    pinMode(LIMIT, INPUT);
-    pinMode(MINMAX,OUTPUT);
-    
-    digitalWrite(MS1,LOW);
-    digitalWrite(MS2,LOW);
-    digitalWrite(SLEEP,LOW);
-    digitalWrite(DIR,LOW);
-    digitalWrite(STEP,LOW);
-    digitalWrite(MINMAX,LOW);
-  
-    //Possible settings are (MS1/MS2) : full step (0,0), half step (1,0), 1/4 step (0,1), and 1/8 step (1,1)
-
-    delay(10);
-    int ok = calibrate();
-    if (ok > 9000)
-    {
-      Serial.println("Calibration failed");
-      g_calibrated = ok;
-      limit = 0;
-      //exit(0);
-    }
-    else
-    {
-      Serial.println("Calibration success!");
-      g_calibrated = ok;
-      limit =  804;
-    }
-
-    g_payload = "{";
-
-    g_payload += "\"counter";
-    g_payload += "\":\"";
-    g_payload += da.counter;
-    g_payload += "\",";
-
-    g_payload += "\"calibrated";
-    g_payload += "\":\"";
-    g_payload += g_calibrated;
-    g_payload += "\",";
-
-    g_payload += "\"limit";
-    g_payload += "\":\"";
-    g_payload += limit;
-    g_payload += "\",";
-    
-    g_payload += "\"steps";
-    g_payload += "\":\"";
-    g_payload += 0;
-    g_payload += "\",";
-    
-    g_payload += "\"direction";
-    g_payload += "\":\"";
-    g_payload += 0;
-    g_payload += "\"";
-    
-    g_payload += "}";
-    
-    lib_publishPayload(&co,&da,g_payload);
-}
-//================================================
-void loop(void){
-//================================================
-
-  int move = 0;
-  
   String msg;
-
-  if (digitalRead(LIMIT) == HIGH)
+  delay(co->conf_period*1000);
+  
+  ++da->counter;
+  da->rssi = WiFi.RSSI();
+  if (da->counter > co->conf_wrap) da->counter = 1;
+  
+  msg = lib_publishDynamic(co,da);
+  //Serial.println(msg); 
+  
+  if (da->counter%50 == 0)
   {
-        digitalWrite(MINMAX, HIGH);
-        limit = 805;
+      lib_publishStatic(co,da);
   }
   
-  if (digitalRead(LIMIT) == LOW)
-  {
-        digitalWrite(MINMAX, LOW);
-        limit = 804;
-  }
-  
-  msg = lib_loop(&co,&da);
-  Serial.println(msg);
-  
-  int res = lib_decode_STEPPER(msg);
-
-  move = 0;
-  if (res < 200 && res > 100)
-  {
-    dir = COUNTER_CLOCKWISE;
-    number_of_steps = res - 100;
-    move = 1;
-  }
-  else if (res > 200 && res < 300)
-  {
-    dir = CLOCKWISE;
-    number_of_steps = res - 200;
-    move = 1;
-  }
-  else if (res == 6614)
-  {
-    int ok = calibrate();
-    if (ok > 9000)
-    {
-      Serial.println("Calibration failed");
-      g_calibrated = ok;
-    }
-    else
-    {
-      Serial.println("Calibration success!");
-      g_calibrated = ok;
-    }
-    move = 0;
-  }
-  else
-  {
-    move = 0;
-  }
-  if (move == 1 || res == 6614 || limit == 805)
-  {
-    limit = move_stepper(dir, step_size, number_of_steps, delay_between_steps);
-
-    g_payload = "{";
-
-    g_payload += "\"counter";
-    g_payload += "\":\"";
-    g_payload += da.counter;
-    g_payload += "\",";
-
-    g_payload += "\"calibrated";
-    g_payload += "\":\"";
-    g_payload += g_calibrated;
-    g_payload += "\",";
-
-    g_payload += "\"limit";
-    g_payload += "\":\"";
-    g_payload += limit;
-    g_payload += "\",";
-    
-    g_payload += "\"steps";
-    g_payload += "\":\"";
-    g_payload += number_of_steps;
-    g_payload += "\",";
-    
-    g_payload += "\"direction";
-    g_payload += "\":\"";
-    g_payload += dir;
-    g_payload += "\"";
-    
-    g_payload += "}";
-    
-    lib_publishPayload(&co,&da,g_payload);
-    //Serial.println(msg);
-
-    g_message = "stepper_";
-    g_message += dir;
-    g_message += "_";
-    g_message += number_of_steps;
-    g_message += "_";
-    g_message += limit;
-    lib_publishLog(&co,&da,g_message);
-  }
-  
+  return msg;
 }
 //=============================================
-// End of File
+void lib_setup(struct Configuration *co,struct Data *da)
 //=============================================
+{
+  Serial.begin(9600);
+
+  for (uint8_t t = 3; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(800);
+  } 
+
+  WiFi.mode(WIFI_STA);
+
+  char ssid[100];
+  char password[100];
+  
+  Serial.print("Connecting to ");
+  Serial.println(co->conf_ssid_1);
+  Serial.println(co->conf_ssid_2);
+  Serial.println(co->conf_ssid_3);
+  
+  //co->conf_ssid_1.toCharArray(ssid,100);
+  //co->conf_password_1.toCharArray(password,100);
+  WiFiMulti.addAP(co->conf_ssid_1, co->conf_password_1);
+  WiFiMulti.addAP(co->conf_ssid_2, co->conf_password_2);
+  WiFiMulti.addAP(co->conf_ssid_3, co->conf_password_3);
+  //WiFiMulti.addAP("bridge", "6301166614");
+  //co->conf_ssid_2.toCharArray(ssid,100);
+  //co->conf_password_2.toCharArray(password,100);
+  //WiFiMulti.addAP(ssid, password);
+  
+  da->counter = 0;
+  co->conf_mac = WiFi.macAddress();
+  da->ssid = WiFi.SSID();
+  co->conf_id = co->conf_mac;
+  String stat_url = lib_buildUrlStatic(co);
+  String dont_care = lib_wifiConnectandSend(co,da, stat_url);
+}
+//=============================================
+String lib_publishStatic(struct Configuration *c2,struct Data *d2)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlStatic(&co);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishDynamic(struct Configuration *c2,struct Data *d2)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlDynamic(&co,&da);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishPayload(struct Configuration *c2,struct Data *d2,String payload)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlPayload(&co,&da, payload);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+String lib_publishLog(struct Configuration *c2,struct Data *d2,String message)
+//=============================================
+{
+  String url,msg;
+  url = lib_buildUrlLog(&co, message);
+  msg = lib_wifiConnectandSend(&co,&da, url);
+  return msg;
+}
+//=============================================
+int lib_decode_ON_OFF(String msg)
+//=============================================
+{
+  char buf[100];
+  int result = 0;
+
+  msg.toCharArray(buf,100);
+
+  if( strstr(buf,"OFF") != NULL)
+  {
+      result = 1;
+  }
+
+  if( strstr(buf,"ONN") != NULL)
+  {
+      result = 2;
+  }
+  return result;
+}
+//=============================================
+int lib_decode_STEPPER(String msg)
+//=============================================
+{
+  char buf[100];
+  int result = 0;
+
+  //msg.toCharArray(buf,100);
+  Serial.print("Decode Stepper:");
+  Serial.println(msg);
+  result = msg.toInt();
+
+  return result;
+}
+//=============================================
+int lib_decode_FREEZER(String msg)
+//=============================================
+{
+  char buf[100];
+  int result = 0;
+
+  //msg.toCharArray(buf,100);
+  Serial.print("Decode Freezer:");
+  Serial.println(msg);
+  result = msg.toInt();
+
+  return result;
+}
+//=============================================
+String lib_buildUrlStatic(struct Configuration *c2)
+//=============================================
+{
+  //===================================
+  String url = '/'+ c2->conf_server;
+  //===================================
+  url += "?do=static";
+
+  url += "&id=";
+  url += c2->conf_id;
+  
+  url += "&json=";
+  url += "{";
+  
+  url += "\"title";
+  url += "\":\"";
+  url += c2->conf_title;
+  url += "\",";
+  
+  url += "\"desc";
+  url += "\":\"";
+  url += c2->conf_desc;
+  url += "\",";
+  
+  url += "\"tags";
+  url += "\":\"";
+  url += c2->conf_tags;
+  url += "\",";
+  
+  url += "\"wrap";
+  url += "\":\"";
+  url += c2->conf_wrap;
+  url += "\",";
+  
+  if (c2->conf_sensors != 0)
+  {
+    url += "\"sensors";
+    url += "\":\"";
+    url += c2->conf_sensors;
+    url += "\",";
+
+    url += "\"target_temp";
+    url += "\":\"";
+    url += c2->conf_target_temp;
+    url += "\",";
+    
+    url += "\"deviation_temp";
+    url += "\":\"";
+    url += c2->conf_deviation_temp;
+    url += "\",";
+  }
+  
+  if (c2->conf_kwh_pulses != 0)
+  {
+    url += "\"kwh_pulses";
+    url += "\":\"";
+    url += c2->conf_kwh_pulses;
+    url += "\",";
+  }  
+  
+  url += "\"feedback";
+  url += "\":\"";
+  url += c2->conf_feedback;
+  url += "\",";
+  
+  url += "\"library";
+  url += "\":\"";
+  url += c2->conf_library;
+  url += "\",";
+  
+  url += "\"sw";
+  url += "\":\"";
+  url += c2->conf_sw;
+  url += "\",";
+  
+  url += "\"platform";
+  url += "\":\"";
+  url += c2->conf_platform;
+  url += "\",";
+  
+  url += "\"period";
+  url += "\":\"";
+  url += c2->conf_period;
+  url += "\"";
+  
+  url += "}";
+
+  return url;
+}
+//=============================================
+String lib_buildUrlDynamic(struct Configuration *c2,struct Data *d2)
+//=============================================
+{
+  //===================================
+  String url = '/'+ c2->conf_server;
+  //===================================
+  url += "?do=dynamic";
+
+  url += "&id=";
+  url += c2->conf_id;
+  
+  url += "&json=";
+  url += "{";
+  url += "\"counter";
+  url += "\":\"";
+  url += d2->counter;
+  url += "\",";
+  url += "\"fail";
+  url += "\":\"";
+  url += d2->fail;
+  url += "\",";
+  if (d2->fail > 0)
+  {
+    url += "\"fail_msg";
+    url += "\":\"";
+    url += d2->fail_msg;
+    url += "\",";
+  }
+  url += "\"latency";
+  url += "\":\"";
+  url += d2->latency;
+  url += "\",";
+  
+  url += "\"ssid";
+  url += "\":\"";
+  url += d2->ssid;
+  url += "\",";
+  
+  url += "\"rssi";
+  url += "\":\"";
+  url += d2->rssi;
+  url += "\"";
+  url += "}";
+  
+  return url;
+}
+//=============================================
+String lib_buildUrlPayload(struct Configuration *c2,struct Data *d2, String payload)
+//=============================================
+{
+  //===================================
+  String url = '/'+ c2->conf_server;
+  //===================================
+  url += "?do=payload";
+
+  url += "&id=";
+  url += c2->conf_id;
+  
+  url += "&json=" + payload;
+  
+  return url;
+}
+//=============================================
+String lib_buildUrlLog(struct Configuration *c2, String message)
+//=============================================
+{
+  //===================================
+  String url = '/'+ c2->conf_server;
+  //===================================
+  url += "?do=log";
+
+  url += "&id=";
+  url += c2->conf_id;
+  
+  url += "&log=";
+  url += message;
+
+  return url;
+}  
+
+//=============================================
+String lib_wifiConnectandSend(struct Configuration *co,struct Data *da, String cur_url)
+//=============================================
+{
+  unsigned long t1,t2;
+  
+  String sub = "-";
+  Serial.print("Requesting URL: ");
+  Serial.println(cur_url);
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  const int httpPort = 80;
+  
+  Serial.println(co->conf_domain);
+  
+  if (!client.connect(co->conf_domain,httpPort)) {
+    Serial.println("connection failed");
+    da->fail += 1;
+    return sub;
+  }
+  Serial.println(cur_url);
+  
+  // This will send the request to the server
+  t1 = millis();
+  client.print(String("GET ") + cur_url + " HTTP/1.1\r\n" +
+             "Host: " + co->conf_domain + "\r\n" +
+             "Connection: close\r\n\r\n");
+  unsigned long timeout = millis();
+  while (client.available() == 0) {
+     if (millis() - timeout > 5000) {
+        Serial.println(">>> Client Timeout !");
+        client.stop();
+        return sub;
+     }
+     delay(5);
+  }
+  t2 = millis();
+  da->latency = t2 - t1;
+  // Read all the lines of the reply from server and print them to Serial
+  while (client.available()) {
+    String action = client.readStringUntil('\r');
+    Serial.print(action);
+    if (action.indexOf('[') == 1)
+    {
+      int b = action.indexOf(':')+1;
+      int x = action.lastIndexOf(':');
+      sub = action.substring(b,x);
+    }
+    // Do something based upon the action string
+  }
+
+  Serial.println("closing connection");
+  return sub;
+}
