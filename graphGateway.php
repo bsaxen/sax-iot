@@ -1,19 +1,45 @@
 <?php
 //=============================================
 // File.......: graphGateway.php
-// Date.......: 2020-10-07
+// Date.......: 2020-10-11
 // Author.....: Benny Saxen
 // Description: Graph Gateway
 //=============================================
+/*
+
+PREFIX device: <http://rdf.simuino.com/device#>
+PREFIX home: <http://rdf.simuino.com/home#>
+ insert data { 
+   home:kvv32 home:hasOutdoorTemp device:8001 .
+   device:8001 device:hasValue "24" .
+   device:8001 device:hasSparql "PREFIX device: <http://rdf.simuino.com/device#> DELETE {device:8001 device:hasValue ?o .} INSERT {device:8001 device:hasValue p1 .} WHERE {device:8001 device:hasValue ?o .}" .
+ } 
+
+
+ PREFIX device: <http://rdf.simuino.com/device#>
+ DELETE {
+   device:8001 device:hasValue ?o .
+ }
+ INSERT {
+   device:8001 device:hasValue "30" .
+ }
+ WHERE {
+   device:8001 device:hasValue ?o .
+ }
+
+
+ */
+//=============================================
 $repository = 'iot';
 $endpoint   = 'http://localhost:7200';
-$pfx_device    = 'PREFIX : <http://rdf.simuino.com/device#>';
-$pfx_home      = 'PREFIX : <http://rdf.simuino.com/home#>';
-$pfx_vehicle   = 'PREFIX : <http://rdf.simuino.com/vehicle#>';
-$pfx_person    = 'PREFIX : <http://rdf.simuino.com/person#>';
-$pfx_work      = 'PREFIX : <http://rdf.simuino.com/work#>';
-$pfx_company   = 'PREFIX : <http://rdf.simuino.com/company#>';
-$pfx_pet       = 'PREFIX : <http://rdf.simuino.com/pet#>';
+
+$pfx_device    = 'PREFIX device: <http://rdf.simuino.com/device#>';
+$pfx_home      = 'PREFIX home: <http://rdf.simuino.com/home#>';
+$pfx_vehicle   = 'PREFIX vehicle: <http://rdf.simuino.com/vehicle#>';
+$pfx_person    = 'PREFIX person: <http://rdf.simuino.com/person#>';
+$pfx_work      = 'PREFIX work: <http://rdf.simuino.com/work#>';
+$pfx_company   = 'PREFIX company: <http://rdf.simuino.com/company#>';
+$pfx_pet       = 'PREFIX pet: <http://rdf.simuino.com/pet#>';
 
 $date         = date_create();
 $obj->sys_ts  = date_format($date, 'Y-m-d H:i:s');
@@ -54,22 +80,22 @@ function printValues($arr) {
     return array('total' => $count, 'values' => $values);
   }
 //=============================================
-function sparqlSelectQuery($endpoint,$repository,$query)
+function sparqlGetQuery($endpoint,$repository,$query)
 //=============================================
 {
     global $values,$count;
     $sparql = 'void';
-    //echo "$query<br>";
-    $query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-    PREFIX owl: <http://www.w3.org/2002/07/owl#> ".$query;
+    echo "$query<br>";
+    //$query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+    //PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+    //PREFIX owl: <http://www.w3.org/2002/07/owl#> ".$query;
 
     $query = urlencode($query);
     $cmd = "curl -X GET --header 'Accept: application/sparql-results+json' '".$endpoint."/repositories/".$repository."?query=".$query."'";
     $cmd = $cmd." > temp.txt";
     system($cmd);
     $json = file_get_contents('temp.txt');
-    //$n = showFileContent("temp.txt");
+    $n = showFileContent("temp.txt");
    
     // // Decode JSON data to PHP associative array
      $arr = json_decode($json,true);
@@ -97,21 +123,26 @@ function sparqlSelectQuery($endpoint,$repository,$query)
     return $sparql;
 }
 //=============================================
-function sparqlConstructQuery($endpoint,$repository,$query)
+function sparqlPostQuery($endpoint,$repository,$query)
 //=============================================
 {
 
-    $query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-    PREFIX owl: <http://www.w3.org/2002/07/owl#> ".$query;
+    //$query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+    //PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+    //PREFIX owl: <http://www.w3.org/2002/07/owl#> ".$query;
 
     echo "$query";
     echo "\n";
 
-    //$query = rawurlencode($query);
+    $query = rawurlencode($query);
+    //$query = urlencode($query);
+    //$cmd = "curl -d '".$query."' -H 'Content-Type: application/sparql-query' -X POST '".$endpoint."/repositories/".$repository."'";
 
-    $cmd = "curl -d '".$query."' -H 'Content-Type: application/sparql-query' -X POST '".$endpoint."/repositories/".$repository."'";
+    $cmd = "curl -X POST --header 'Content-Type: application/rdf+xml' --header 'Accept: application/json' '".$endpoint."/repositories/".$repository."/statements?update=".$query."'";
+
+
     $cmd = $cmd." > temp.txt";
+    echo $cmd;
     system($cmd);
 
     $n = showFileContent("temp.txt");
@@ -157,6 +188,8 @@ if (isset($_GET['id']))
 
   $id = $_GET['id'];
   echo ($id);
+  $counter = $_GET['counter'];
+  echo ($counter);
 
   // $query ="$prefix  
   //           construct where { 
@@ -166,14 +199,16 @@ if (isset($_GET['id']))
  
   $query ="$pfx_device 
             select ?sparql where { 
-                :$id :hasSparql ?sparql . 
+                device:$id device:hasSparql ?sparql . 
             } ";
     
 
-  $res = sparqlSelectQuery($endpoint,$repository,$query);
+  $res = sparqlGetQuery($endpoint,$repository,$query);
+  echo "res=$res";
   if ($res != 'void')
   {
-    sparqlConstructQuery($endpoint,$repository,$res);
+    $query = str_replace("p1", "$counter", $res);
+    sparqlPostQuery($endpoint,$repository,$query);
   }
 
 } // do
